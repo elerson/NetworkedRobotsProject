@@ -1,0 +1,19 @@
+<launch>
+
+<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+   <!--<param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/> -->
+   <rosparam file="$(find network_deployment_planner)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
+   <rosparam file="$(find network_deployment_planner)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
+   <rosparam file="$(find network_deployment_planner)/launch/local_costmap_params.yaml" command="load" />
+   <rosparam file="$(find network_deployment_planner)/launch/global_costmap_params.yaml" command="load" />
+   <rosparam file="$(find network_deployment_planner)/launch/base_local_planner_params.yaml" command="load" />
+   <rosparam file="$(find network_deployment_planner)/launch/networkplanner.yaml" command="load" />
+   <rosparam file="$(find network_deployment_planner)/launch/networkplanner.yaml" command="load" />
+   <param name="planner_file_dir" value="$(find network_deployment_planner)/experiment/exp1/"/>
+   <param name="global_costmap/robot_base_frame" value="robot_0/base_footprint"/>
+   <param name="local_costmap/global_frame" value="robot_0/odom"/>
+   <param name="local_costmap/robot_base_frame" value="robot_0/base_footprint"/>
+   <remap from="/robot_0/map" to="/map" />
+</node>
+
+</launch>

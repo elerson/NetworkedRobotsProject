@@ -1,0 +1,8 @@
+<launch>  
+
+<group ns="robot_0">   
+   <include file="$(find network_deployment_planner)/launch/robots/amcl.launch" />
+   <include file="$(find network_deployment_planner)/launch/robots/move_base_network_planner.launch"/>
+</group>
+
+</launch>

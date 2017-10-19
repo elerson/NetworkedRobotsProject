@@ -1,0 +1,10 @@
+<launch>
+<include file="$(find robots_deployment_offline)/launch/scripts/robot0.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot1.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot2.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot3.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot4.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot5.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot6.launch" />
+<include file="$(find robots_deployment_offline)/launch/scripts/robot7.launch" />
+</launch>

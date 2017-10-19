@@ -1,0 +1,13 @@
+ <launch>
+
+   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find network_deployment_planner)/launch/map/icex.world" >
+   </node>
+
+   <!-- Map server -->
+   <arg name="map_file" default="$(find network_deployment_planner)/launch/map/icex.yaml"/>
+   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  
+
+ 
+ </launch>

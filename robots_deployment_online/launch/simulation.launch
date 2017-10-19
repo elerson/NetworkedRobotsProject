@@ -1,0 +1,11 @@
+ <launch>
+
+   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find robots_deployment_offline)/launch/map/icex.world" >
+   </node>
+
+   <!--Map server -->
+   <arg name="map_file" default="$(find robots_deployment_offline)/launch/map/icex.yaml"/>
+   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+ 
+ </launch>
