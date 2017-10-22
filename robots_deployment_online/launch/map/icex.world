@@ -78,11 +78,11 @@ floorplan
 )
 
 # throw in two robots
-erratic( pose [ 13.114 7.359 0.000 0.000 ] name "era1" color "blue")
-erratic( pose [ 12.482 7.721 0.000 0.000 ] name "era2" color "blue")
+erratic( pose [ 13.114 7.359 0.000 0.000 ] name "era0" color "blue")
+erratic( pose [ 12.482 7.721 0.000 0.000 ] name "era1" color "blue")
 erratic( pose [ 13.899 7.963 0.000 0.000 ] name "era2" color "blue")
 erratic( pose [ 14.683 7.895 0.000 0.000 ] name "era3" color "blue")
-erratic( pose [ 14.935 6.963 0.000 0.000 ] name "er4" color "blue")
+erratic( pose [ 14.935 6.963 0.000 0.000 ] name "era4" color "blue")
 erratic( pose [ 14.062 7.126 0.000 0.000 ] name "era5" color "blue")
 erratic( pose [ 15.695 7.728 0.000 0.000 ] name "era6" color "blue")
 erratic( pose [ 12.473 6.522 0.000 0.000 ] name "era8" color "blue")

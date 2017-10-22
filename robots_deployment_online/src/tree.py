@@ -96,6 +96,31 @@ class TreeSegmention:
     #     #if leaf_flag:
     #     #    print ("Leaf", visited)
 
+    def findPath(self, first_node, nodes_to_find):
+        path = []
+        self.findPathRecursion(first_node, [first_node], path, nodes_to_find)
+        return path
+
+    def findPathRecursion(self, vertex, visited, path, nodes_to_find):
+
+        for node in self.tree.graph_adj_list[vertex]:            
+            if not node in visited:
+                path.append((vertex, node))
+
+                if(node in nodes_to_find):
+                    return True
+
+                visited.append(node)
+               
+                if(self.findPathRecursion(node, visited, path, nodes_to_find)):
+                    return True
+               
+                visited.remove(node)
+                path.remove((vertex, node))
+
+        return False
+
+
 
 
     def breadthFirstSearch(self):
@@ -300,6 +325,16 @@ class TreeSegmention:
                 i = len(self.segmentaion_paths)
                 self.segmentaion_paths[i] = new_paths
 
+
+
+    def get_path_cost_from_segments(self, path):
+        total_distance = 0
+        for i in range(0,len(path)):
+            p1 = self.tree.graph_vertex_position[path[i][0]]
+            p2 = self.tree.graph_vertex_position[path[i][1]]
+            distance = self.getDistance(p1, p2)
+            total_distance += distance
+        return total_distance
 
 
     def get_path_cost(self, path):

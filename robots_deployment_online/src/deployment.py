@@ -111,6 +111,7 @@ class Robot:
         self.tree_segmentation_segments = segmentation
         return segmentation
 
+
     def getTreeAllocationPerSegment(self):
 
         ##define the number of robots per segment
@@ -138,6 +139,57 @@ class Robot:
 
 
         return allocation, segmentation
+
+
+
+
+    def getClosetPointToTree(self):
+
+        #TODO: make it less cost
+        allocation, segmentation = self.getTreeAllocationPerSegment()
+
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                self.allocation_id = alloc_id
+                break
+
+        allocated_segment = segmentation[self.allocation_id]
+
+        #get the closest point in each segment
+        r = self.position['position']
+        closest_points = []
+        points_allocation = []
+        closest_points_segments = []
+        j = 0
+        for allocation_path in segmentation:       
+            for i in range(1,len(allocation_path)):
+                p = self.tree.graph_vertex_position[allocation_path[i-1]]
+                q = self.tree.graph_vertex_position[allocation_path[i]]
+
+                closest_point = dist_to_segment(p, q, r)
+                closest_points.append(closest_point)
+
+                points_allocation.append(j)
+
+                closest_points_segments.append((allocation_path[i-1], allocation_path[i]))
+            j += 1
+       
+        #determine the closest point
+        min_distance = float('inf')
+        closest_point = []
+        closest_point_seg_allocation = []
+        closest_point_segment = []
+
+        #from all segments, gets the closest point
+        for i in range(len(closest_points)):
+            distance = self.getDistance(closest_points[i], r)
+            if(min_distance > distance):
+                min_distance = distance
+                closest_point = closest_points[i]
+                closest_point_seg_allocation = (points_allocation[i], self.allocation_id)
+                closest_point_segment = closest_points_segments[i]
+
+        return closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
 
 
 
@@ -249,9 +301,7 @@ class Robot:
         return neighbor_positions
 
 
-
-
-    def control(self):
+    def control_(self):
         r = self.position['position']
         #r = (math.ceil(r[0]), math.ceil(r[1]))
 
@@ -283,53 +333,109 @@ class Robot:
         
 
 
+        cmd_vel = Twist()
+        #if(abs(robot_direction[0]) > 0.1):
+        cmd_vel.linear.x = final_direction[0]
+        #if(abs(robot_direction[1]) > 0.1):
+        cmd_vel.linear.y = final_direction[1]
+
+
+        self.vel_pub.publish(cmd_vel)
+
+    def segmentInsideSgment(self, segment1, segment2):
+        return segment1[0] in segment2 and segment1[1] in segment2
+
+    def control(self):
+        r = self.position['position']
+        #r = (math.ceil(r[0]), math.ceil(r[1]))
+        #closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
+        closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = robot.getClosetPointToTree()
+
+        #the allocated segments are different
+        direction_to_segment = (0, 0)
+        distance_to_segment = 0
+        print(closest_point_seg_allocation)
+        if( not closest_point_seg_allocation[0] == closest_point_seg_allocation[1]):
+            #get the path to the allocated segment
+            path_to_segment = self.tree_segmentation.findPath(closest_segment[0], allocated_segment)
+            
+            distance_to_segment = 0
+            direction_to_segment = []
+            #see the second node from closest_segment [(3,2),(2,1)] - (2,3)
+            if(self.segmentInsideSgment(path_to_segment[0], closest_segment)):                
+                distance_to_segment = self.tree_segmentation.get_path_cost_from_segments(path_to_segment[1:])
+                distance_to_segment += self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]])
+                
+                print("Distance-1", self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]]))
+                #get the direction
+                if(self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]]) < 1.0):
+                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
+                    if(len(path_to_segment) > 1):
+                        next_point = self.tree.graph_vertex_position[path_to_segment[1][0]]
+                        
+                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
+
+                else:
+                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
+                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
+
+
+            else:
+                distance_to_segment = self.tree_segmentation.get_path_cost_from_segments(path_to_segment)
+                #print("Distance-2",self.id, direction_to_segment, distance_to_segment, path_to_segment)
+                distance_to_segment += self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]])
+
+
+                #get the direction      
+                          
+                if(self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]]) < 1.0):
+                   
+                   
+                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
+                        
+                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
+
+                    #print("Distance-2",self.id, direction_to_segment, distance_to_segment, path_to_segment, allocated_segment)
+
+                else:
+                    next_point = self.tree.graph_vertex_position[path_to_segment[0][0]]
+                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
+
+            direction_size_ = self.getDistance((0,0), direction_to_segment)
+            direction_to_segment = (direction_to_segment[0]/direction_size_, direction_to_segment[1]/direction_size_)
+            
 
 
 
-        # #metric for the path
-        # path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
+        neighbors_positions = robot.getNeighbors()
+
+        neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
+        neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+
+        print(neighbor_1_distance, neighbor_2_distance)
+        derivative_neighbor_1_distance = (-((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), (-(r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
+        derivative_neighbor_2_distance = (-((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), (-(r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
+
+        #first derivative
+        d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
+        d1_f = (d1[0]*(neighbor_1_distance - neighbor_2_distance)/4, -d1[1]*(neighbor_1_distance - neighbor_2_distance)/4)
+
+
+        #second derivative
+        d2 = (derivative_neighbor_2_distance[0]-derivative_neighbor_1_distance[0], derivative_neighbor_2_distance[1]-derivative_neighbor_1_distance[1])
+        d2_f = (d2[0]*(neighbor_2_distance - neighbor_1_distance)/4, -d2[1]*(neighbor_2_distance - neighbor_1_distance)/4)
+
+
+        closest_point_path = closest_point
+        path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         # #print("closest ", r, closest_point_path)
-        # path_direction = ((path_distance**2)*((closest_point_path[0] - r[0])/abs((closest_point_path[0] - r[0]))),  (path_distance**2)*(closest_point_path[1] - r[1])/abs((closest_point_path[1] - r[1])))
+        path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        # #print(path_direction)
-        # #metric to the other robots       
+        #segment direction
+        direction_to_segment = (direction_to_segment[0]*distance_to_segment*self.map_resolution, -direction_to_segment[1]*distance_to_segment*self.map_resolution)
 
-        # neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution
-        # neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution
-
-
-        # mean_distance = (neighbor_1_distance + neighbor_2_distance)/2
-
-        # #################################
-        # ######for the fist neighbor######
-        # c = 2*(neighbor_1_distance - mean_distance)
-
-        # dx = -2*neighbor_1_distance*(r[0] - neighbors_positions[0][0])*self.map_resolution
-        # dy = -2*neighbor_1_distance*(r[1] - neighbors_positions[0][1])*self.map_resolution
-
-        # neighbor_1_direction = (c*dx, c*dy)
-
-        # ##################################
-        # #####for the second neighbor######
-
-        # c = 2*(neighbor_2_distance - mean_distance)
-
-        # dx = -2*neighbor_2_distance*(r[0] - neighbors_positions[1][0])*self.map_resolution
-        # dy = -2*neighbor_2_distance*(r[1] - neighbors_positions[1][1])*self.map_resolution
-
-        # neighbor_2_direction = (c*dx, c*dy)
-
-        # print(mean_distance, neighbor_1_distance, neighbor_2_distance)
-
-        # a = (path_direction[0],path_direction[1])
-        # b = (neighbor_1_direction[0]+ neighbor_2_direction[0],neighbor_1_direction[1]+ neighbor_2_direction[1])
-        # lambda_ = 1#math.sqrt(b[0]**2 + b[1]**2)/math.sqrt(a[0]**2 + a[1]**2)*2
-        # print("lambda", lambda_)
-
-        # robot_direction = (lambda_*path_direction[0]+neighbor_1_direction[0]+ neighbor_2_direction[0], -lambda_*path_direction[1]-neighbor_1_direction[1]-neighbor_2_direction[1]) 
-        # #robot_direction = (lambda_*path_direction[0]+neighbor_1_direction[0], lambda_*path_direction[1]+neighbor_1_direction[1]) 
-        # #robot_direction = (path_direction[0]/k, -path_direction[1]/k)
-        # print(neighbor_1_direction, neighbor_2_direction, path_direction)
+        final_direction = (10*path_direction[0] + direction_to_segment[0] + d1_f[0] + d2_f[0], 10*path_direction[1] + direction_to_segment[1] + d1_f[1] + d2_f[1])
+        
 
 
         cmd_vel = Twist()
