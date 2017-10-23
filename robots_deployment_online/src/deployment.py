@@ -434,7 +434,7 @@ class Robot:
         #segment direction
         direction_to_segment = (direction_to_segment[0]*distance_to_segment*self.map_resolution, -direction_to_segment[1]*distance_to_segment*self.map_resolution)
 
-        final_direction = (10*path_direction[0] + direction_to_segment[0] + d1_f[0] + d2_f[0], 10*path_direction[1] + direction_to_segment[1] + d1_f[1] + d2_f[1])
+        final_direction = (8*path_direction[0] + direction_to_segment[0] + d1_f[0] + d2_f[0], 8*path_direction[1] + direction_to_segment[1] + d1_f[1] + d2_f[1])
         
 
 
