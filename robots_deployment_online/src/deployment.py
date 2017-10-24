@@ -345,70 +345,75 @@ class Robot:
     def segmentInsideSgment(self, segment1, segment2):
         return segment1[0] in segment2 and segment1[1] in segment2
 
+    def getClosestNodeFromPoint(self, nodeSet, point):
+
+        distance = float('inf')
+        out_node = []
+        for node in nodeSet:
+            new_distance = self.getDistance(point, self.tree.graph_vertex_position[node])
+            if(new_distance < distance):
+                distance = new_distance
+                out_node = node
+        return out_node
+
+
+
+
+
     def control(self):
         r = self.position['position']
         #r = (math.ceil(r[0]), math.ceil(r[1]))
         #closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
         closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = robot.getClosetPointToTree()
 
-        #the allocated segments are different
+        #
+        #
+        #       Gradient to the allocated Segment
+        #
+        #
         direction_to_segment = (0, 0)
         distance_to_segment = 0
-        print(closest_point_seg_allocation)
-        if( not closest_point_seg_allocation[0] == closest_point_seg_allocation[1]):
+        if( not closest_point_seg_allocation[0] == closest_point_seg_allocation[1]): ##when they are different, they where allocated to different segments
             #get the path to the allocated segment
             path_to_segment = self.tree_segmentation.findPath(closest_segment[0], allocated_segment)
             
             distance_to_segment = 0
             direction_to_segment = []
+            print(path_to_segment)
             #see the second node from closest_segment [(3,2),(2,1)] - (2,3)
-            if(self.segmentInsideSgment(path_to_segment[0], closest_segment)):                
-                distance_to_segment = self.tree_segmentation.get_path_cost_from_segments(path_to_segment[1:])
-                distance_to_segment += self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]])
-                
-                print("Distance-1", self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]]))
-                #get the direction
-                if(self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][1]]) < 1.0):
-                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
-                    if(len(path_to_segment) > 1):
-                        next_point = self.tree.graph_vertex_position[path_to_segment[1][0]]
-                        
-                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
-
-                else:
-                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
-                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
-
-
-            else:
-                distance_to_segment = self.tree_segmentation.get_path_cost_from_segments(path_to_segment)
-                #print("Distance-2",self.id, direction_to_segment, distance_to_segment, path_to_segment)
-                distance_to_segment += self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]])
-
-
-                #get the direction      
-                          
-                if(self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]]) < 1.0):
-                   
-                   
-                    next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
-                        
-                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
-
-                    #print("Distance-2",self.id, direction_to_segment, distance_to_segment, path_to_segment, allocated_segment)
-
-                else:
-                    next_point = self.tree.graph_vertex_position[path_to_segment[0][0]]
-                    direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
-
-            direction_size_ = self.getDistance((0,0), direction_to_segment)
-            direction_to_segment = (direction_to_segment[0]/direction_size_, direction_to_segment[1]/direction_size_)
+            if(self.segmentInsideSgment(path_to_segment[0], closest_segment)): 
+                path_to_segment = path_to_segment[1:]
             
 
+            if(path_to_segment == []):
+                    #get closet point to allocated segment
+                    node = self.getClosestNodeFromPoint(allocated_segment,closest_point)
+                    path_to_segment = [(node, node)]
+            ## Get the distance to the allocated segment
+            distance_to_segment = self.tree_segmentation.get_path_cost_from_segments(path_to_segment)
+            distance_to_segment += self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]])
 
+
+            #get the direction to the allocated segment
+            if(self.getDistance(closest_point, self.tree.graph_vertex_position[path_to_segment[0][0]]) < 1.0):
+                next_point = self.tree.graph_vertex_position[path_to_segment[0][1]]
+            else:
+                next_point = self.tree.graph_vertex_position[path_to_segment[0][0]]
+
+            direction_to_segment = (next_point[0] - closest_point[0] ,next_point[1] - closest_point[1] )
+            direction_size_ = self.getDistance((0,0), direction_to_segment)
+            direction_to_segment = (direction_to_segment[0]/direction_size_, direction_to_segment[1]/direction_size_)
+
+          
+            
+        
+        #
+        #
+        #       Gradient to the neighbors
+        #
+        #
 
         neighbors_positions = robot.getNeighbors()
-
         neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
 
@@ -425,16 +430,32 @@ class Robot:
         d2 = (derivative_neighbor_2_distance[0]-derivative_neighbor_1_distance[0], derivative_neighbor_2_distance[1]-derivative_neighbor_1_distance[1])
         d2_f = (d2[0]*(neighbor_2_distance - neighbor_1_distance)/4, -d2[1]*(neighbor_2_distance - neighbor_1_distance)/4)
 
-
+        
+        #
+        #       Gradient to the tree
+        #
+        #
         closest_point_path = closest_point
-        path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
+        tree_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         # #print("closest ", r, closest_point_path)
-        path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
+        tree_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
         #segment direction
-        direction_to_segment = (direction_to_segment[0]*distance_to_segment*self.map_resolution, -direction_to_segment[1]*distance_to_segment*self.map_resolution)
+        #distance_to_segment = min(distance_to_segment, 30)
+        direction_to_segment = (direction_to_segment[0]*self.map_resolution, -direction_to_segment[1]*self.map_resolution)
 
-        final_direction = (8*path_direction[0] + direction_to_segment[0] + d1_f[0] + d2_f[0], 8*path_direction[1] + direction_to_segment[1] + d1_f[1] + d2_f[1])
+
+
+        #final_direction = (10*tree_direction[0] + direction_to_segment[0], 10*tree_direction[1] + direction_to_segment[1])
+        #final_direction = ( direction_to_segment[0],  direction_to_segment[1])
+        
+        #alpha = (self.getDistance((0,0), direction_to_segment)+0.01)/self.getDistance((0,0), tree_direction) + 3
+        #print("direction=", direction_to_segment, tree_direction, alpha)
+        alpha = 20
+        final_direction = (tree_direction[0] + alpha*direction_to_segment[0], tree_direction[1] + alpha*direction_to_segment[1])
+
+
+        #final_direction = (tree_direction[0] + direction_to_segment[0] + d1_f[0] + d2_f[0], 8*tree_direction[1] + direction_to_segment[1] + d1_f[1] + d2_f[1])
         
 
 
