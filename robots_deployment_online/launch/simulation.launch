@@ -1,6 +1,6 @@
  <launch>
 
-   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find robots_deployment_offline)/launch/map/icex.world" >
+   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find robots_deployment_online)/launch/map/icex.world" >
    </node>
 
    <!--Map server -->

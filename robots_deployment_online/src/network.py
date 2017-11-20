@@ -9,7 +9,7 @@ import cPickle as pickle
 
 class Network:
     running = True
-    def __init__(self, broadcast_addr = "<broadcast>", port = 9988):
+    def __init__(self, broadcast_addr = "127.255.255.255", port = 9988):
 
         self.port = port
         self.broadcast_addr = broadcast_addr
@@ -20,7 +20,7 @@ class Network:
         #self.send_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 
         #configure rcv socket
-        self.rcv_socket = socket(AF_INET, SOCK_DGRAM)
+        self.rcv_socket = socket(AF_INET, SOCK_DGRAM, SOL_UDP)
         self.rcv_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 
         self.rcv_socket.bind(('', self.port))
@@ -44,7 +44,7 @@ class Network:
             id = rcv_data['id']
             self.rcv_data[id] = rcv_data
         
-        #print(self.rcv_data)
+            print(self.rcv_data)
     #message must be an dictionary with id field
     def sendMessage(self, message):
         #print(message)
