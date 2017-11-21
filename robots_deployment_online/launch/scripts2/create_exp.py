@@ -8,7 +8,7 @@ robot_exp = '''
     <param name="id" value="ID" />
     <param name="tree_file" value="/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat" />
     <param name="map_resolution" value="0.05" />
-    <param name="ray" value="50.0"/>
+    <param name="ray" value="150.0"/>
   </node> 
 
 
@@ -21,7 +21,7 @@ robot_exp = '''
   </node>
 
 
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base_ID" output="screen">
    <!--<param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/> -->
 
    <rosparam file="$(find robots_deployment_online)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -57,7 +57,7 @@ class Create():
     with open("all.launch", 'w') as f:
       text = "<launch>\n"
       for x in range(1, numfiles):
-        text += "<include file=\"$(find robots_deployment_online)/launch/scripts/"+files[x]+ "\" />\n"
+        text += "<include file=\"$(find robots_deployment_online)/launch/scripts2/"+files[x]+ "\" />\n"
       text += "</launch>\n"
       f.write(text)
       
@@ -68,4 +68,4 @@ class Create():
 
 if __name__ == "__main__":
   exp = Create()
-  exp.create(2)
+  exp.create(8)

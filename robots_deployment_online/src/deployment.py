@@ -32,7 +32,7 @@ class Robot:
 
         self.position = {}
         self.position['id'] = self.id
-        self.position['position'] = (0.0, 0.0)
+        self.position['position'] = (0.0, 0.0, 0.0)
         self.initialized = False
 
         self.high_level_distance = 3
@@ -42,7 +42,7 @@ class Robot:
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file = rospy.get_param("~tree_file")
-        self.ray = rospy.get_param("~ray", 70)
+        self.ray = rospy.get_param("~ray", 120)
 
         self.map_resolution = 0.5
         self.height = 0
@@ -97,8 +97,14 @@ class Robot:
 
 
     def getPose(self, Pose):
+        orientation = (
+            Pose.pose.pose.orientation.x,
+            Pose.pose.pose.orientation.y,
+            Pose.pose.pose.orientation.z,
+            Pose.pose.pose.orientation.w)
+        orientation_euler = tf.transformations.euler_from_quaternion(orientation)
 
-        self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution)
+        self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
 
         #print(self.position['position'])
         #avoid to flood the network with messages
@@ -355,14 +361,14 @@ class Robot:
 
     def highLevelControl(self):
         print("control")
-        closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
+        closest_point = robot.getClosetPointToPath()
         r = self.position['position']
 
         dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
         
-        ##  
-        ##  Chose the high level navigation or the gradient allocation
-        ##
+        #  
+        #  Chose the high level navigation or the gradient allocation
+        #
         if(dist_to_segmentation > self.high_level_distance):
             if(self.status == 1 or self.status == 0 or self.status == 2):
                 return
@@ -375,46 +381,76 @@ class Robot:
             #print(self.position['destination'])
         else:
             if(self.status == 3 or self.status == -1): #succed or pending
-                self.control_(closest_point, closest_segment, allocated_segment)
+                self.control_(closest_point)
+        #self.control_(closest_point)
+
+    def distanceDerivatice(self, x, y):
+        return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
 
 
-    def control_(self, closest_point, closest_segment, allocated_segment):
+
+    def control_(self, closest_point):
         r = self.position['position']
         #r = (math.ceil(r[0]), math.ceil(r[1]))
 
         #closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
         neighbors_positions = robot.getNeighbors()
-        print(closest_point,closest_segment,  allocated_segment)
+
+        #print(closest_point,closest_segment,  allocated_segment)
 
         neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+
+        print("neighbors", neighbors_positions, (neighbor_1_distance-neighbor_2_distance)**2)
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         # #print("closest ", r, closest_point_path)
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-
-        derivative_neighbor_1_distance = (((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), ((r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
-        derivative_neighbor_2_distance = (((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), ((r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
+        derivative_neighbor_1_distance = self.distanceDerivatice(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
+        derivative_neighbor_2_distance = self.distanceDerivatice(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
+        #derivative_neighbor_1_distance = (((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), ((r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
+        #derivative_neighbor_2_distance = (((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), ((r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
 
         d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
         df = self.limitVector(df, 2)
 
-        alpha = 4
-        final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] -df[1])
+        alpha = 6
+        final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] +df[1])
         
         #final_direction = (alpha*path_direction[0], alpha*path_direction[1])
         
         print(path_distance, "final direction")
+        
+        ##
+        ##  Coverting to non-holonomic
+        ##
+        robot_angle = -r[2]
+        # #if(robot_angle > math.pi/2):
+        # #    robot_angle = robot_angle - math.pi
+
+        # #theta = math.atan2(final_direction[1], final_direction[0]) - robot_angle
+        # force_size = math.sqrt(final_direction[1]*final_direction[1] + final_direction[0]*final_direction[0])
+        # if(force_size < 1.0):
+        #     return
+
+
+        # theta = (final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
+        # linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
+        # cos(theta) -sin(theta)
+        # sin(theta) cos(theta)
+
+        #print("Orientation", theta, linear)
 
         cmd_vel = Twist()
         #if(abs(robot_direction[0]) > 0.1):
-        cmd_vel.linear.x = final_direction[0]
+        cmd_vel.linear.x = final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
         #if(abs(robot_direction[1]) > 0.1):
-        cmd_vel.linear.y = final_direction[1]
-
+        cmd_vel.linear.y = final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
+        
+        cmd_vel.angular.z = 0
 
         self.vel_pub.publish(cmd_vel)
 
