@@ -23,7 +23,7 @@ class Robot:
     def __init__(self):
 
         rospy.init_node('robot_deployment', anonymous=True)
-
+        #print("ROBOT")
         self.network = Network()
         id = rospy.get_param("~id")
 
@@ -34,6 +34,9 @@ class Robot:
         self.position['id'] = self.id
         self.position['position'] = (0.0, 0.0)
         self.initialized = False
+
+        self.high_level_distance = 2
+        self.sent_goal = 0
 
 
 
@@ -59,14 +62,38 @@ class Robot:
         rospy.Subscriber("/robot_"+str(self.id)+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.vel_pub = rospy.Publisher("/robot_"+str(self.id)+"/cmd_vel", Twist, queue_size=10)
 
+        self.goal_pub = rospy.Publisher("/robot_"+str(self.id)+"/move_base_simple/goal", PoseStamped, queue_size=10)
+        rospy.Subscriber("/robot_"+str(self.id)+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
+    def getStatus(self, Status):
 
+        if(len(Status.status_list) > 0):
+            self.status = Status.status_list[0].status
 
     def getMap(self, MapData):
 
         self.map_resolution = MapData.resolution
         self.height = MapData.height
+
+
+    def sendDeployment(self, deployment_position):
+
+
+        #print(deployment_position)
+        pose = PoseStamped()
+        pose.header.frame_id = "map"
+        pose.pose.position.x = deployment_position[0]*self.map_resolution
+        pose.pose.position.y = deployment_position[1]*self.map_resolution
+
+        #for debug
+        self.position['destination'] = (deployment_position[0], deployment_position[1])
+
+        print(pose.pose.position.x, pose.pose.position.y)
+        q = tf.transformations.quaternion_from_euler(0, 0, 0)
+        pose.pose.orientation = Quaternion(*q)
+        self.goal_pub.publish(pose)
+
 
 
     def getPose(self, Pose):
@@ -160,39 +187,35 @@ class Robot:
 
         #get the closest point in each segment
         r = self.position['position']
-        closest_points = []
-        points_allocation = []
+
+        #gets the closest point for each segment
+        closest_points = []     
         closest_points_segments = []
-        j = 0
-        for allocation_path in segmentation:       
-            for i in range(1,len(allocation_path)):
-                p = self.tree.graph_vertex_position[allocation_path[i-1]]
-                q = self.tree.graph_vertex_position[allocation_path[i]]
+        for i in range(1,len(allocated_segment)):
+            p = self.tree.graph_vertex_position[allocated_segment[i-1]]
+            q = self.tree.graph_vertex_position[allocated_segment[i]]
 
-                closest_point = dist_to_segment(p, q, r)
-                closest_points.append(closest_point)
+            closest_point = dist_to_segment(p, q, r)
+            closest_points.append(closest_point)
 
-                points_allocation.append(j)
+            closest_points_segments.append((allocated_segment[i-1], allocated_segment[i]))
 
-                closest_points_segments.append((allocation_path[i-1], allocation_path[i]))
-            j += 1
-       
         #determine the closest point
         min_distance = float('inf')
         closest_point = []
         closest_point_seg_allocation = []
         closest_point_segment = []
 
-        #from all segments, gets the closest point
+
+        #gets the closest point from all segments
         for i in range(len(closest_points)):
             distance = self.getDistance(closest_points[i], r)
             if(min_distance > distance):
                 min_distance = distance
                 closest_point = closest_points[i]
-                closest_point_seg_allocation = (points_allocation[i], self.allocation_id)
                 closest_point_segment = closest_points_segments[i]
 
-        return closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
+        return closest_point, closest_point_segment, allocated_segment
 
 
 
@@ -330,13 +353,36 @@ class Robot:
         else:
             return vec
 
+    def highLevelControl(self):
+        print("control")
+        closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
+        r = self.position['position']
 
-    def control_(self):
+        dist_to_segmentation = self.getDistance(r, closest_point)
+
+        ##  
+        ##  Chose the high level navigation or the gradient allocation
+        ##
+        if(dist_to_segmentation > self.high_level_distance):
+            if(self.status == 1 or self.status == 3 or self.status == 0 or self.sent_goal > 10):
+                return
+            self.sent_goal+=1
+            goal = (closest_point[0]*self.map_resolution, (self.height-closest_point[1])*self.map_resolution)
+            print("Goal", goal)
+            self.sendDeployment(goal)
+           
+        else:
+            if(self.status == 3 or self.status == 4 or self.status == 1 or self.status == -1): #succed or pending
+                self.control_(closest_point, closest_segment, allocated_segment)
+
+
+    def control_(self, closest_point, closest_segment, allocated_segment):
         r = self.position['position']
         #r = (math.ceil(r[0]), math.ceil(r[1]))
 
-        closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = robot.getClosetPointToTree()
+        #closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
         neighbors_positions = robot.getNeighbors()
+        print(closest_point,closest_segment,  allocated_segment)
 
         neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
@@ -470,6 +516,6 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
         print('send')
-        robot.control_()
+        robot.highLevelControl()
         rate.sleep()
         print(now-rospy.get_rostime())

@@ -44,7 +44,7 @@ class Network:
             id = rcv_data['id']
             self.rcv_data[id] = rcv_data
         
-            print(self.rcv_data)
+            #print(self.rcv_data)
     #message must be an dictionary with id field
     def sendMessage(self, message):
         #print(message)
