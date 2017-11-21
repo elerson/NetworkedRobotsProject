@@ -35,7 +35,7 @@ class Robot:
         self.position['position'] = (0.0, 0.0)
         self.initialized = False
 
-        self.high_level_distance = 2
+        self.high_level_distance = 3
         self.sent_goal = 0
 
 
@@ -358,21 +358,23 @@ class Robot:
         closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
         r = self.position['position']
 
-        dist_to_segmentation = self.getDistance(r, closest_point)
-
+        dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
+        
         ##  
         ##  Chose the high level navigation or the gradient allocation
         ##
         if(dist_to_segmentation > self.high_level_distance):
-            if(self.status == 1 or self.status == 3 or self.status == 0 or self.sent_goal > 10):
+            if(self.status == 1 or self.status == 0 or self.status == 2):
                 return
-            self.sent_goal+=1
-            goal = (closest_point[0]*self.map_resolution, (self.height-closest_point[1])*self.map_resolution)
+
+            goal = (closest_point[0], (self.height-closest_point[1]))
+            #goal = (19.695165209372934, 10.23384885215893)
             print("Goal", goal)
             self.sendDeployment(goal)
-           
+        
+            #print(self.position['destination'])
         else:
-            if(self.status == 3 or self.status == 4 or self.status == 1 or self.status == -1): #succed or pending
+            if(self.status == 3 or self.status == -1): #succed or pending
                 self.control_(closest_point, closest_segment, allocated_segment)
 
 
