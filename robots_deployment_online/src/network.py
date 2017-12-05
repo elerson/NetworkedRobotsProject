@@ -48,6 +48,9 @@ class Network:
     #message must be an dictionary with id field
     def sendMessage(self, message):
         #print(message)
+        #save message before sending
+        self.rcv_data[message['id']] = message
+
         data_string = pickle.dumps(message, -1) 
         self.send_socket.sendto(data_string,(self.broadcast_addr, self.port))
         pass

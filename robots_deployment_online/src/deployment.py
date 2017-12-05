@@ -27,17 +27,11 @@ class Robot:
         self.network = Network()
         id = rospy.get_param("~id")
 
-        self.id = int(id)
-        self.allocation_id = -1
-
-        self.position = {}
-        self.position['id'] = self.id
-        self.position['position'] = (0.0, 0.0, 0.0)
+        
+        self.allocation_id = -1        
         self.initialized = False
-
         self.high_level_distance = 3
         self.sent_goal = 0
-
 
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
@@ -53,18 +47,54 @@ class Robot:
         self.tree_segmentation = TreeSegmention(self.tree)
         self.tree_segmentation_segments = []
 
+
+        self.robots_ids_start = len(self.tree.vertices)
+
+        self.id = int(id) + self.robots_ids_start
+        self.position = {}
+        self.position['id'] = self.id
+        self.position['position'] = (0.0, 0.0, 0.0)
+        
+        ###force inicialization of metric
+        self.metric_measurements = {}
+        self.network.sendMessage(self.position)
+        self.simulationMetric(0)
+
         self.num_robots = 0
         self.deployment_position = []
 
         self.status = -1
 
+        self.ros_id = self.id - self.robots_ids_start  
+        rospy.Subscriber("/robot_"+str(self.ros_id)+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
+        self.vel_pub = rospy.Publisher("/robot_"+str(self.ros_id)+"/cmd_vel", Twist, queue_size=10)
 
-        rospy.Subscriber("/robot_"+str(self.id)+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
-        self.vel_pub = rospy.Publisher("/robot_"+str(self.id)+"/cmd_vel", Twist, queue_size=10)
-
-        self.goal_pub = rospy.Publisher("/robot_"+str(self.id)+"/move_base_simple/goal", PoseStamped, queue_size=10)
-        rospy.Subscriber("/robot_"+str(self.id)+"/move_base/status", GoalStatusArray, self.getStatus)
+        self.goal_pub = rospy.Publisher("/robot_"+str(self.ros_id)+"/move_base_simple/goal", PoseStamped, queue_size=10)
+        rospy.Subscriber("/robot_"+str(self.ros_id)+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
+
+        rospy.Timer(rospy.Duration(0.1), self.simulationMetric)
+        
+
+
+
+    def simulationMetric(self, param):
+
+        variance = 0.1
+        #for the robots
+        for data_id in self.network.rcv_data:
+            real_distance = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
+            simulated_metric = real_distance + np.random.normal(0,variance,1)[0]
+            #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
+            self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
+
+        #for the tree
+        for vertex in self.tree.graph_adj_list:
+            real_distance = self.getDistance(self.position['position'], self.tree.graph_vertex_position[vertex])*self.map_resolution
+            simulated_metric = real_distance + np.random.normal(0,variance,1)[0]
+            self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
+
+
 
     def getStatus(self, Status):
 
@@ -115,6 +145,9 @@ class Robot:
         self.initialized = True
                 
                
+    def getMetricDistance(self, p1, p2):
+        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
 
     def getDistance(self, p1, p2):
         return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
@@ -122,21 +155,29 @@ class Robot:
 
 
     #The current robot is always allocated in the first position
-    def getAllRobotsPositions(self, allocation):
+    def getAllRobotsPositions(self, allocation, inverse = False):
 
 
         robot_positions = []
+        robot_ids = []
         robot_positions.append(self.position['position'])
+        robot_ids.append(self.id)
 
         for data_id in self.network.rcv_data:
             if(data_id != self.id and allocation == []):
                 position = self.network.rcv_data[data_id]['position']
                 robot_positions.append(position)
-            elif(data_id != self.id and data_id in allocation):
+                robot_ids.append(data_id)
+            elif(data_id != self.id and data_id in allocation and not inverse):
                 position = self.network.rcv_data[data_id]['position']
                 robot_positions.append(position)
+                robot_ids.append(data_id)
+            elif(data_id != self.id and inverse): #data_id not in allocation
+                position = self.network.rcv_data[data_id]['position']
+                robot_positions.append(position)
+                robot_ids.append(data_id)
 
-        return robot_positions
+        return robot_positions, robot_ids
   
     def getSegmentation(self):
         if(not self.tree_segmentation_segments == []):
@@ -170,7 +211,7 @@ class Robot:
         for r in range(int(sum_robots)):
             for j in range(len(segmentation)):
                 if(r < allocation_sum[j]):
-                    allocation[j].append(r)
+                    allocation[j].append(r+self.robots_ids_start)
                     break
 
 
@@ -265,7 +306,7 @@ class Robot:
 
     def robotAsObstacles(self, robot_size = 0.70, force_multiplier = 1):
 
-        robots = self.getAllRobotsPositions([])
+        robots,_ = self.getAllRobotsPositions([])
         resulting_direction = (0, 0)
 
         #get the distances
@@ -299,7 +340,7 @@ class Robot:
 
 
         #get all robots that are in the allocation
-        positions = self.getAllRobotsPositions(allocation[self.allocation_id])
+        positions,_ = self.getAllRobotsPositions(allocation[self.allocation_id])
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
         q = self.tree.graph_vertex_position[segmentation[self.allocation_id][-1]]
@@ -341,14 +382,107 @@ class Robot:
         else:
             neighbors = negative_closest.argsort()[-2:]
 
-
-
         
         neighbor_positions = []
         neighbor_positions.append(positions[neighbors[0]])
         neighbor_positions.append(positions[neighbors[1]])
 
+
         return neighbor_positions
+
+    def getNeighborsIDs(self):
+
+        #get all robots that are from the same allocation
+        #TODO: make it less costy
+        allocation, segmentation = self.getTreeAllocationPerSegment()
+
+        #get my allocation
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                self.allocation_id = alloc_id
+                break
+
+        print(allocation, self.allocation_id)
+        #get all robots that are in the allocation
+        positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
+
+
+        p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
+        q = self.tree.graph_vertex_position[segmentation[self.allocation_id][-1]]
+
+        #append the clients ids to the allocation list
+        ids.append(segmentation[self.allocation_id][0])
+        ids.append(segmentation[self.allocation_id][-1])
+        #append the clients positions to the positions list
+        positions.append(p)
+        positions.append(q)
+
+
+        alphas = []
+        for position in positions:
+
+            alpha = dist_to_segment_alpha(p, q, position)
+            alphas.append(alpha)
+
+
+        #get the closet element from the position 0 alpha // self
+        #negative closest and positive closest
+
+        neighbors = []
+        #position 0 is the self robot
+        self_alpha = alphas[0]
+        alphas = np.asfarray(alphas[1:]) - self_alpha
+
+        positive_closest = alphas.copy()
+        positive_closest[positive_closest < 0] = np.inf    
+        
+        negative_closest = alphas.copy()
+        negative_closest[negative_closest >= 0] = -np.inf
+
+        if(not np.isinf(positive_closest.min()) and not np.isinf(negative_closest.max())):
+            neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 1 was desconsidered -> alphas = alphas[1:]
+            neighbors.append(negative_closest.argmax() + 1)
+
+        elif(not np.isinf(positive_closest.min())):
+            neighbors = positive_closest.argsort()[0:2]
+
+        else:
+            neighbors = negative_closest.argsort()[-2:]
+
+        neigh_0 = ids[neighbors[0]]
+        neigh_1 = ids[neighbors[1]]
+        # ##
+        # ##  IF the neigbor selected is not a client or a robot from the segment allocation
+        # ##
+        # if(neighbors[0] < self.robots_ids_start or neighbors[1] < self.robots_ids_start):
+        #     #defining the alphas for all robots that are not from my segment
+        #     positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+
+        #     alphas = []
+        #     for position in positions:
+
+        #         alpha = dist_to_segment_alpha(p, q, position)
+        #         alphas.append(alpha)
+
+        #     self_alpha = alphas[0]
+        #     alphas = np.asfarray(alphas[1:]) - self_alpha
+            
+        #     if(neighbors[0] < self.robots_ids_start):
+        #         positive_closest = alphas.copy()
+        #         positive_closest[positive_closest < 0] = np.inf
+        #         if(not np.isinf(positive_closest.min())):
+        #             neighbors[0] = neighbors.append(positive_closest.argmin() + 1)
+        #             neigh_0 = ids[neighbors[0]]
+
+        #     if(neighbors[1] < self.robots_ids_start):
+        #         negative_closest = alphas.copy()
+        #         negative_closest[negative_closest >= 0] = -np.inf
+        #         if(not np.isinf(negative_closest.max())):
+        #             neighbors[1] = neighbors.append(negative_closest.argmax() + 1)
+        #             neigh_1 = ids[neighbors[1]]
+
+
+        return [neigh_0, neigh_1]
 
     def limitVector(self, vec, maxsize):
 
@@ -360,59 +494,72 @@ class Robot:
             return vec
 
     def highLevelControl(self):
-        print("control")
+        # print("control")
         closest_point = robot.getClosetPointToPath()
-        r = self.position['position']
+        # r = self.position['position']
 
-        dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
+        # dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
         
-        #  
-        #  Chose the high level navigation or the gradient allocation
-        #
-        if(dist_to_segmentation > self.high_level_distance):
-            if(self.status == 1 or self.status == 0 or self.status == 2):
-                return
+        # #  
+        # #  Chose the high level navigation or the gradient allocation
+        # #
+        # if(dist_to_segmentation > self.high_level_distance):
+        #     if(self.status == 1 or self.status == 0 or self.status == 2):
+        #         return
 
-            goal = (closest_point[0], (self.height-closest_point[1]))
-            #goal = (19.695165209372934, 10.23384885215893)
-            print("Goal", goal)
-            self.sendDeployment(goal)
+        #     goal = (closest_point[0], (self.height-closest_point[1]))
+        #     #goal = (19.695165209372934, 10.23384885215893)
+        #     print("Goal", goal)
+        #     self.sendDeployment(goal)
         
-            #print(self.position['destination'])
-        else:
-            if(self.status == 3 or self.status == -1): #succed or pending
-                self.control_(closest_point)
-        #self.control_(closest_point)
+        #     #print(self.position['destination'])
+        # else:
+        #     if(self.status == 3 or self.status == -1): #succed or pending
+        #         self.control_(closest_point)
+        self.control_holonomic(closest_point)
 
-    def distanceDerivatice(self, x, y):
+    def distanceDerivative(self, x, y):
         return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
 
 
+    def getDistanceByID(self, id):
+        #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
+        #print(self.metric_measurements)
+        return self.metric_measurements[id][4]
 
-    def control_(self, closest_point):
+
+    def getPositionByID(self, id):
+        print(self.network.rcv_data)
+        ##Client or tree junctions id
+        if(id < self.robots_ids_start):
+            return self.tree.graph_vertex_position[id]
+        else:
+            return self.network.rcv_data[id]['position']
+
+    def control_holonomic(self, closest_point):
         r = self.position['position']
-        #r = (math.ceil(r[0]), math.ceil(r[1]))
+        #print(r)
+        neighbors_ids = robot.getNeighborsIDs()
 
-        #closest_point, closest_segment, allocated_segment = robot.getClosetPointToTree()
-        neighbors_positions = robot.getNeighbors()
+        neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
-        #print(closest_point,closest_segment,  allocated_segment)
+        #neighbors_positions = self.getNeighbors()
+        neighbor_1_distance = self.getDistanceByID(neighbors_ids[0]) + 0.001
+        neighbor_2_distance = self.getDistanceByID(neighbors_ids[1]) + 0.001
 
-        neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
-        neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+        #neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
+        #neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+
 
         print("neighbors", neighbors_positions, (neighbor_1_distance-neighbor_2_distance)**2)
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
-        # #print("closest ", r, closest_point_path)
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivatice(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
-        derivative_neighbor_2_distance = self.distanceDerivatice(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
-        #derivative_neighbor_1_distance = (((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), ((r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
-        #derivative_neighbor_2_distance = (((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), ((r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
-
+        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
+        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
+      
         d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
         df = self.limitVector(df, 2)
@@ -420,37 +567,52 @@ class Robot:
         alpha = 6
         final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] +df[1])
         
-        #final_direction = (alpha*path_direction[0], alpha*path_direction[1])
-        
-        print(path_distance, "final direction")
-        
+
+      
         ##
         ##  Coverting to non-holonomic
         ##
         robot_angle = -r[2]
-        # #if(robot_angle > math.pi/2):
-        # #    robot_angle = robot_angle - math.pi
-
-        # #theta = math.atan2(final_direction[1], final_direction[0]) - robot_angle
-        # force_size = math.sqrt(final_direction[1]*final_direction[1] + final_direction[0]*final_direction[0])
-        # if(force_size < 1.0):
-        #     return
-
-
-        # theta = (final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
-        # linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
-        # cos(theta) -sin(theta)
-        # sin(theta) cos(theta)
-
-        #print("Orientation", theta, linear)
 
         cmd_vel = Twist()
-        #if(abs(robot_direction[0]) > 0.1):
         cmd_vel.linear.x = final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
-        #if(abs(robot_direction[1]) > 0.1):
-        cmd_vel.linear.y = final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
-        
+        cmd_vel.linear.y = final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)        
         cmd_vel.angular.z = 0
+
+        self.vel_pub.publish(cmd_vel)
+
+
+    def control_nonholonomic(self, closest_point):
+        r = self.position['position']
+        neighbors_positions = robot.getNeighbors()
+
+        neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
+        neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+
+        closest_point_path = closest_point
+        path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
+        path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
+
+        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
+        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
+    
+        d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
+        df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
+        df = self.limitVector(df, 2)
+
+        alpha = 6
+        final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] +df[1])
+        
+        robot_angle = r[2]
+    
+        theta = (final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
+        linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
+    
+        cmd_vel = Twist()
+        cmd_vel.linear.x = linear#final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
+        cmd_vel.linear.y = 0#final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
+        
+        cmd_vel.angular.z = theta
 
         self.vel_pub.publish(cmd_vel)
 

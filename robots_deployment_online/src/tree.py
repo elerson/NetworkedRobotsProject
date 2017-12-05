@@ -10,6 +10,7 @@ class Tree:
         self.graph_adj_list = {}
         self.graph_vertex_position = {}
         self.clients = []
+        self.vertices = []
         self.readTree()
         pass
     def readTree(self):
@@ -53,6 +54,7 @@ class Tree:
         for vertex in self.graph_adj_list:
             if(len(self.graph_adj_list[vertex]) == 1):
                 self.clients.append(vertex)
+            self.vertices.append(vertex)
 
 
     def print_(self):
