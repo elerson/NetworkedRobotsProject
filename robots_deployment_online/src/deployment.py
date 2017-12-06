@@ -16,6 +16,8 @@ from nav_msgs.msg import MapMetaData
 
 from util import dist_to_segment_alpha, dist_to_segment
 
+from rssi_kalman import RSSIKalmanFilter
+
 import tf
 
         
@@ -55,10 +57,7 @@ class Robot:
         self.position['id'] = self.id
         self.position['position'] = (0.0, 0.0, 0.0)
         
-        ###force inicialization of metric
         self.metric_measurements = {}
-        self.network.sendMessage(self.position)
-        self.simulationMetric(0)
 
         self.num_robots = 0
         self.deployment_position = []
@@ -74,27 +73,49 @@ class Robot:
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
         rospy.Timer(rospy.Duration(0.1), self.simulationMetric)
+
+        self.metric_kalman = {}
+        self.gamma = 3
         
 
+    def logNormalMetric(self, distance, variance):
+        if(distance < 1):
+            return 40
+        return 40 + 10*self.gamma*math.log(distance) + np.random.normal(0,variance,1)[0]
 
 
     def simulationMetric(self, param):
 
-        variance = 0.1
+        variance = 10.0
         #for the robots
         for data_id in self.network.rcv_data:
+            #if(data_id == self.id):
+            #    continue
             real_distance = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
-            simulated_metric = real_distance + np.random.normal(0,variance,1)[0]
+            simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
+            
+
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
+            if( data_id not in self.metric_kalman):
+                self.metric_kalman[data_id] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
+
+            m, P = self.metric_kalman[data_id].getResult()
+            #print(m)
+
+            self.metric_kalman[data_id].addMeasurement(real_distance, simulated_metric)
+
 
         #for the tree
         for vertex in self.tree.graph_adj_list:
             real_distance = self.getDistance(self.position['position'], self.tree.graph_vertex_position[vertex])*self.map_resolution
-            simulated_metric = real_distance + np.random.normal(0,variance,1)[0]
+            simulated_metric = self.logNormalMetric(real_distance, variance)#real_distance + np.random.normal(0,variance,1)[0]
             self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
+            if( vertex not in self.metric_kalman):
+                self.metric_kalman[vertex] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
 
+            self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
 
     def getStatus(self, Status):
 
@@ -278,7 +299,7 @@ class Robot:
 
 
         allocation_path = segmentation[self.allocation_id]
-        print("Allocation Path", allocation_path, allocation)
+        #print("Allocation Path", allocation_path, allocation)
 
 
         #get the closest point in each segment
@@ -320,7 +341,7 @@ class Robot:
                 force = (robot_size - distance)*force_multiplier
                 resulting_direction = (resulting_direction[0] +force*direction[0], resulting_direction[1] +force*direction[1])
 
-            print("DIRECTION", distance)
+            #print("DIRECTION", distance)
         return resulting_direction
 
 
@@ -402,7 +423,7 @@ class Robot:
                 self.allocation_id = alloc_id
                 break
 
-        print(allocation, self.allocation_id)
+        #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
 
@@ -518,50 +539,83 @@ class Robot:
         #         self.control_(closest_point)
         self.control_holonomic(closest_point)
 
-    def distanceDerivative(self, x, y):
-        return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
+
+    def distanceDerivative(self, x, y, id):
+
+
+        gamma = self.metric_kalman[id].getGamma()
+        print(id, gamma)
+        #return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
+        return(10*gamma*x/((x**2 + y**2)+0.001), 10*gamma*y/((x**2 + y**2)+0.001))
+        #return(5*self.gamma*x/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)), 5*self.gamma*y/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)))
 
 
     def getDistanceByID(self, id):
         #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
         #print(self.metric_measurements)
-        return self.metric_measurements[id][4]
+        r = self.position['position']
+        p = self.getPositionByID(id)
+
+        distance = self.getDistance(r, p)*self.map_resolution
+
+        # return self.logNormalMetric(dist, 0)
+        #return self.metric_measurements[id][4]
+        #print(self.metric_kalman)
+        return self.metric_kalman[id].getMetricValue(distance)
 
 
     def getPositionByID(self, id):
-        print(self.network.rcv_data)
+        #print(self.network.rcv_data)
         ##Client or tree junctions id
         if(id < self.robots_ids_start):
             return self.tree.graph_vertex_position[id]
         else:
             return self.network.rcv_data[id]['position']
 
+
+    def verifyMetricOnNeighbors(self, neighbors_ids):
+        return (neighbors_ids[0] in self.metric_kalman) and (neighbors_ids[1] in self.metric_kalman)      
+
+
     def control_holonomic(self, closest_point):
         r = self.position['position']
         #print(r)
         neighbors_ids = robot.getNeighborsIDs()
 
+        #print(self.metric_kalman, neighbors_ids, self.id)
+        #verify if we already can use the metric
+        if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
+            return
+        #print(self.metric_kalman)
+
+
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
         #neighbors_positions = self.getNeighbors()
-        neighbor_1_distance = self.getDistanceByID(neighbors_ids[0]) + 0.001
-        neighbor_2_distance = self.getDistanceByID(neighbors_ids[1]) + 0.001
-
+        neighbor_1_distance = self.getDistanceByID(neighbors_ids[0])
+        neighbor_2_distance = self.getDistanceByID(neighbors_ids[1])
+       
         #neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         #neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
 
 
-        print("neighbors", neighbors_positions, (neighbor_1_distance-neighbor_2_distance)**2)
+        #print("neighbors", neighbors_positions, (neighbor_1_distance-neighbor_2_distance)**2)
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
-        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
-      
-        d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
+        derivative_neighbor_1_distance = self.distanceDerivative((r[0] -neighbors_positions[0][0])*self.map_resolution, (r[1]-neighbors_positions[0][1])*self.map_resolution, neighbors_ids[0])
+        derivative_neighbor_2_distance = self.distanceDerivative((r[0] -neighbors_positions[1][0])*self.map_resolution, (r[1]-neighbors_positions[1][1])*self.map_resolution, neighbors_ids[1])
+        
+        beta = 0.01
+        d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
+        
+        #print("Derivative", self.ros_id, df )
+
+
+
         df = self.limitVector(df, 2)
 
         alpha = 6
@@ -616,8 +670,10 @@ class Robot:
 
         self.vel_pub.publish(cmd_vel)
 
+
     def segmentInsideSgment(self, segment1, segment2):
         return segment1[0] in segment2 and segment1[1] in segment2
+
 
     def getClosestNodeFromPoint(self, nodeSet, point):
 
@@ -629,9 +685,6 @@ class Robot:
                 distance = new_distance
                 out_node = node
         return out_node
-
-
-
 
 
     def control(self):
@@ -652,7 +705,7 @@ class Robot:
         neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
 
-        print(neighbor_1_distance, neighbor_2_distance)
+        #print(neighbor_1_distance, neighbor_2_distance)
         derivative_neighbor_1_distance = (-((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), (-(r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
         derivative_neighbor_2_distance = (-((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), (-(r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
 
@@ -708,14 +761,13 @@ class Robot:
         self.vel_pub.publish(cmd_vel)
 
         
-
 if __name__ == "__main__":
     robot = Robot()
     robot.getTreeAllocationPerSegment()
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
-        print('send')
+        #print('send')
         robot.highLevelControl()
         rate.sleep()
-        print(now-rospy.get_rostime())
+        #print(now-rospy.get_rostime())
