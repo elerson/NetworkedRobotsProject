@@ -537,7 +537,7 @@ class Robot:
         # else:
         #     if(self.status == 3 or self.status == -1): #succed or pending
         #         self.control_(closest_point)
-        self.control_holonomic(closest_point)
+        self.control_nonholonomic(closest_point)
 
 
     def distanceDerivative(self, x, y, id):
@@ -638,19 +638,28 @@ class Robot:
 
     def control_nonholonomic(self, closest_point):
         r = self.position['position']
-        neighbors_positions = robot.getNeighbors()
 
-        neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
-        neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+        neighbors_ids = robot.getNeighborsIDs()
+
+        if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
+            return
+
+        #neighbors_positions = robot.getNeighbors()
+        neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
+
+        #neighbors_positions = self.getNeighbors()
+        neighbor_1_distance = self.getDistanceByID(neighbors_ids[0])
+        neighbor_2_distance = self.getDistanceByID(neighbors_ids[1])
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1])
-        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1])
+        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1], neighbors_ids[0])
+        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1], neighbors_ids[1])
     
-        d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
+        beta = 0.1
+        d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
         df = self.limitVector(df, 2)
 
