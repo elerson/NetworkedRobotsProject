@@ -72,7 +72,7 @@ class Robot:
         rospy.Subscriber("/robot_"+str(self.ros_id)+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
-        rospy.Timer(rospy.Duration(0.1), self.simulationMetric)
+        rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
 
         self.metric_kalman = {}
         self.gamma = 3
@@ -668,7 +668,7 @@ class Robot:
         
         robot_angle = r[2]
     
-        theta = (final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
+        theta = 0.1*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
         linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
     
         cmd_vel = Twist()
