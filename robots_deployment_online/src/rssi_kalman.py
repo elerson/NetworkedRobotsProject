@@ -1,3 +1,4 @@
+
 ##
 ## Here we consider the function PL(d) = PL(d0) + 10*n*log(d/d0) -> y = theta0 + theta1*(10*log(d/d0))
 ## and we want to estimate the PL(d0) a constant and "n"
