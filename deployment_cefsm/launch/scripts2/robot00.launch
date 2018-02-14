@@ -1,0 +1,34 @@
+
+
+
+<launch>
+
+  <node pkg="deployment_cefsm" type="deployment.py" name="ros_deployment_0" output="screen">
+    <param name="pose_send_time" value="0.3" />
+    <param name="id" value="0" />
+    <param name="tree_file" value="/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat" />
+    <param name="lower_threshold" value="-81" />
+    <param name="higher_threshold" value="-72" />
+  </node> 
+
+
+  <node pkg="fake_localization" type="fake_localization" name="amclrobot_0" output="screen">
+   <!-- Publish scans from best pose at a max of 10 Hz -->
+   <param name="odom_model_type" value="omni"/>
+
+   <param name="global_frame_id" value="/map"/>
+  </node>
+
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base_0" output="screen">
+   
+
+   <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
+   <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
+   <rosparam file="$(find deployment_cefsm)/launch/local_costmap_params.yaml" command="load" />
+   <rosparam file="$(find deployment_cefsm)/launch/global_costmap_params.yaml" command="load" />
+   <rosparam file="$(find deployment_cefsm)/launch/base_local_planner_params.yaml" command="load" />
+
+  </node>
+
+ </launch>
