@@ -31,6 +31,7 @@ class Robot:
         rospy.init_node('robot_deployment', anonymous=True)
         #print("ROBOT")
         self.network             = Network()
+        self.network.addCommandCallback(self.receiveNetworkCommand)
 
         ###
         ###         REAL ROBOT(1) OR SIMULATED (0)
@@ -82,19 +83,24 @@ class Robot:
 
         self.status              = -1
 
-        self.ros_id              = self.id - self.robots_ids_start  
-        rospy.Subscriber("/robot_"+str(self.ros_id)+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
-        self.vel_pub             = rospy.Publisher("/robot_"+str(self.ros_id)+"/cmd_vel", Twist, queue_size=10)
+        self.ros_id              = self.id - self.robots_ids_start
+        prefix                   = "/robot_"+str(self.ros_id)+"/amcl_pose"
+        rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
+        self.vel_pub             = rospy.Publisher(prefix+"/cmd_vel", Twist, queue_size=10)
 
-        self.goal_pub            = rospy.Publisher("/robot_"+str(self.ros_id)+"/move_base_simple/goal", PoseStamped, queue_size=10)
-        rospy.Subscriber("/robot_"+str(self.ros_id)+"/move_base/status", GoalStatusArray, self.getStatus)
+        self.goal_pub            = rospy.Publisher(prefix+"/move_base_simple/goal", PoseStamped, queue_size=10)
+        rospy.Subscriber(prefix+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
         rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
 
         self.metric_kalman       = {}
         self.gamma               = 3
+
+
         
+    def receiveNetworkCommand(self):
+        print(self.network.rcv_command)
 
     def createRoutingTable():
         neighbors_ids, routing = robot.getNeighborsIDs()

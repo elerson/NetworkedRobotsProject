@@ -50,6 +50,7 @@ class Robot:
         rospy.init_node('deployment_cefsm', anonymous=True)
         #print("ROBOT")
         self.network             = Network()
+        self.network.addCommandCallback(self.receiveNetworkCommand)
 
         self.initialized         = False
         self.neighbors           = []
@@ -103,12 +104,14 @@ class Robot:
 
 
         self.ros_id              = self.id - self.robots_ids_start  
-        rospy.Subscriber("/robot_"+str(self.ros_id)+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
+        prefix                   = "/robot_"+str(self.ros_id)+"/amcl_pose"
+
+        rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
   
-        self.cancel_pub          = rospy.Publisher("/robot_"+str(self.ros_id)+"/move_base/cancel", GoalID, queue_size=10)
+        self.cancel_pub          = rospy.Publisher(prefix + "/move_base/cancel", GoalID, queue_size=10)
         self.current_goal_id     = 0
-        self.goal_pub            = rospy.Publisher("/robot_"+str(self.ros_id)+"/move_base/goal", MoveBaseActionGoal, queue_size=10)
-        rospy.Subscriber("/robot_"+str(self.ros_id)+"/move_base/status", GoalStatusArray, self.getStatus)
+        self.goal_pub            = rospy.Publisher(prefix+"/move_base/goal", MoveBaseActionGoal, queue_size=10)
+        rospy.Subscriber(prefix+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
         rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
@@ -125,6 +128,9 @@ class Robot:
             message['routing']  = []
             self.network.addMessage(message) 
 
+
+    def receiveNetworkCommand(self):
+        print(self.network.rcv_command)
 
     def createRoutingTable(self):
         #neighbors_ids, routing = robot.getNeighborsIDs()

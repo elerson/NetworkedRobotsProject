@@ -10,7 +10,7 @@ import cPickle as pickle
 class Network:
     
     def __init__(self, broadcast_addr = "127.255.255.255", port = 9988):
-        self.running = True
+	self.running = True
         self.port = port
         self.broadcast_addr = broadcast_addr
 
@@ -29,17 +29,17 @@ class Network:
         self.rcv_thread.start()
         
 
-        self.rcv_data    = {}
-        self.rcv_command = {}
+        self.rcv_data = {}
 
-        self.command_callback = None
-
-    def addCommandCallback(self, callback):
-        self.command_callback = callback 
+    def destroy(self):
+        self.running = False
+        print('exit')
+        self.rcv_thread.deamon = True 
 
     def __del__(self):
         self.running = False
-        self.rcv_thread.join()
+        print('exit')
+        self.rcv_thread.deamo = True 
 
         pass
         
@@ -48,12 +48,7 @@ class Network:
             data_string = self.rcv_socket.recvfrom(2048)
             rcv_data = pickle.loads(data_string[0])
             id = rcv_data['id']
-            if(id >= 0):
-                self.rcv_data[id]    = rcv_data
-            else:
-                self.rcv_command[id] = rcv_data
-                if self.command_callback != None:
-                    self.command_callback()
+            self.rcv_data[id] = rcv_data
 
     def addMessage(self, message):
         self.rcv_data[message['id']] = message
