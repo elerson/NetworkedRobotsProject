@@ -65,7 +65,6 @@ class Routing:
     # put link down
     sub.Popen(('sudo', 'ifconfig', ifname, 'down'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
-    sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
     sub.Popen(('sudo', 'ifconfig', ifname, 'promisc'))
     
 
@@ -76,6 +75,7 @@ class Routing:
     sub.Popen(('sudo', 'ifconfig', ifname, ip+'/24', 'up'))
     #sub.Popen(('sudo', 'ifconfig', ifname, ip, 'up'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'essid', network_name))
+    sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
    
     #
   def flushRouting(self):
