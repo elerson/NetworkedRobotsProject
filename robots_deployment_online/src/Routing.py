@@ -92,8 +92,8 @@ class Routing:
     self.interface.route("add", index=x, dst=dest+'/32', gateway=next_hop)
     self.ip_list[dest] = 1
   #
-  def createGraph(self, network):
-    for robot_id in network.
+  #def createGraph(self, network):
+  #  for robot_id in network.
   #
   # def createRoute( neighbors, routing ): # routing = [routing_through_0, routing_through_1]
   #   self.flushRouting()
