@@ -64,18 +64,26 @@ class Routing:
 
     # put link down
     sub.Popen(('sudo', 'ifconfig', ifname, 'down'))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'ifconfig', ifname, 'promisc'))
-    
+    time.sleep(0.2)
 
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)
+    time.sleep(0.2)
 
     sub.Popen(('sudo', 'iwconfig', ifname, 'ap', network_cell))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'ifconfig', ifname, ip+'/24', 'up'))
+    time.sleep(0.2)
     #sub.Popen(('sudo', 'ifconfig', ifname, ip, 'up'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'essid', network_name))
+    time.sleep(0.2)
+    print('all configured')
    
    
     #
