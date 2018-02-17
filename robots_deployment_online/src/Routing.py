@@ -25,7 +25,7 @@ class Routing:
     self.interface    = IPRoute()
     self.network_cell = "76:A9:80:06:38:32"
     self.network_name = essid
-    self.channel = '0'
+    self.channel = '5'
     self.ip_list = dict()
     self.last_routing_hash = ''
     #
