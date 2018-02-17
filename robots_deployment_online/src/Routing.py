@@ -61,15 +61,19 @@ class Routing:
   def setupInterface(self, ifname, ip, network_name, network_cell, channel='5'):
     #
     x = self.interface.link_lookup(ifname=ifname)[0]
+
     # put link down
     sub.Popen(('sudo', 'ifconfig', ifname, 'down'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
+
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)
+
     sub.Popen(('sudo', 'ifconfig', ifname, ip+'/24', 'up'))
     #sub.Popen(('sudo', 'ifconfig', ifname, ip, 'up'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'essid', network_name))
+   
     #
   def flushRouting(self):
     x = self.interface.link_lookup(ifname=self.ifname)[0]
