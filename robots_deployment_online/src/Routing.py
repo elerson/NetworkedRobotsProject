@@ -25,12 +25,12 @@ class Routing:
     self.interface    = IPRoute()
     self.network_cell = "76:A9:80:06:38:32"
     self.network_name = essid
-    self.channel = '5'
+    self.channel = '0'
     self.ip_list = dict()
     self.last_routing_hash = ''
     #
     self.setupInterface(self.ifname, self.my_ip, self.network_name, self.network_cell, self.channel)
-    self.setupInterfaceMonitor(self.ifname)
+    #self.setupInterfaceMonitor(self.ifname)
     #
   def getMyMacAddr(self):
     return netifaces.ifaddresses(self.ifname)[netifaces.AF_LINK][0]['addr']
@@ -66,6 +66,8 @@ class Routing:
     sub.Popen(('sudo', 'ifconfig', ifname, 'down'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
+    sub.Popen(('sudo', 'ifconfig', ifname, 'promisc'))
+    
 
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)
