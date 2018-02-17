@@ -72,6 +72,7 @@ class Routing:
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)
 
+    sub.Popen(('sudo', 'iwconfig', ifname, 'ap', network_cell))
     sub.Popen(('sudo', 'ifconfig', ifname, ip+'/24', 'up'))
     #sub.Popen(('sudo', 'ifconfig', ifname, ip, 'up'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'essid', network_name))
