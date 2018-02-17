@@ -119,6 +119,16 @@ class Robot:
         self.metric_kalman       = {}
         self.gamma               = 3
         
+        if(self.real_robot):
+            self.updateRouting()
+
+
+    def updateRouting(self):
+        threading.Timer(1, self.updateMap).start()
+        graph = self.createRoutingGraph()
+        self.routing.createRoute(graph)
+
+
     def initializeClients(self):
         for client in self.clients:
             message = {}
@@ -127,6 +137,32 @@ class Robot:
             message['state']    = int(State.CONNECT)
             message['routing']  = []
             self.network.addMessage(message) 
+
+    
+    def createRoutingGraph(self):
+        graph = {}
+        for id in self.network.rcv_data:
+            graph[id] = set([])
+
+        graph[self.id] = set([])
+
+        for id in self.network.rcv_data:
+            if(self.network.rcv_data[id]['state'] != State.CONNECT):
+                continue
+            graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
+            for neigbor in self.network.rcv_data[id]['routing']:
+                graph[neigbor] = graph[neigbor].union(set([id]))
+
+        if(with_my_self):
+            graph[self.id] = graph[self.id].union(self.neighbors)
+
+            for neigbor in self.neighbors:            
+                graph[neigbor] = graph[neigbor].union(set([self.id]))
+
+
+        for id in self.network.rcv_data:
+            graph[id] = list(graph[id])
+        return graph
 
 
     def receiveNetworkCommand(self):

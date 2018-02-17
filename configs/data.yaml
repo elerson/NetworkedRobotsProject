@@ -1,21 +1,27 @@
 robots:
   robot_0:
-    id: 0
-    ip: 192.168.0.1
+    id: 6
+    ip: 192.168.0.6
     macaddress: b8:27:eb:04:8d:c6
     cable_ip: 150.164.212.42
 
   robot_1:
-    id: 1
-    ip: 192.168.0.2
-    macaddress: a4:4e:31:ed:6d:d4
+    id: 5
+    ip: 192.168.0.5
+    macaddress: b8:27:eb:65:5a:6c
     cable_ip: 150.164.212.43
 
   robot_2:
-    id: 2
+    id: 3
     ip: 192.168.0.3
     macaddress: a4:4e:31:ed:6d:e4
-    cable_ip: 150.164.212.44
+    cable_ip: 150.164.212.45
+  
+  robot_3:
+    id: 1
+    ip: 192.168.0.1
+    macaddress: 74:46:a0:3b:14:6a
+    cable_ip: 150.164.212.46
 
 configs:
   map: /home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/exp1/ambiente.png

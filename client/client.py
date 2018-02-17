@@ -102,7 +102,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.network.sendMessage(command)
 
     def loadImage(self):
-        return QtGui.QImage(self.config_data['image'])
+        return QtGui.QImage(self.config_data['map'])
 
 
 

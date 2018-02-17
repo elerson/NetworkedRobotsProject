@@ -56,7 +56,7 @@ class Robot:
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
-        self.ray                 = rospy.get_param("~ray", 120)
+        self.radius                 = rospy.get_param("~ray", 120)
 
 
         self.map_resolution      = 0.5
@@ -97,6 +97,14 @@ class Robot:
         self.metric_kalman       = {}
         self.gamma               = 3
 
+        if(self.real_robot):
+            self.updateRouting()
+
+
+    def updateRouting(self):
+        threading.Timer(1, self.updateMap).start()
+        graph = self.createRoutingGraph()
+        self.routing.createRoute(graph)
 
         
     def receiveNetworkCommand(self):
@@ -174,6 +182,31 @@ class Robot:
                 self.metric_kalman[vertex] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
 
             self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
+
+
+    def createRoutingGraph(self):
+        graph = {}
+        for id in self.network.rcv_data:
+            graph[id] = set([])
+
+        graph[self.id] = set([])
+
+        for id in self.network.rcv_data:
+            graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
+            for neigbor in self.network.rcv_data[id]['routing']:
+                graph[neigbor] = graph[neigbor].union(set([id]))
+
+        if(with_my_self):
+            graph[self.id] = graph[self.id].union(self.neighbors)
+
+            for neigbor in self.neighbors:            
+                graph[neigbor] = graph[neigbor].union(set([self.id]))
+
+
+        for id in self.network.rcv_data:
+            graph[id] = list(graph[id])
+        return graph
+
 
     def getStatus(self, Status):
 
@@ -278,7 +311,7 @@ class Robot:
         i = 0
         for segment in segmentation:
             cost = self.tree_segmentation.get_path_cost(segment)
-            n_robots[i] = math.ceil(cost/self.ray)
+            n_robots[i] = math.ceil(cost/self.radius)
             sum_robots += n_robots[i]
 
             allocation_sum.append(sum_robots)
