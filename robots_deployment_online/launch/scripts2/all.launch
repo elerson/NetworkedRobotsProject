@@ -1,4 +1,8 @@
 <launch>
 <include file="$(find robots_deployment_online)/launch/scripts2/robot0.launch" />
 <include file="$(find robots_deployment_online)/launch/scripts2/robot1.launch" />
+<include file="$(find robots_deployment_online)/launch/scripts2/robot2.launch" />
+<include file="$(find robots_deployment_online)/launch/scripts2/robot3.launch" />
+<include file="$(find robots_deployment_online)/launch/scripts2/robot4.launch" />
+<include file="$(find robots_deployment_online)/launch/scripts2/robot5.launch" />
 </launch>

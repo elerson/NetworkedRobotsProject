@@ -59,7 +59,7 @@ class Robot:
         ###
         ###         REAL ROBOT(1) OR SIMULATED (0)
         ###
-        # self.real_robot          = rospy.get_param("~real_robot")
+        self.real_robot          = rospy.get_param("~real_robot", False)
         # if(self.real_robot):
         #     self.config_file     = rospy.get_param("~config_file")
         #     self.routing         = Routing('teste4', self.config_file)
@@ -104,7 +104,7 @@ class Robot:
 
 
         self.ros_id              = self.id - self.robots_ids_start  
-        prefix                   = "/robot_"+str(self.ros_id)+"/amcl_pose"
+        prefix                   = "/robot_"+str(self.ros_id)
 
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
   
@@ -320,7 +320,7 @@ class Robot:
         if(id in self.metric_kalman):
             return self.metric_kalman[id].getMetricValue(distance)
         else:
-            return -100
+            return -1000
 
     def defineNeighbors(self):
         neighbors = []
@@ -402,14 +402,15 @@ class Robot:
         
         self.clients_connections = clients_connections
 
-
+        if(self.state == State.MOVE):
+            if(self.last_connected_clients - connected_clients == set([])):
+                self.last_connected_clients = connected_clients
 
         if(self.connected_clients - connected_clients == set([])):
             self.connected_clients = connected_clients
-            if(self.last_connected_clients - connected_clients == set([]) ):
-                self.last_connected_clients = connected_clients
+
         else:
-            self.last_connected_clients = self.connected_clients
+            #self.last_connected_clients = self.connected_clients
             self.connected_clients = connected_clients
 
 
@@ -440,7 +441,8 @@ class Robot:
         #print(closet_client)
         if(closet_client != self.closet_client):
             self.closet_client = closet_client
-            self.sendDeployment(self.tree.graph_vertex_position[closet_client])
+            if(closet_client >= 0):
+                self.sendDeployment(self.tree.graph_vertex_position[closet_client])
 
     def MoveBackwards(self):
         self.sendDeployment(self.tree.graph_vertex_position[self.disconnected])
@@ -466,6 +468,7 @@ class Robot:
 
 
     def AllClientsConnected(self):
+        print('connected ', self.connected_clients)
         if self.clients == self.connected_clients:
             return True
         return False
@@ -479,14 +482,17 @@ class Robot:
         return False
 
     def ReconnectedToClient(self):
+        print('reconnected ', self.last_connected_clients, self.connected_clients)
         if(self.last_connected_clients - self.connected_clients == set([])):
             return True
         return False
         
     def BelongsToSolution(self):
         graph = self.defineGraph(False)
-        connected_clients = self.searchGraph(graph, list(self.clients)[0], set([]))
-        connected_clients = connected_clients.union(set[list(self.clients)[0]])
+        clients_connections = {}
+        connected_clients = self.searchGraph(graph, list(self.clients)[0], set([]), clients_connections)
+
+        connected_clients = connected_clients.union(set([list(self.clients)[0]]))
         if(self.connected_clients == connected_clients):
             return False
         return True
@@ -515,7 +521,7 @@ class Robot:
 
     def CEFSM(self):
         self.precomputeGraph() #muda estado da classe
-        print('State ', self.state )
+        print('State ', self.state, self.ros_id )
         if self.state == State.IDLE:
             if(not self.AllClientsConnected()):
                 self.state = State.MOVE
@@ -524,6 +530,7 @@ class Robot:
         elif self.state == State.MOVE:
             self.Move()
 
+            print('allclient', self.AllClientsConnected(),'win', self.WinVote(), 'belong', self.BelongsToSolution())
             if(self.DisconnectedToClient()):#muda estado da classe
                 self.MoveBackwards()
                 self.state = State.DISCONNECT 
@@ -540,6 +547,7 @@ class Robot:
             pass
 
         elif self.state == State.DISCONNECT:
+
             if(self.ReconnectedToClient() and (self.RouteToClientChanged() or self.LoseVote())):
                 #TODO: update neigbor state
                 self.state = State.MOVE 
@@ -557,7 +565,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    time.sleep(20 + robot.ros_id*12)
+    time.sleep(20 + robot.ros_id*20)
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():
         now = rospy.get_rostime()

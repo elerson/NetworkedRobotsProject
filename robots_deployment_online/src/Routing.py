@@ -67,8 +67,8 @@ class Routing:
     time.sleep(0.2)
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
     time.sleep(0.2)
-    sub.Popen(('sudo', 'ifconfig', ifname, 'promisc'))
-    time.sleep(0.2)
+    #sub.Popen(('sudo', 'ifconfig', ifname, 'mode', 'monitor'))
+    #time.sleep(0.2)
 
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)

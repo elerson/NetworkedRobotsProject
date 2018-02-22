@@ -9,8 +9,8 @@ robot_exp = '''
     <param name="pose_send_time" value="0.3" />
     <param name="id" value="ID" />
     <param name="tree_file" value="/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat" />
-    <param name="lower_threshold" value="-81" />
-    <param name="higher_threshold" value="-72" />
+    <param name="lower_threshold" value="-111" />
+    <param name="higher_threshold" value="-91" />
   </node> 
 
 
@@ -73,4 +73,4 @@ class Create():
 
 if __name__ == "__main__":
   exp = Create()
-  exp.create(9)
+  exp.create(5)

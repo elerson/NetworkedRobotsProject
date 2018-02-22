@@ -55,11 +55,9 @@ class RSSMeasure:
 
 
 
-m = RSSMeasure('teste4','data.yaml')
+#m = RSSMeasure('teste4','data.yaml')
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
-  
-  while(true)
-  m.
+
   

@@ -3,8 +3,4 @@
 <include file="$(find deployment_cefsm)/launch/scripts2/robot1.launch" />
 <include file="$(find deployment_cefsm)/launch/scripts2/robot2.launch" />
 <include file="$(find deployment_cefsm)/launch/scripts2/robot3.launch" />
-<include file="$(find deployment_cefsm)/launch/scripts2/robot4.launch" />
-<include file="$(find deployment_cefsm)/launch/scripts2/robot5.launch" />
-<include file="$(find deployment_cefsm)/launch/scripts2/robot6.launch" />
-<include file="$(find deployment_cefsm)/launch/scripts2/robot7.launch" />
 </launch>

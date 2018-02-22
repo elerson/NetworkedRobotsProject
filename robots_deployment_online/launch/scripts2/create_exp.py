@@ -68,4 +68,4 @@ class Create():
 
 if __name__ == "__main__":
   exp = Create()
-  exp.create(4)
+  exp.create(7)

@@ -36,11 +36,11 @@ class Robot:
         ###
         ###         REAL ROBOT(1) OR SIMULATED (0)
         ###
-        self.real_robot          = rospy.get_param("~real_robot")
-        if(self.real_robot):
-            self.config_file     = rospy.get_param("~config_file")
-            self.routing         = Routing('teste4', self.config_file)
-            self.rss_measure     = RSSMeasure('teste4', self.config_file)
+        self.real_robot          = rospy.get_param("~real_robot", 0)
+        # if(self.real_robot):
+        #     self.config_file     = rospy.get_param("~config_file")
+        #     self.routing         = Routing('teste4', self.config_file)
+        #     self.rss_measure     = RSSMeasure('teste4', self.config_file)
 
 
         id                       = rospy.get_param("~id")
@@ -84,7 +84,7 @@ class Robot:
         self.status              = -1
 
         self.ros_id              = self.id - self.robots_ids_start
-        prefix                   = "/robot_"+str(self.ros_id)+"/amcl_pose"
+        prefix                   = "/robot_"+str(self.ros_id)
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.vel_pub             = rospy.Publisher(prefix+"/cmd_vel", Twist, queue_size=10)
 
@@ -111,7 +111,7 @@ class Robot:
         print(self.network.rcv_command)
 
     def createRoutingTable():
-        neighbors_ids, routing = robot.getNeighborsIDs()
+        neighbors_ids = robot.getNeighborsIDs()
 
 
     def logNormalMetric(self, distance, variance):
@@ -134,7 +134,7 @@ class Robot:
             if( data_id not in self.metric_kalman):
                 self.metric_kalman[data_id]   =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
 
-            if(real_metric > self.rss_measure.MAX)
+            if(real_metric > self.rss_measure.MAX):
                 self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
 
 
@@ -145,7 +145,7 @@ class Robot:
 
             if( vertex not in self.metric_kalman):
                 self.metric_kalman[vertex] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
-            if(real_metric > self.rss_measure.MAX)
+            if(real_metric > self.rss_measure.MAX):
                 self.metric_kalman[vertex].addMeasurement(real_distance, real_metric)
 
 
@@ -502,6 +502,12 @@ class Robot:
 
         return neighbor_positions
 
+    def isTreeInternalNode(self, id):
+        if not id in self.tree.clients and id < self.robots_ids_start:
+            return True
+        return False
+
+
     def getNeighborsIDs(self):
 
         #get all robots that are from the same allocation
@@ -552,7 +558,7 @@ class Robot:
         negative_closest[negative_closest >= 0] = -np.inf
 
         if(not np.isinf(positive_closest.min()) and not np.isinf(negative_closest.max())):
-            neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 1 was desconsidered -> alphas = alphas[1:]
+            neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
             neighbors.append(negative_closest.argmax() + 1)
 
         elif(not np.isinf(positive_closest.min())):
@@ -566,12 +572,51 @@ class Robot:
         neigh_0 = ids[neighbors[0]]
         neigh_1 = ids[neighbors[1]]
 
+        #get the closest from the other group - positive
+        if(self.isTreeInternalNode(ids[neighbors[0]])):
+            positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+            self_alpha   = dist_to_segment_alpha(p, q, positions[0])
+            max_distance = float('inf')
+            max_index    = -1
+            index = 1
 
-        #define routing
-        routing_through_0 = positive_closest[np.logical_and(positive_closest != np.inf, positive_closest != neigh_0 )]
-        routing_through_1 = negative_closest[np.logical_and(negative_closest != np.inf, negative_closest != neigh_1 )]
+            for position in positions[1:]:
+                alpha    = dist_to_segment_alpha(p, q, position)
+                distance = self.getDistance( position , positions[0])
+                if((alpha - self_alpha) > 0 and distance < self.radius):
+                    if(distance < max_distance):
+                        max_distance = distance
+                        max_index    = index
+                index += 1
 
-    
+            if(max_index >= 0):               
+                neigh_0 = ids_local[max_index]
+
+            
+        #get the closest from the other group - negative
+        if(self.isTreeInternalNode(ids[neighbors[1]])):
+            positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+            self_alpha   = dist_to_segment_alpha(p, q, positions[0])
+            max_distance = float('inf')
+            max_index    = -1
+            index = 1
+
+            for position in positions[1:]:
+                alpha    = dist_to_segment_alpha(p, q, position)
+                distance = self.getDistance( position , positions[0])
+                if((alpha - self_alpha) < 0 and distance < self.radius):
+                    if(distance < max_distance):
+                        max_distance = distance
+                        max_index    = index
+                index += 1
+
+            if(max_index >= 0):
+                neigh_1 = ids_local[max_index]
+
+
+
+
+       
 
 
         # ##
@@ -608,7 +653,7 @@ class Robot:
         self.neigh_0 = neigh_0
         self.neigh_1 = neigh_1
 
-        return [neigh_0, neigh_1], [routing_through_0, routing_through_1]
+        return [neigh_0, neigh_1]
 
     def limitVector(self, vec, maxsize):
 
@@ -649,7 +694,7 @@ class Robot:
 
 
         gamma = self.metric_kalman[id].getGamma()
-        print(id, gamma)
+        #print(id, gamma)
         #return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
         return(10*gamma*x/((x**2 + y**2)+0.001), 10*gamma*y/((x**2 + y**2)+0.001))
         #return(5*self.gamma*x/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)), 5*self.gamma*y/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)))
@@ -685,7 +730,7 @@ class Robot:
     def control_holonomic(self, closest_point):
         r = self.position['position']
         #print(r)
-        neighbors_ids, routing____ = robot.getNeighborsIDs()
+        neighbors_ids = robot.getNeighborsIDs()
 
         #print(self.metric_kalman, neighbors_ids, self.id)
         #verify if we already can use the metric
@@ -744,7 +789,7 @@ class Robot:
     def control_nonholonomic(self, closest_point):
         r = self.position['position']
 
-        neighbors_ids, routing____ = robot.getNeighborsIDs()
+        neighbors_ids = robot.getNeighborsIDs()
 
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
@@ -781,6 +826,7 @@ class Robot:
         cmd_vel.linear.y = 0#final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
         
         cmd_vel.angular.z = theta
+        #print('control')
 
         self.vel_pub.publish(cmd_vel)
 

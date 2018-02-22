@@ -13,6 +13,7 @@ class Tree:
         self.vertices = []
         self.readTree()
         pass
+
     def readTree(self):
         VERTEX, VERTEX_CONNECTION, VERTEX_POSITION = range(3)
 

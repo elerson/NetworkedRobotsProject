@@ -30,7 +30,7 @@ class Routing:
     self.last_routing_hash = ''
     #
     self.setupInterface(self.ifname, self.my_ip, self.network_name, self.network_cell, self.channel)
-    self.setupInterfaceMonitor(self.ifname)
+    #self.setupInterfaceMonitor(self.ifname)
     #
   def getMyMacAddr(self):
     return netifaces.ifaddresses(self.ifname)[netifaces.AF_LINK][0]['addr']
@@ -61,15 +61,31 @@ class Routing:
   def setupInterface(self, ifname, ip, network_name, network_cell, channel='5'):
     #
     x = self.interface.link_lookup(ifname=ifname)[0]
+
     # put link down
     sub.Popen(('sudo', 'ifconfig', ifname, 'down'))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'iwconfig', ifname, 'mode', 'ad-hoc'))
-    sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
+    time.sleep(0.2)
+    #sub.Popen(('sudo', 'ifconfig', ifname, 'mode', 'monitor'))
+    #time.sleep(0.2)
+
     #self.interface.link("set", index=x, address=network_cell, name=network_name)
     self.interface.link("set", index=x, mtu=1000, txqlen=2000)
+    time.sleep(0.2)
+
+    sub.Popen(('sudo', 'iwconfig', ifname, 'ap', network_cell))
+    time.sleep(0.2)
+    sub.Popen(('sudo', 'iwconfig', ifname, 'channel', channel))
+    time.sleep(0.2)
     sub.Popen(('sudo', 'ifconfig', ifname, ip+'/24', 'up'))
+    time.sleep(0.2)
     #sub.Popen(('sudo', 'ifconfig', ifname, ip, 'up'))
     sub.Popen(('sudo', 'iwconfig', ifname, 'essid', network_name))
+    time.sleep(0.2)
+    print('all configured')
+   
+   
     #
   def flushRouting(self):
     x = self.interface.link_lookup(ifname=self.ifname)[0]
@@ -92,8 +108,8 @@ class Routing:
     self.interface.route("add", index=x, dst=dest+'/32', gateway=next_hop)
     self.ip_list[dest] = 1
   #
-  def createGraph(self, network):
-    for robot_id in network.
+  #def createGraph(self, network):
+  #  for robot_id in network.
   #
   # def createRoute( neighbors, routing ): # routing = [routing_through_0, routing_through_1]
   #   self.flushRouting()
