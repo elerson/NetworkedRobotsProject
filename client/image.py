@@ -21,6 +21,10 @@ class Image(QtGui.QWidget):
         self.end_pose            = QPointF(0, 0)
         self.image_number        = 2
         self.pixmap  = QtGui.QImage(960, 529, QtGui.QImage.Format_RGB32)
+        self.communication_graph = {}
+
+    def setIdStart(self, start):
+        self.robots_ids_start = start
 
 
     def setImage(self, image):
@@ -41,6 +45,18 @@ class Image(QtGui.QWidget):
         for robot_id in robots:
             self.robots[robot_id] = robots[robot_id]['position']
 
+    def addConnections(self, graph):
+        self.communication_graph = graph
+
+    def getPositionByID(self, id):
+        #print(self.network.rcv_data)
+        ##Client or tree junctions id
+        if(id < self.robots_ids_start):
+            position = self.positions[id]
+            return position
+        else:
+            return self.robots[id]
+
     def saveLog(self):
         number = self.image_number
         filename = '/image' + ''.zfill(8-int(ceil(log(number, 10)))) + str(number) + '.jpg'
@@ -54,6 +70,7 @@ class Image(QtGui.QWidget):
         pen = QtGui.QPen()
         pen.setWidth(2)
         painter.setPen(pen)
+        #print(self.positions)
         for i in self.graph:
             for j in self.graph[i]:
                 initial_pose = QPointF(self.positions[i][0], self.positions[i][1])
@@ -62,9 +79,11 @@ class Image(QtGui.QWidget):
         
         pen.setWidth(8)
         painter.setPen(pen)
+        #print robots
         for client in self.clients:
             position = QPointF(self.positions[client][0], self.positions[client][1])
             painter.drawPoint(self.offset +  self.offset_ + position)
+
 
         painter.setPen(pen_back)
 
@@ -86,13 +105,30 @@ class Image(QtGui.QWidget):
         painter.drawImage(self.offset +  self.offset_, self.image)
 
         self.paintTree(painter)
+
+        pen = QtGui.QPen()
+        #print connections
+        color = QtGui.QColor(255,215,0)
+        pen.setColor(color)
+        pen.setWidth(2)
+        painter.setPen(pen)
+        #print connections
+        for node1 in self.communication_graph:
+            for node2 in self.communication_graph[node1]:
+                p = self.getPositionByID(node1)
+                p1 = QPointF(p[0], p[1])
+
+                p = self.getPositionByID(node2)
+                p2 = QPointF(p[0], p[1])
+
+                painter.drawLine(self.offset +  self.offset_ + p1, self.offset +  self.offset_ + p2)
         #print(self.offset +  self.offset_)
-        for robot_id in self.robots:
-            painter.drawPointF(QPointF(self.offset +  self.offset_ + elf.robots[robot_id][0], self.robots[robot_id][1]))
+
+            #print(position)
 
         #paint tree
 
-        pen = QtGui.QPen()
+       
         color = QtGui.QColor(255, 0, 0)
         pen.setColor(color)
         pen.setWidth(2)
@@ -101,6 +137,10 @@ class Image(QtGui.QWidget):
         pen.setWidth(6)
         painter.setPen(pen)
         painter.drawPoint(self.offset +  self.offset_ + self.end_pose)
+
+        for robot_id in self.robots:
+            position = QPointF(self.robots[robot_id][0], self.robots[robot_id][1])
+            painter.drawPoint(self.offset +  self.offset_ + position)
 
 
     def mousePressEvent(self, e):
@@ -122,7 +162,7 @@ class Image(QtGui.QWidget):
 
         if(self.pressed_button == QtCore.Qt.RightButton):
             self.end_pose   = e.pos() - self.offset -  self.offset_
-            self.repaint()
+        self.repaint()
 
 
     def mouseReleaseEvent(self, e):
@@ -137,8 +177,5 @@ class Image(QtGui.QWidget):
         self.pressed_button = -1
         self.repaint()
 
-
-    def __del__(self):
-        self.network.destroy()        
 
         

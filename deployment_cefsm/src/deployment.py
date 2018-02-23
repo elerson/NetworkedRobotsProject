@@ -298,7 +298,12 @@ class Robot:
         orientation_euler = tf.transformations.euler_from_quaternion(orientation)
 
         self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
-        self.position['routing']  = self.neighbors
+        
+        if(self.state == State.CONNECT):
+            self.position['routing']  = self.neighbors
+        else:
+            self.position['routing']  = []
+
         self.position['state']    = int(self.state)
         #print(self.position)
         #print(self.position['position'])

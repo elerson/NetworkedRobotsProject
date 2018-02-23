@@ -16,6 +16,9 @@ import math
 import time, threading
 import glob
 
+import sys
+import signal
+
 import subprocess as sub
 
 class COMMANDS(IntEnum):    
@@ -51,14 +54,19 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.tree        = Tree(self.treefile)
         self.widget_image.addTree(self.tree.graph_adj_list, self.tree.graph_vertex_position, self.tree.clients)
 
+
         self.solution_started = False
         self.log_id = 0
+        self.robots_ids_start    = len(self.tree.vertices)
+
+
+        self.widget_image.setIdStart(self.robots_ids_start)
 
 
         self.log_folder, self.log_data, self.log_network = self.createLog()
 
-        self.log_data_file      = open(self.log_data, 'a')
-        self.log_network_file   = open(self.log_network, 'a')
+        self.log_data_file      = open(self.log_data, 'a', 0)
+        self.log_network_file   = open(self.log_network, 'a', 0)
 
 
         self.log_timer  = QElapsedTimer()
@@ -85,6 +93,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
     def updateALL(self):
        
+        self.solutionStarted()
         #update robots draw
         self.widget_image.addRobots(self.network.rcv_data)
 
@@ -94,6 +103,8 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         graph = self.createRoutingGraph()
         min_distance, max_distance = self.getMinAndMaxDistances(graph)
         simulation_time = self.getSimulationTime()
+
+        self.widget_image.addConnections(graph)
 
         self.saveLog(min_distance, max_distance, simulation_time)
         self.saveNetworkLog()
@@ -109,17 +120,18 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         threading.Timer(0.2, self.updateALL).start()
 
     def saveLog(self, min_distance, max_distance, simulation_time):
-        str_data = str(min_distance) + ',' + str(max_distance) + ',' + str(simulation_time)
+        str_data = str(min_distance) + ',' + str(max_distance) + ',' + str(simulation_time) + '\n'
+        #print(str_data)
         self.log_data_file.write(str_data)
 
     def getSimulationTime(self):
         return self.log_timer.elapsed()
 
     def getDistance(self, p1, p2):
-        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)*self.resolution
 
     def saveNetworkLog(self):
-        str_data = str(self.network.rcv_data)
+        str_data = str(self.network.rcv_data) + '\n'
         self.log_network_file.write(str_data)
 
         #print log in file
@@ -135,18 +147,29 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         if(self.solution_started):
             self.log_timer.start()
+            print('Started', )
 
         return (started == 1)
+
+    def getPositionByID(self, id):
+        #print(self.network.rcv_data)
+        ##Client or tree junctions id
+        if(id < self.robots_ids_start):
+            position = self.tree.graph_vertex_position[id]
+            return position
+        else:
+            return self.network.rcv_data[id]['position']
+
 
     def getMinAndMaxDistances(self, graph):
 
         min_distance  = float('inf')
         max_distance  = 0 
         for node1 in graph:
-            p1 = self.self.network.rcv_data[node1]['position']
-            if( self.self.network.rcv_data[node1]['routing'] !=  []):
+            p1 = self.getPositionByID(node1)
+            if( node1 >= self.robots_ids_start and self.network.rcv_data[node1]['routing'] !=  []):
                 for node2 in graph[node1]:
-                    p2 = self.self.network.rcv_data[node2]['position']
+                    p2 = self.getPositionByID(node2)
                     distance = self.getDistance(p1, p2)
                     min_distance = min(distance, min_distance)
                     max_distance = max(distance, max_distance)
@@ -160,7 +183,10 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         for id in self.network.rcv_data:
             graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
             for neigbor in self.network.rcv_data[id]['routing']:
-                graph[neigbor] = graph[neigbor].union(set([id]))
+                try:
+                    graph[neigbor] = graph[neigbor].union(set([id]))
+                except:
+                    graph[neigbor] = set([id])
 
 
         for id in self.network.rcv_data:
@@ -228,25 +254,29 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         for id in self.network.rcv_data:
 
             if 'diff' in self.network.rcv_data[id]:
-                if abs(self.network.rcv_data[id]) > 1:
+                if abs(self.network.rcv_data[id]['diff']) > 1:
                     connected = False
                     num_connected += 1
 
             if 'state' in self.network.rcv_data[id]:
                 if self.network.rcv_data[id]['state'] == 3:
-                    self.num_connected  += 1
+                    num_connected  += 1
                 if self.network.rcv_data[id]['state'] != 0 or self.network.rcv_data[id]['state'] != 3:
                     connected = False 
 
         return connected, num_connected
 
+    def closeEvent(self, event):
+        sub.Popen(('kill', '-9', str(os.getpid())))
 
 def main():
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    
     app = QtGui.QApplication(sys.argv)  # A new instance of QApplication
     form = clientApp()                 # We set the form to be our ExampleApp (design)
     form.show()                         # Show the form
-    app.exec_()                         # and execute the app
-
+    sys.exit(app.exec_())                         # and execute the app
+   
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
     main()                              # run the main function

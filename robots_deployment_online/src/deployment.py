@@ -249,7 +249,12 @@ class Robot:
         orientation_euler = tf.transformations.euler_from_quaternion(orientation)
 
         self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
-        self.position['routing']  = (self.neigh_0, self.neigh_1)
+        
+        if(self.neigh_0 < 0 or self.neigh_1 < 0):
+            self.position['routing']  = []
+        else:
+            self.position['routing']  = [self.neigh_0, self.neigh_1]
+
         #print(self.position['position'])
         #avoid to flood the network with messages
         if(rospy.get_time() - self.send_position_time > self.send_position_time_diff or not self.initialized):
@@ -597,11 +602,12 @@ class Robot:
         neigh_0 = ids[neighbors[0]]
         neigh_1 = ids[neighbors[1]]
 
-        #print('neighbors ', neigh_0, ' ',neigh_1)
+       
 
         #get the closest from the other group - positive
         if(self.isTreeInternalNode(ids[neighbors[0]])):
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+            selected_position = self.tree.graph_vertex_position[ids[neighbors[0]]]
             self_alpha   = dist_to_segment_alpha(p, q, positions[0])
             max_distance = float('inf')
             max_index    = -1
@@ -609,7 +615,7 @@ class Robot:
 
             for position in positions[1:]:
                 alpha    = dist_to_segment_alpha(p, q, position)
-                distance = self.getDistance( position , positions[0])
+                distance = self.getDistance( position , selected_position)
                 if((alpha - self_alpha) > 0 and distance < self.radius):
                     if(distance < max_distance):
                         max_distance = distance
@@ -622,7 +628,9 @@ class Robot:
             
         #get the closest from the other group - negative
         if(self.isTreeInternalNode(ids[neighbors[1]])):
+
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+            selected_position = self.tree.graph_vertex_position[ids[neighbors[1]]]
             self_alpha   = dist_to_segment_alpha(p, q, positions[0])
             max_distance = float('inf')
             max_index    = -1
@@ -630,13 +638,14 @@ class Robot:
 
             for position in positions[1:]:
                 alpha    = dist_to_segment_alpha(p, q, position)
-                distance = self.getDistance( position , positions[0])
+                distance = self.getDistance( position , selected_position)
+
                 if((alpha - self_alpha) < 0 and distance < self.radius):
                     if(distance < max_distance):
                         max_distance = distance
                         max_index    = index
-                index += 1
 
+                index += 1
             if(max_index >= 0):
                 neigh_1 = ids_local[max_index]
 
@@ -680,6 +689,7 @@ class Robot:
         self.neigh_0 = neigh_0
         self.neigh_1 = neigh_1
 
+
         return [neigh_0, neigh_1] 
 
     def limitVector(self, vec, maxsize):
@@ -713,6 +723,7 @@ class Robot:
         
             #print(self.position['destination'])
         else:
+            #print('status', self.status)
             if(self.status == 3 or self.status == -1): #succed or pending
                 #self.control_(closest_point)
                 #print('control')
