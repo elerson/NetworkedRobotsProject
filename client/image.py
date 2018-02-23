@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui, Qt# Import the PyQt4 module we'll need
 from PyQt4.QtCore import QPointF
-
+from math import ceil, log
 
 
 
@@ -19,10 +19,16 @@ class Image(QtGui.QWidget):
 
         self.initial_pose        = QPointF(0, 0)
         self.end_pose            = QPointF(0, 0)
+        self.image_number        = 2
+        self.pixmap  = QtGui.QImage(960, 529, QtGui.QImage.Format_RGB32)
 
 
     def setImage(self, image):
         self.image = image
+
+
+    def setLogFolder(self, folder):
+        self.log_folder = folder
 
 
     def addTree(self, graph, positions, clients):
@@ -34,6 +40,13 @@ class Image(QtGui.QWidget):
     def addRobots(self, robots):
         for robot_id in robots:
             self.robots[robot_id] = robots[robot_id]['position']
+
+    def saveLog(self):
+        number = self.image_number
+        filename = '/image' + ''.zfill(8-int(ceil(log(number, 10)))) + str(number) + '.jpg'
+        self.saveImage(self.log_folder + filename)
+
+        self.image_number += 1
 
     def paintTree(self, painter):
 
@@ -55,8 +68,21 @@ class Image(QtGui.QWidget):
 
         painter.setPen(pen_back)
 
+    def saveImage(self, filename):
+        
+        painter = QtGui.QPainter(self.pixmap)
+        self.plotImage(painter)
+
+        self.pixmap.save(filename, 'jpg')
+    
+
     def paintEvent(self, e):
-        painter = QtGui.QPainter(self)        
+        painter = QtGui.QPainter(self)
+        self.plotImage(painter)    
+
+        #for robot_id in self.robot_initials:
+        #    
+    def plotImage(self, painter):
         painter.drawImage(self.offset +  self.offset_, self.image)
 
         self.paintTree(painter)
@@ -75,8 +101,7 @@ class Image(QtGui.QWidget):
         pen.setWidth(6)
         painter.setPen(pen)
         painter.drawPoint(self.offset +  self.offset_ + self.end_pose)
-        #for robot_id in self.robot_initials:
-        #    
+
 
     def mousePressEvent(self, e):
         #print(e.button())
@@ -91,9 +116,9 @@ class Image(QtGui.QWidget):
 
     def mouseMoveEvent(self, e):
         
-        if(self.pressed_button == QtCore.Qt.LeftButton):
-            self.offset = e.pos() - self.press_position
-            self.repaint()
+        # if(self.pressed_button == QtCore.Qt.LeftButton):
+        #     self.offset = e.pos() - self.press_position
+        #     self.repaint()
 
         if(self.pressed_button == QtCore.Qt.RightButton):
             self.end_pose   = e.pos() - self.offset -  self.offset_
@@ -101,9 +126,9 @@ class Image(QtGui.QWidget):
 
 
     def mouseReleaseEvent(self, e):
-        if(e.button() == QtCore.Qt.LeftButton):
-            self.offset   = QPointF(0, 0)
-            self.offset_ += e.pos() - self.press_position
+        # if(e.button() == QtCore.Qt.LeftButton):
+        #     self.offset   = QPointF(0, 0)
+        #     self.offset_ += e.pos() - self.press_position
 
         if(e.button() == QtCore.Qt.RightButton):
             self.end_pose   = e.pos() - self.offset -  self.offset_

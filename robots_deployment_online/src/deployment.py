@@ -74,7 +74,9 @@ class Robot:
         self.id                  = int(id) + self.robots_ids_start
         self.position            = {}
         self.position['id']      = self.id
-        self.position['position'] = (0.0, 0.0, 0.0)
+        self.position['position']= (0.0, 0.0, 0.0)
+        self.position['started'] = 0
+        self.position['diff']    = -1
         
         self.metric_measurements = {}
 
@@ -113,12 +115,10 @@ class Robot:
     def createRoutingTable():
         neighbors_ids = robot.getNeighborsIDs()
 
-
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
-            return 40
-        return 40 + 10*self.gamma*math.log(distance) + np.random.normal(0,variance,1)[0]
-
+            return -40
+        return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,variance,1)[0]
 
     def realMetric(self, param):
 
@@ -132,7 +132,7 @@ class Robot:
             #simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
 
             if(real_metric > self.rss_measure.MAX):
                 self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
@@ -144,7 +144,7 @@ class Robot:
             real_metric      = self.rss_measure.getMeasurement(vertex)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
+                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
             if(real_metric > self.rss_measure.MAX):
                 self.metric_kalman[vertex].addMeasurement(real_distance, real_metric)
 
@@ -161,9 +161,9 @@ class Robot:
             
 
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
-            self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
+            #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 2.4], 10.0, variance)
 
 
             m, P = self.metric_kalman[data_id].getResult()
@@ -176,12 +176,13 @@ class Robot:
         for vertex in self.tree.graph_adj_list:
             real_distance    = self.getDistance(self.position['position'], self.tree.graph_vertex_position[vertex])*self.map_resolution
             simulated_metric = self.logNormalMetric(real_distance, variance)#real_distance + np.random.normal(0,variance,1)[0]
-            self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
+            #self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([40.0, 2.4], 10.0, variance)
+                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 2.4], 10.0, variance)
 
             self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
+
 
 
     def createRoutingGraph(self):
@@ -229,12 +230,13 @@ class Robot:
         pose.pose.position.y = deployment_position[1]*self.map_resolution
 
         #for debug
-        self.position['destination'] = (deployment_position[0], deployment_position[1])
+        #self.position['destination'] = (deployment_position[0], deployment_position[1])
 
         print(pose.pose.position.x, pose.pose.position.y)
         q = tf.transformations.quaternion_from_euler(0, 0, 0)
         pose.pose.orientation = Quaternion(*q)
         self.goal_pub.publish(pose)
+        
 
 
 
@@ -551,26 +553,51 @@ class Robot:
         self_alpha = alphas[0]
         alphas = np.asfarray(alphas[1:]) - self_alpha
 
+        #guarantee that the robot start the deployment only inside its path
+        if(self_alpha < 0.05):
+            neigh_0 = self.id
+            neigh_1 = segmentation[self.allocation_id][-1]
+            self.neigh_0 = neigh_0
+            self.neigh_1 = neigh_1
+            return [neigh_0, neigh_1] 
+
+        if(self_alpha > 0.95):
+            neigh_0 = segmentation[self.allocation_id][0]
+            neigh_1 = self.id
+            self.neigh_0 = neigh_0
+            self.neigh_1 = neigh_1
+            return [neigh_0, neigh_1] 
+
+
         positive_closest = alphas.copy()
         positive_closest[positive_closest < 0] = np.inf    
         
         negative_closest = alphas.copy()
-        negative_closest[negative_closest >= 0] = -np.inf
-
+        negative_closest[negative_closest > 0] = -np.inf
+        
+        
         if(not np.isinf(positive_closest.min()) and not np.isinf(negative_closest.max())):
+            #print('0')
             neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
             neighbors.append(negative_closest.argmax() + 1)
 
         elif(not np.isinf(positive_closest.min())):
-            neighbors = positive_closest.argsort()[0:2]
+            inverse = -1          
+            neigh = positive_closest.argsort()[0:2] 
+            neighbors.append(neigh[1] + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
+            neighbors.append(neigh[0] + 1)
 
         else:
-            neighbors = negative_closest.argsort()[-2:]
-
+            inverse = -1    
+            neigh = negative_closest.argsort()[0:2] 
+            neighbors.append(neigh[0] + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
+            neighbors.append(neigh[1] + 1)
 
 
         neigh_0 = ids[neighbors[0]]
         neigh_1 = ids[neighbors[1]]
+
+        #print('neighbors ', neigh_0, ' ',neigh_1)
 
         #get the closest from the other group - positive
         if(self.isTreeInternalNode(ids[neighbors[0]])):
@@ -649,11 +676,11 @@ class Robot:
         #             neighbors[1] = neighbors.append(negative_closest.argmax() + 1)
         #             neigh_1 = ids[neighbors[1]]
 
-        #save the neigbors in the instance
+        #save the niegbors in the instance        
         self.neigh_0 = neigh_0
         self.neigh_1 = neigh_1
 
-        return [neigh_0, neigh_1]
+        return [neigh_0, neigh_1] 
 
     def limitVector(self, vec, maxsize):
 
@@ -667,34 +694,37 @@ class Robot:
     def highLevelControl(self):
         # print("control")
         closest_point = robot.getClosetPointToPath()
-        # r = self.position['position']
+        r = self.position['position']
 
-        # dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
-        
-        # #  
-        # #  Chose the high level navigation or the gradient allocation
-        # #
-        # if(dist_to_segmentation > self.high_level_distance):
-        #     if(self.status == 1 or self.status == 0 or self.status == 2):
-        #         return
 
-        #     goal = (closest_point[0], (self.height-closest_point[1]))
-        #     #goal = (19.695165209372934, 10.23384885215893)
-        #     print("Goal", goal)
-        #     self.sendDeployment(goal)
+        dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
         
-        #     #print(self.position['destination'])
-        # else:
-        #     if(self.status == 3 or self.status == -1): #succed or pending
-        #         self.control_(closest_point)
-        self.control_nonholonomic(closest_point)
+        #  
+        #  Chose the high level navigation or the gradient allocation
+        #
+        if(dist_to_segmentation > self.high_level_distance):
+            if(self.status == 1 or self.status == 0 or self.status == 2):
+                return
+
+            goal = (closest_point[0], (self.height-closest_point[1]))
+            #goal = (19.695165209372934, 10.23384885215893)
+            print("Goal", goal)
+            self.sendDeployment(goal)
+        
+            #print(self.position['destination'])
+        else:
+            if(self.status == 3 or self.status == -1): #succed or pending
+                #self.control_(closest_point)
+                #print('control')
+                self.control_nonholonomic(closest_point)
+        self.position['started'] = 1
 
 
     def distanceDerivative(self, x, y, id):
 
 
         gamma = self.metric_kalman[id].getGamma()
-        #print(id, gamma)
+        #print('gamma', id, gamma)
         #return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
         return(10*gamma*x/((x**2 + y**2)+0.001), 10*gamma*y/((x**2 + y**2)+0.001))
         #return(5*self.gamma*x/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)), 5*self.gamma*y/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)))
@@ -707,6 +737,7 @@ class Robot:
         p = self.getPositionByID(id)
 
         distance = self.getDistance(r, p)*self.map_resolution
+        #print('robot', r)
 
         # return self.logNormalMetric(dist, 0)
         #return self.metric_measurements[id][4]
@@ -718,7 +749,8 @@ class Robot:
         #print(self.network.rcv_data)
         ##Client or tree junctions id
         if(id < self.robots_ids_start):
-            return self.tree.graph_vertex_position[id]
+            position = self.tree.graph_vertex_position[id]
+            return position
         else:
             return self.network.rcv_data[id]['position']
 
@@ -800,6 +832,8 @@ class Robot:
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = self.getDistanceByID(neighbors_ids[1])
+        #print('distance', neighbor_1_distance, ' ', neighbor_2_distance)
+
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
@@ -807,14 +841,17 @@ class Robot:
 
         derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1], neighbors_ids[0])
         derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1], neighbors_ids[1])
-    
+        
+
+        #print(neighbor_1_distance - neighbor_2_distance)
         beta = 0.1
         d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
         df = self.limitVector(df, 2)
 
+
         alpha = 6
-        final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] +df[1])
+        final_direction = (alpha*path_direction[0] +df[0], alpha*path_direction[1] -df[1])
         
         robot_angle = r[2]
     
@@ -829,6 +866,8 @@ class Robot:
         #print('control')
 
         self.vel_pub.publish(cmd_vel)
+
+        self.position['diff'] = neighbor_1_distance - neighbor_2_distance
 
 
     def segmentInsideSgment(self, segment1, segment2):

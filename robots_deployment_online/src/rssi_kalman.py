@@ -28,7 +28,7 @@ class RSSIKalmanFilter:
 			return
 
 		y = measurement
-		t = 10.0*math.log(distance/self.d0)
+		t = -10.0*math.log(distance/self.d0)
 		self.mutex.acquire()
 		
 		self.Y = np.append(self.Y, [y], axis=0)
@@ -59,7 +59,7 @@ class RSSIKalmanFilter:
 
 		#print(m)
 		self.gamma = m
-		return m[0] + t*m[1]
+		return m[0] - t*m[1]
 
 
 	def getGamma(self):

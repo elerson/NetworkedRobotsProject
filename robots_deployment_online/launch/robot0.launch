@@ -1,8 +1,0 @@
-<launch>
-  <node pkg="robots_deployment_online" type="data_gettering.py" name="ros_data_gettering" output="screen">
-    <param name="pose_send_time" value="0.05" />
-    <param name="id" value="0" />
-    <param name="map_resolution" value="0.05" />
-  </node> 
-
-</launch>

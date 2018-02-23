@@ -9,7 +9,7 @@ define topurg ranger
   sensor( 			
     range [ 0.0  30.0 ]
     fov 270.25
-    samples 1
+   samples 1
   )
 
   # generic model properties
@@ -44,10 +44,10 @@ define floorplan model
   gui_outline 0
   gripper_return 0
   fiducial_return 0
-  laser_return 1
+  laser_return 0
   fiducial_return 0
   fiducial_key 0
-  obstacle_return 1
+  obstacle_return 0
 
 
 
@@ -55,9 +55,9 @@ define floorplan model
 
 
 # set the resolution of the underlying raytrace model in meters
-resolution 0.1
+resolution 0.02
 
-interval_sim 50  # simulation timestep in milliseconds
+interval_sim 100  # simulation timestep in milliseconds
 
 
 window
@@ -78,22 +78,14 @@ floorplan
 )
 
 # throw in two robots
-erratic( pose [ 12.975 7.363 0.000 0.000 ] name "era0" color "blue")
-erratic( pose [ 12.586 8.134 0.000 0.000 ] name "era1" color "blue")
-erratic( pose [ 13.814 8.243 0.000 0.000 ] name "era2" color "blue")
-erratic( pose [ 14.565 8.638 0.000 0.000 ] name "era3" color "blue")
-erratic( pose [ 15.247 6.538 0.000 0.000 ] name "era4" color "blue")
-erratic( pose [ 13.845 7.640 0.000 0.000 ] name "era5" color "blue")
-erratic( pose [ 14.776 7.938 0.000 0.000 ] name "era6" color "blue")
-erratic( pose [ 12.453 5.783 0.000 0.000 ] name "era8" color "blue")
-erratic( pose [ 14.666 5.584 0.000 0.000 ] name "era9" color "blue")
-erratic( pose [ 13.509 5.524 0.000 0.000 ] name "era10" color "blue")
-erratic( pose [ 14.986 7.101 0.000 0.000 ] name "era11" color "blue")
-erratic( pose [ 15.666 8.376 0.000 0.000 ] name "era12" color "blue")
-erratic( pose [ 11.742 6.819 0.000 0.000 ] name "era13" color "blue")
-erratic( pose [ 14.270 6.335 0.000 0.000 ] name "era14" color "blue")
-erratic( pose [ 13.258 6.501 0.000 0.000 ] name "era15" color "blue")
-erratic( pose [ 13.965 6.944 0.000 0.000 ] name "era16" color "blue")
-erratic( pose [ 15.686 7.405 0.000 0.000 ] name "era17" color "blue")
-erratic( pose [ 12.472 6.476 0.000 0.000 ] name "era18" color "blue")
+erratic( pose [ 13.114 7.359 0.000 0.000 ] name "era1" color "blue")
+erratic( pose [ 12.482 7.721 0.000 0.000 ] name "era2" color "blue")
+erratic( pose [ 13.899 7.963 0.000 0.000 ] name "era2" color "blue")
+erratic( pose [ 14.683 7.895 0.000 0.000 ] name "era3" color "blue")
+erratic( pose [ 14.935 6.963 0.000 0.000 ] name "er4" color "blue")
+erratic( pose [ 14.062 7.126 0.000 0.000 ] name "era5" color "blue")
+erratic( pose [ 15.695 7.728 0.000 0.000 ] name "era6" color "blue")
+erratic( pose [ 12.473 6.522 0.000 0.000 ] name "era8" color "blue")
+erratic( pose [ 14.369 6.563 0.000 0.000 ] name "era9" color "blue")
+erratic( pose [ 13.257 6.455 0.000 0.000 ] name "era10" color "blue")
 #block( pose [ 13.924 25.020 0 0 ] color "red")

@@ -94,13 +94,14 @@ class Robot:
         self.position['id']      = self.id
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['state']   = int(self.state)
+        self.position['started'] = 0
 
         self.closet_client       = -1
         
         self.connected_clients   = set([])
         self.last_connected_clients = set([])
         self.route_to_disconected= {}
-
+        self.disconnected        = -1
 
 
         self.ros_id              = self.id - self.robots_ids_start  
@@ -332,7 +333,7 @@ class Robot:
 
             #print(self.distance_metric(id), self.lower_threshold, self.higher_threshold)
             if(self.neighbor_state[id] == NeighborState.CONNECTED):
-                if(self.distance_metric(id) < self.lower_threshold):
+                if(self.distance_metric(id) < self.lower_threshold and self.state == State.MOVE):
                     self.neighbor_state[id] = NeighborState.DISCONNECTED
 
 
@@ -398,7 +399,7 @@ class Robot:
         clients_connections = {}
         
         connected_clients = self.searchGraph(self.graph, self.id, set([]), clients_connections)
-        #print('connected clients', connected_clients)
+        print('connected clients', connected_clients)
         
         self.clients_connections = clients_connections
 
@@ -443,9 +444,17 @@ class Robot:
             self.closet_client = closet_client
             if(closet_client >= 0):
                 self.sendDeployment(self.tree.graph_vertex_position[closet_client])
+                self.position['started'] = 1
 
     def MoveBackwards(self):
-        self.sendDeployment(self.tree.graph_vertex_position[self.disconnected])
+        disconnected = list(self.last_connected_clients - self.connected_clients)
+        print('discon: ', disconnected, ' ', self.disconnected, 'last', self.last_connected_clients, self.connected_clients)
+        if( disconnected != [] and self.disconnected != disconnected[0]):
+            self.disconnected = disconnected[0]
+            self.sendDeployment(self.tree.graph_vertex_position[self.disconnected])
+        if(disconnected == []):
+            self.disconnected = -1
+
 
     def Stall(self):
         goal = GoalID()
@@ -476,7 +485,7 @@ class Robot:
     def DisconnectedToClient(self):
         if((self.last_connected_clients - self.connected_clients) != set([])):
             print("disconnect", self.last_connected_clients, self.connected_clients, self.clients_connections)
-            self.disconnected = list(self.last_connected_clients - self.connected_clients)[0]
+            #self.disconnected = list(self.last_connected_clients - self.connected_clients)[0]
 
             return True
         return False
@@ -547,7 +556,7 @@ class Robot:
             pass
 
         elif self.state == State.DISCONNECT:
-
+            self.MoveBackwards()
             if(self.ReconnectedToClient() and (self.RouteToClientChanged() or self.LoseVote())):
                 #TODO: update neigbor state
                 self.state = State.MOVE 
