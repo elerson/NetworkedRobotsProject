@@ -118,11 +118,11 @@ class Robot:
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
             return -40
-        return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,variance,1)[0]
+        return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
     def realMetric(self, param):
 
-        variance = 1.0
+        variance = 10.0
         #for the robots
         for data_id in self.network.rcv_data:
             #if(data_id == self.id):
@@ -151,7 +151,7 @@ class Robot:
 
     def simulationMetric(self, param):
 
-        variance = 1.0
+        variance = 10.0
         #for the robots
         for data_id in self.network.rcv_data:
             #if(data_id == self.id):
@@ -163,7 +163,7 @@ class Robot:
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 2.4], 10.0, variance)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
 
 
             m, P = self.metric_kalman[data_id].getResult()
@@ -303,7 +303,7 @@ class Robot:
             return self.tree_segmentation_segments
         self.tree_segmentation.segmentation_search([], [])
         #print(tree_segmentation.segmentaion_paths)
-        segmentation = self.tree_segmentation.evaluate_segmentation()
+        segmentation = self.tree_segmentation.evaluate_segmentation(self.radius)
         self.tree_segmentation_segments = segmentation
         return segmentation
 
@@ -727,6 +727,7 @@ class Robot:
             if(self.status == 3 or self.status == -1): #succed or pending
                 #self.control_(closest_point)
                 #print('control')
+                #self.control_holonomic(closest_point)
                 self.control_nonholonomic(closest_point)
         self.position['started'] = 1
 
@@ -772,48 +773,38 @@ class Robot:
 
     def control_holonomic(self, closest_point):
         r = self.position['position']
-        #print(r)
+
         neighbors_ids = robot.getNeighborsIDs()
 
-        #print(self.metric_kalman, neighbors_ids, self.id)
-        #verify if we already can use the metric
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
-        #print(self.metric_kalman)
 
-
+        #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = self.getDistanceByID(neighbors_ids[1])
-       
-        #neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
-        #neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
+        #print('distance', neighbor_1_distance, ' ', neighbor_2_distance)
 
-
-        #print("neighbors", neighbors_positions, (neighbor_1_distance-neighbor_2_distance)**2)
 
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivative((r[0] -neighbors_positions[0][0])*self.map_resolution, (r[1]-neighbors_positions[0][1])*self.map_resolution, neighbors_ids[0])
-        derivative_neighbor_2_distance = self.distanceDerivative((r[0] -neighbors_positions[1][0])*self.map_resolution, (r[1]-neighbors_positions[1][1])*self.map_resolution, neighbors_ids[1])
+        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1], neighbors_ids[0])
+        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1], neighbors_ids[1])
         
-        beta = 0.01
+
+        #print(neighbor_1_distance - neighbor_2_distance)
+        beta = 0.1
         d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
         df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
-        
-        #print("Derivative", self.ros_id, df )
-
-
-
         df = self.limitVector(df, 2)
 
+
         alpha = 6
-        final_direction = (alpha*path_direction[0] -df[0], alpha*path_direction[1] +df[1])
-        
+        final_direction = (alpha*path_direction[0] +df[0], alpha*path_direction[1] -df[1])
 
       
         ##
@@ -827,6 +818,8 @@ class Robot:
         cmd_vel.angular.z = 0
 
         self.vel_pub.publish(cmd_vel)
+
+        self.position['diff'] = neighbor_1_distance - neighbor_2_distance
 
 
     def control_nonholonomic(self, closest_point):

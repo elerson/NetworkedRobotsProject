@@ -116,6 +116,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         connected, num_connected = self.verifyNetworkConcluded()
         if(connected and num_connected > 0 and self.exit):
             self.closeRos()
+            self.close()
 
         threading.Timer(0.2, self.updateALL).start()
 
@@ -254,17 +255,23 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         for id in self.network.rcv_data:
 
             if 'diff' in self.network.rcv_data[id]:
-                if abs(self.network.rcv_data[id]['diff']) > 1:
+                if abs(self.network.rcv_data[id]['diff']) > math.sqrt(8):
                     connected = False
-                    num_connected += 1
+                else:
+                    if(self.network.rcv_data[id]['routing'] != []):
+                        num_connected += 1
 
             if 'state' in self.network.rcv_data[id]:
                 if self.network.rcv_data[id]['state'] == 3:
                     num_connected  += 1
-                if self.network.rcv_data[id]['state'] != 0 or self.network.rcv_data[id]['state'] != 3:
+                if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
                     connected = False 
 
+
         return connected, num_connected
+
+    def close(self):
+        sub.Popen(('kill', '-9', str(os.getpid())))
 
     def closeEvent(self, event):
         sub.Popen(('kill', '-9', str(os.getpid())))

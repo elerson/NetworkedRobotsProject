@@ -23,7 +23,7 @@ robot_exp = '''
   </node>
 
 
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base_ID" output="screen">
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
    <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
 
    <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
@@ -36,9 +36,15 @@ robot_exp = '''
    <param name="planner_file_1" value="steinerData1.dat"/>
    <param name="planner_file_2" value="steinerData2.dat"/>
 
-   <param name="global_costmap/robot_base_frame" value="robot_ID/base_footprint"/>
+   <param name="global_costmap/footprint" value="robot_ID/base_footprint"/>
    <param name="local_costmap/global_frame" value="robot_ID/odom"/>
+   <param name="global_costmap/robot_base_frame" value="robot_ID/base_footprint"/>
+
    <param name="local_costmap/robot_base_frame" value="robot_ID/base_footprint"/>
+   <param name="global_costmap/laser_scan_sensor/sensor_frame" value="robot_ID/base_laser_link"/>
+   <param name="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" value="robot_ID/base_laser_link"/>
+
+
    <remap from="/robot_ID/map" to="/map" />
   </node>
 </group>

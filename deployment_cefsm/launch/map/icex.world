@@ -9,7 +9,7 @@ define topurg ranger
   sensor( 			
     range [ 0.0  30.0 ]
     fov 270.25
-   samples 1
+   samples 1080
   )
 
   # generic model properties
@@ -44,10 +44,10 @@ define floorplan model
   gui_outline 0
   gripper_return 0
   fiducial_return 0
-  laser_return 0
+  laser_return 1
   fiducial_return 0
   fiducial_key 0
-  obstacle_return 0
+  obstacle_return 1
 
 
 
@@ -88,4 +88,4 @@ erratic( pose [ 15.695 7.728 0.000 0.000 ] name "era6" color "blue")
 erratic( pose [ 12.473 6.522 0.000 0.000 ] name "era8" color "blue")
 erratic( pose [ 14.369 6.563 0.000 0.000 ] name "era9" color "blue")
 erratic( pose [ 13.257 6.455 0.000 0.000 ] name "era10" color "blue")
-#block( pose [ 13.924 25.020 0 0 ] color "red")
+block( pose [ 13.924 25.020 0 0 ] color "red")

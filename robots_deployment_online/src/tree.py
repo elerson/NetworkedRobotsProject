@@ -349,8 +349,45 @@ class TreeSegmention:
         return total_distance
 
 
+    # def evaluate_segmentation(self, radius):
 
-    def evaluate_segmentation(self):
+    #     segmentation_costs = {}
+    #     segmentation_total_cost = {}
+    #     min_cost = float('inf')
+    #     min_cost_index = -1
+    #     for i in self.segmentaion_paths:
+    #         segmentation_costs[i] = []
+    #         segmentation = self.segmentaion_paths[i]
+    #         segmentation_cost = 0
+    #         for path in segmentation:
+    #             cost = self.get_path_cost(path)
+    #             segmentation_costs[i].append(cost)
+    #             segmentation_cost += cost
+    #         segmentation_total_cost[i] = segmentation_cost
+    #         if(segmentation_cost < min_cost):
+    #             min_cost = segmentation_cost
+
+    #     #get the one with approximates more the mean distance of the paths
+    #     max_diff = float('inf')
+    #     max_diff_index = -1
+    #     for i in self.segmentaion_paths:
+    #         if(segmentation_total_cost[i] != min_cost):
+    #             continue
+    #         mean_distance = min_cost/len(segmentation_costs[i])
+
+    #         max_from_seg = 0
+    #         for cost in segmentation_costs[i]:
+    #             max_from_seg = max(max_from_seg, cost)
+
+    #         if(max_diff > abs(mean_distance-max_from_seg)):
+    #             max_diff = abs(mean_distance-max_from_seg)
+    #             max_diff_index = i
+
+
+    #     #print(segmentation_costs[max_diff_index])
+    #     return (self.segmentaion_paths[max_diff_index])
+
+    def evaluate_segmentation(self, radius):
 
         segmentation_costs = {}
         segmentation_total_cost = {}
@@ -372,16 +409,30 @@ class TreeSegmention:
         max_diff = float('inf')
         max_diff_index = -1
         for i in self.segmentaion_paths:
+            not_selected = False
             if(segmentation_total_cost[i] != min_cost):
                 continue
-            mean_distance = min_cost/len(segmentation_costs[i])
 
-            max_from_seg = 0
+            diff = float('inf')
             for cost in segmentation_costs[i]:
-                max_from_seg = max(max_from_seg, cost)
+                if(cost/radius < 1):
+                    not_selected = True
+                    continue
+                diff_ = radius - cost/math.ceil(cost/radius)
+                diff = min(diff, diff_)
 
-            if(max_diff > abs(mean_distance-max_from_seg)):
-                max_diff = abs(mean_distance-max_from_seg)
+            if(not_selected):
+                continue
+
+            # mean_distance = min_cost/len(segmentation_costs[i])
+
+            # max_from_seg = 0
+            # for cost in segmentation_costs[i]:
+            #     max_from_seg = max(max_from_seg, cost)
+
+            if(diff < max_diff):
+                print('max diff', diff)
+                max_diff = diff
                 max_diff_index = i
 
 
