@@ -1,26 +1,30 @@
 robots:
-  robot_0:
-    id: 6
-    ip: 192.168.0.6
-    macaddress: b8:27:eb:04:8d:c6
-    cable_ip: 150.164.212.42
-
   robot_1:
-    id: 5
-    ip: 192.168.0.5
-    macaddress: b8:27:eb:65:5a:6c
-    cable_ip: 150.164.212.43
-
-  robot_2:
-    id: 3
-    ip: 192.168.0.3
-    macaddress: a4:4e:31:ed:6d:e4
-    cable_ip: 150.164.212.45
-  
-  robot_3:
     id: 1
     ip: 192.168.0.1
     macaddress: a4:4e:31:ed:6d:d4
+    cable_ip: 150.164.212.43
+
+  robot_2:
+    id: 2
+    ip: 192.168.0.2
+    macaddress: 1c:4b:d6:85:b0:67
+    cable_ip: 150.164.212.45
+  
+  robot_3:
+    id: 3
+    ip: 192.168.0.3
+    macaddress: 1c:4b:d6:85:bc:20
+    cable_ip: 150.164.212.46
+  robot_4:
+    id: 4
+    ip: 192.168.0.4
+    macaddress: 48:5d:60:f5:48:8c
+    cable_ip: 150.164.212.46
+  robot_5:
+    id: 5
+    ip: 192.168.0.5
+    macaddress: 48:5d:60:f5:2c:54
     cable_ip: 150.164.212.46
 
 configs:
