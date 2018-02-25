@@ -12,7 +12,7 @@ for dir_ in ${diretorios[@]}; do
 	#export LOG_DIR=$dir_$'_gradient_'$dist'/'
 	./client/client.py &
 	
- 	cd /simulated_experiments/cefsm/
+ 	cd simulated_experiments/cefsm/
 	./create_exp.py 25 ${distancias[d]} 0.05
 	cd ../../
 
