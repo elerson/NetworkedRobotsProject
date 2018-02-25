@@ -75,7 +75,7 @@ class Robot:
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
-        self.vote_distance       = 3
+        self.vote_distance       = 1
 
         self.map_resolution      = 0.5
         self.height              = 0
@@ -581,7 +581,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    time.sleep(20 + robot.ros_id*20)
+    time.sleep(20 + robot.ros_id*40)
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
