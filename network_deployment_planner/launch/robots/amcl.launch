@@ -1,0 +1,8 @@
+<launch>
+<node pkg="fake_localization" type="fake_localization" name="amcl" output="screen">
+  <!-- Publish scans from best pose at a max of 10 Hz -->
+  <param name="odom_model_type" value="diff"/>
+  <param name="base_frame_id" value="robot_0/base_footprint"/>
+  <param name="odom_frame_id" value="robot_0/odom"/>
+</node>
+</launch>

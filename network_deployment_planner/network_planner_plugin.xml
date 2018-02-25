@@ -1,0 +1,7 @@
+<library path="lib/libnetwork_deployment_planner">
+  <class name="network_planner/NetworkDeploymentPlanner" type="network_deployment_planner::NetworkDeploymentPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+    	network planner 
+    </description>
+  </class>
+</library>
