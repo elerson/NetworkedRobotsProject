@@ -91,6 +91,8 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
 
         self.log_timer  = QElapsedTimer()
+        self.finish_time  = QElapsedTimer()
+        self.finish_time.start()
         #create a new log folder
         self.widget_image.setLogFolder(self.log_folder)
 
@@ -137,7 +139,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         #verify experiment exit
         
-        if(connected and num_connected > 0 and self.exit):
+        if((connected and num_connected > 0 and self.exit) or (self.exit and (self.finish_time.elapsed() > 600000 ))):
             self.closeRos()
             self.close()
 
