@@ -94,6 +94,7 @@ class Robot:
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['state']   = int(self.state)
         self.position['started'] = 0
+        self.position['ended']     = 0
 
         self.closet_client       = -1
         
@@ -484,6 +485,7 @@ class Robot:
     def AllClientsConnected(self):
         print('connected ', self.connected_clients)
         if self.clients == self.connected_clients:
+            self.position['ended'] = 1
             return True
         return False
 
