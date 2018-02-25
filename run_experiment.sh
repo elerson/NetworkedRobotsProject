@@ -34,7 +34,7 @@ done
 
 
 
-TODO: 
-Log
-numero de robos na solucao
-Coviriancia
+#TODO: 
+#Log
+#numero de robos na solucao
+#Coviriancia
