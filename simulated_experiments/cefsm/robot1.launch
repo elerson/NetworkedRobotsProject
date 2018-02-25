@@ -23,6 +23,7 @@
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
    <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
+   <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
 
    <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
    <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
@@ -41,6 +42,8 @@
    <param name="local_costmap/robot_base_frame" value="robot_1/base_footprint"/>
    <param name="global_costmap/laser_scan_sensor/sensor_frame" value="robot_1/base_laser_link"/>
    <param name="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" value="robot_1/base_laser_link"/>
+   <param name="oscillation_distance" value="0.1"/>
+
 
    <param name="global_costmap/transform_tolerance" value="20.0"/>
 

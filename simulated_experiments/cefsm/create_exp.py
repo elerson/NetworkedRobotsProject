@@ -26,6 +26,7 @@ robot_exp = '''
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
    <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
+   <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
 
    <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
    <rosparam file="$(find deployment_cefsm)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
