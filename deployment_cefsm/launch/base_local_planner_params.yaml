@@ -29,7 +29,7 @@ DWAPlannerROS:
   sim_time: 1.5 
   sim_granularity: 0.025 
   goal_distance_bias: 32.0 
-  path_distance_bias: 24.0 
+  path_distance_bias: 5.0 
   occdist_scale: 0.01 
   stop_time_buffer: 0.2 
   oscillation_reset_dist: 0.05 
