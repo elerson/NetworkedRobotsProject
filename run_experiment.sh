@@ -11,7 +11,12 @@ for dir_ in ${diretorios[@]}; do
 	export LOG_DIR=$dir_$'_cefsm_'$dist'/'
 	#export LOG_DIR=$dir_$'_gradient_'$dist'/'
 	./client/client.py &
-	./simulated_experiments/cefsm/create_exp.py 25 ${distancias[d]} 0.05
+	
+ 	cd /simulated_experiments/cefsm/
+	./create_exp.py 25 ${distancias[d]} 0.05
+	cd ../../
+
+
 	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05
 
 	roslaunch simulated_experiments/simulation.launch &
