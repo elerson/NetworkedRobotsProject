@@ -23,13 +23,12 @@ from network_utils.rssi_kalman import RSSIKalmanFilter
 from network_utils.Routing import Routing
 from network_utils.RSSMeasure import RSSMeasure
 
-
+import time
 import tf
 
         
 class Robot:
     def __init__(self):
-
         rospy.init_node('robot_deployment', anonymous=True)
         #print("ROBOT")
         self.network             = Network()

@@ -44,6 +44,10 @@ robot_exp = '''
    <param name="local_costmap/robot_base_frame" value="robot_ID/base_footprint"/>
    <param name="global_costmap/laser_scan_sensor/sensor_frame" value="robot_ID/base_laser_link"/>
    <param name="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" value="robot_ID/base_laser_link"/>
+   <param name="oscillation_distance" value="0.1"/>
+
+
+   <param name="global_costmap/transform_tolerance" value="20.0"/>
 
 
    <remap from="/robot_ID/map" to="/map" />

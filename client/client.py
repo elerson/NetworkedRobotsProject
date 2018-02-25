@@ -69,7 +69,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.tree_segmentation   = TreeSegmention(self.tree)
         self.tree_segmentation.segmentation_search([], [])
         #print(tree_segmentation.segmentaion_paths)
-        segmentation = self.tree_segmentation.evaluate_segmentation(150)
+        segmentation = self.tree_segmentation.evaluate_segmentation(200)
 
         self.widget_image.setSegementation(segmentation)
 
@@ -98,10 +98,11 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.updateALL()
 
     def createLog(self):
-        folders = glob.glob('Logs/*')
-        folder = 'Logs/' + 'log' + str(len(folders) + 1)
+        log_dir_ = os.environ['LOG_DIR']
+        folders = glob.glob('Logs/'+log_dir_+'/*')
+        folder = 'Logs/' +log_dir_+ '/log' + str(len(folders) + 1)
 
-        os.mkdir(folder)
+        os.makedirs(folder)
         log_folder = folder
         log_data = folder + '/log.txt'
         log_network = folder + '/network.txt'
@@ -124,25 +125,26 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         graph = self.createRoutingGraph()
         min_distance, max_distance = self.getMinAndMaxDistances(graph)
         simulation_time = self.getSimulationTime()
+        connected, num_connected = self.verifyNetworkConcluded()
 
         self.widget_image.addConnections(graph)
 
-        self.saveLog(min_distance, max_distance, simulation_time)
+        self.saveLog(min_distance, max_distance, simulation_time, num_connected)
         self.saveNetworkLog()
         self.widget_image.saveLog()
 
         #update routing
 
         #verify experiment exit
-        connected, num_connected = self.verifyNetworkConcluded()
+        
         if(connected and num_connected > 0 and self.exit):
             self.closeRos()
             self.close()
 
         threading.Timer(0.2, self.updateALL).start()
 
-    def saveLog(self, min_distance, max_distance, simulation_time):
-        str_data = str(min_distance) + ',' + str(max_distance) + ',' + str(simulation_time) + '\n'
+    def saveLog(self, min_distance, max_distance, simulation_time, num_connected):
+        str_data = str(min_distance) + ',' + str(max_distance) + ',' + str(simulation_time) + ',' + str(num_connected) + '\n'
         #print(str_data)
         self.log_data_file.write(str_data)
 

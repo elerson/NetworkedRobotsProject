@@ -46,7 +46,6 @@ class NeighborState(IntEnum):
         
 class Robot:
     def __init__(self):
-
         rospy.init_node('deployment_cefsm', anonymous=True)
         #print("ROBOT")
         self.network             = Network()
@@ -349,6 +348,7 @@ class Robot:
             if(self.neighbor_state[id] == NeighborState.CONNECTED):
                 neighbors.append(id)
             #print('dsin' , self.distance_metric(id), self.neighbor_state[id])
+        
 
         self.neighbors = neighbors
 

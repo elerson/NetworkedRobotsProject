@@ -42,6 +42,8 @@
    <param name="global_costmap/laser_scan_sensor/sensor_frame" value="robot_3/base_laser_link"/>
    <param name="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" value="robot_3/base_laser_link"/>
 
+   <param name="global_costmap/transform_tolerance" value="20.0"/>
+
 
    <remap from="/robot_3/map" to="/map" />
   </node>

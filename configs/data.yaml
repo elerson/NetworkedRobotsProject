@@ -27,6 +27,6 @@ configs:
   map: /home/elerson/catkin_ws/src/simulated_experiments/3euclideanexperiment/map/ambiente.png
   treefile: /home/elerson/catkin_ws/src/simulated_experiments/3euclideanexperiment/steinerData1.dat
   resolution: 0.05
-  exit: 0
+  exit: 1
   simulation: 1
 
