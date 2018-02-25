@@ -137,6 +137,7 @@ namespace network_deployment_planner {
     double diff_y = goal_y - start_y;
     double diff_yaw = angles::normalize_angle(goal_yaw-start_yaw);
    
+
     std::vector<point2d_> path;
     path.clear();
     //ROS_INFO("start and goal plan(%f)(%f)(%f)(%f)",start_x, start_y, goal_x, goal_y);
