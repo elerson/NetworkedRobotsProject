@@ -274,6 +274,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def verifyNetworkConcluded(self):
         #cefsm
         connected = True
+        ended     = False
         num_connected = 0
         for id in self.network.rcv_data:
 
@@ -290,9 +291,9 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
                 if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
                     connected = False 
 
-                connected = connected and self.network.rcv_data[id]['ended']
+                ended = ended or self.network.rcv_data[id]['ended']
 
-
+        connected = connected and ended
         return connected, num_connected
 
     def close(self):
