@@ -23,7 +23,7 @@ DWAPlannerROS:
   max_vel_y: 0.1 
   min_vel_y: -0.1 
 
-  controller_frequency: 10.0
+  controller_frequency: 30.0
 
   max_trans_vel: 0.95 
   min_trans_vel: 0.1 
@@ -31,7 +31,7 @@ DWAPlannerROS:
   min_rot_vel: 0.4 
   sim_time: 2.0 
   sim_granularity: 0.025 
-  goal_distance_bias: 32.0 
+  goal_distance_bias: 0.5 
   path_distance_bias: 0.25 
   occdist_scale: 0.01 
   stop_time_buffer: 0.2 
