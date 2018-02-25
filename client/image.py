@@ -23,6 +23,9 @@ class Image(QtGui.QWidget):
         self.pixmap  = QtGui.QImage(960, 529, QtGui.QImage.Format_RGB32)
         self.communication_graph = {}
 
+    def setSegementation(self, segments):
+        self.segments = segments
+
     def setIdStart(self, start):
         self.robots_ids_start = start
 
@@ -63,6 +66,24 @@ class Image(QtGui.QWidget):
         self.saveImage(self.log_folder + filename)
 
         self.image_number += 1
+
+    def paintSegments(self, painter):
+        pen_back = painter.pen()
+        pen = QtGui.QPen()
+        #print connections
+        color = QtGui.QColor(0,0,255)
+        pen.setColor(color)
+        pen.setWidth(2)
+        painter.setPen(pen)
+
+        for segment in self.segments:
+            for s in range(1,len(segment)):
+                i = segment[s-1]
+                j = segment[s]
+                initial_pose = QPointF(self.positions[i][0], self.positions[i][1])
+                end_pose     = QPointF(self.positions[j][0], self.positions[j][1])
+                painter.drawLine(self.offset +  self.offset_ + initial_pose, self.offset +  self.offset_ + end_pose)
+        painter.setPen(pen_back)
 
     def paintTree(self, painter):
 
@@ -105,6 +126,7 @@ class Image(QtGui.QWidget):
         painter.drawImage(self.offset +  self.offset_, self.image)
 
         self.paintTree(painter)
+        #self.paintSegments(painter)
 
         pen = QtGui.QPen()
         #print connections

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import rospy
-from tree import Tree, TreeSegmention
+from network_utils.tree import Tree, TreeSegmention
 from scipy.optimize import linear_sum_assignment
-from network import Network
+from network_utils.network import Network
 import numpy as np
 import math
 
@@ -19,9 +19,9 @@ from nav_msgs.msg import MapMetaData
 from move_base_msgs.msg import MoveBaseActionGoal
 
 from util import dist_to_segment_alpha, dist_to_segment
-from rssi_kalman import RSSIKalmanFilter
-from Routing import Routing
-from RSSMeasure import RSSMeasure
+from network_utils.rssi_kalman import RSSIKalmanFilter
+from network_utils.Routing import Routing
+from network_utils.RSSMeasure import RSSMeasure
 
 from enum import IntEnum
 import tf

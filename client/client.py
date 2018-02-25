@@ -3,8 +3,8 @@
 from   PyQt4 import QtCore, QtGui, Qt# Import the PyQt4 module we'll need
 from   PyQt4.QtCore import QPointF, QElapsedTimer
 import sys # We need sys so that we can pass argv to QApplication
-from   network import Network
-from   tree    import Tree
+from   network_utils.network import Network
+from   network_utils.tree    import Tree, TreeSegmention
 import client_ui # This file holds our MainWindow and all design related things
               # it also keeps events etc that we defined in Qt Designer
 
@@ -41,10 +41,23 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.pushButton_execCommand.clicked.connect(self.executeCommand)
         self.pushButton_startDeployment.clicked.connect(self.startDeployment)
 
-        self.config_data = self.readConfig('../configs/data.yaml')
+        home = os.path.expanduser("~")
+        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
+
+        if(self.config_data['simulation']):
+            dir_ = os.environ['EXP_DIR']
+            self.config_data['treefile'] = dir_ + '/steinerData1.dat'
+            self.config_data['map'] = dir_ + '/map/ambiente.png'
+
+            with open(dir_ +'/map/simple.yaml', 'r') as stream:
+                self.config_data['resolution'] = yaml.load(stream)['resolution']
+
+
         self.resolution  = self.config_data['resolution']
         self.treefile    = self.config_data['treefile']
         self.exit        = self.config_data['exit']
+
+
         print(self.config_data)
 
 
@@ -52,6 +65,14 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.widget_image.setImage(self.image)
         self.network     = Network()
         self.tree        = Tree(self.treefile)
+        print(self.tree.getSize(), 'size')
+        self.tree_segmentation   = TreeSegmention(self.tree)
+        self.tree_segmentation.segmentation_search([], [])
+        #print(tree_segmentation.segmentaion_paths)
+        segmentation = self.tree_segmentation.evaluate_segmentation(150)
+
+        self.widget_image.setSegementation(segmentation)
+
         self.widget_image.addTree(self.tree.graph_adj_list, self.tree.graph_vertex_position, self.tree.clients)
 
 

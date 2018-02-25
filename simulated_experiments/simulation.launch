@@ -1,0 +1,11 @@
+ <launch>
+
+   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(env EXP_DIR)/map/simple.world" >
+   </node>
+
+   <!--Map server -->
+   <arg name="map_file" default="$(env EXP_DIR)/map/simple.yaml"/>
+   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+ 
+ </launch>

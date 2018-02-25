@@ -24,8 +24,9 @@ robots:
     cable_ip: 150.164.212.46
 
 configs:
-  map: /home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/exp1/ambiente.png
-  treefile: /home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat
+  map: /home/elerson/catkin_ws/src/simulated_experiments/3euclideanexperiment/map/ambiente.png
+  treefile: /home/elerson/catkin_ws/src/simulated_experiments/3euclideanexperiment/steinerData1.dat
   resolution: 0.05
   exit: 0
+  simulation: 1
 

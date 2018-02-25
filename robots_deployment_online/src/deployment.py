@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import rospy
-from tree import Tree, TreeSegmention
+from network_utils.tree import Tree, TreeSegmention
 from scipy.optimize import linear_sum_assignment
-from network import Network
+from network_utils.network import Network
 import numpy as np
 import math
 
@@ -13,13 +13,15 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Quaternion 
 from actionlib_msgs.msg import GoalStatusArray
+from actionlib_msgs.msg import GoalID
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import MapMetaData
+from move_base_msgs.msg import MoveBaseActionGoal
 
 from util import dist_to_segment_alpha, dist_to_segment
-from rssi_kalman import RSSIKalmanFilter
-from Routing import Routing
-from RSSMeasure import RSSMeasure
+from network_utils.rssi_kalman import RSSIKalmanFilter
+from network_utils.Routing import Routing
+from network_utils.RSSMeasure import RSSMeasure
 
 
 import tf
@@ -90,11 +92,16 @@ class Robot:
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.vel_pub             = rospy.Publisher(prefix+"/cmd_vel", Twist, queue_size=10)
 
-        self.goal_pub            = rospy.Publisher(prefix+"/move_base_simple/goal", PoseStamped, queue_size=10)
+        self.cancel_pub          = rospy.Publisher(prefix + "/move_base/cancel", GoalID, queue_size=10)
+        self.current_goal_id     = 0
+        self.goal_pub            = rospy.Publisher(prefix+"/move_base/goal", MoveBaseActionGoal, queue_size=10)
+
         rospy.Subscriber(prefix+"/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
         rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
+        self.send_deployment     = 0
+        self.send_deployment_time_diff = 1.0
 
         self.metric_kalman       = {}
         self.gamma               = 3
@@ -113,7 +120,7 @@ class Robot:
         print(self.network.rcv_command)
 
     def createRoutingTable():
-        neighbors_ids = robot.getNeighborsIDs()
+        neighbors_ids = self.getNeighborsIDs()
 
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
@@ -220,23 +227,46 @@ class Robot:
         self.height         = MapData.height
 
 
+    def Stall(self):
+        goal = GoalID()
+        goal.id = str(self.current_goal_id-1)
+        print('stall', self.current_goal_id-1)
+        self.cancel_pub.publish(goal)
+
     def sendDeployment(self, deployment_position):
 
-
+        if(rospy.get_time() - self.send_deployment < self.send_deployment_time_diff):
+            return
+        self.send_deployment = rospy.get_time()
         #print(deployment_position)
         pose = PoseStamped()
         pose.header.frame_id = "map"
         pose.pose.position.x = deployment_position[0]*self.map_resolution
-        pose.pose.position.y = deployment_position[1]*self.map_resolution
+        pose.pose.position.y = (self.height - deployment_position[1])*self.map_resolution
+
+        print(pose.pose.position)
 
         #for debug
-        #self.position['destination'] = (deployment_position[0], deployment_position[1])
+        self.position['destination'] = (deployment_position[0], deployment_position[1])
 
         print(pose.pose.position.x, pose.pose.position.y)
         q = tf.transformations.quaternion_from_euler(0, 0, 0)
         pose.pose.orientation = Quaternion(*q)
-        self.goal_pub.publish(pose)
-        
+
+
+        goal_id = GoalID()
+        goal_id.id = str(self.current_goal_id)
+
+        self.current_goal_id +=1
+
+
+        goal = MoveBaseActionGoal()
+        goal.goal_id = goal_id
+        goal.goal.target_pose = pose
+
+
+        self.goal_pub.publish(goal)
+
 
 
 
@@ -318,7 +348,7 @@ class Robot:
         i = 0
         for segment in segmentation:
             cost = self.tree_segmentation.get_path_cost(segment)
-            n_robots[i] = math.ceil(cost/self.radius)
+            n_robots[i] = math.floor(cost/self.radius)
             sum_robots += n_robots[i]
 
             allocation_sum.append(sum_robots)
@@ -384,6 +414,59 @@ class Robot:
         return closest_point, closest_point_segment, allocated_segment
 
 
+    def getAllocationAlpha(self):
+        allocation, segmentation = self.getTreeAllocationPerSegment()
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                self.allocation_id = alloc_id
+                break
+       
+        p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
+        q = self.tree.graph_vertex_position[segmentation[self.allocation_id][-1]]
+
+        position = self.position['position']
+
+        alpha = dist_to_segment_alpha(p, q, position)
+       
+        return alpha
+
+    def getPathSize(self, path):
+        path_size = 0
+        for i in range(1,len(path)):
+            p1        = self.tree.graph_vertex_position[path[i-1]]
+            p2        = self.tree.graph_vertex_position[path[i]]
+            path_size += self.getDistance(p1, p2)
+
+        return path_size
+
+
+    def getCenterOfPath(self):
+        allocation, segmentation = self.getTreeAllocationPerSegment()
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                self.allocation_id = alloc_id
+                break
+        allocation_path = segmentation[self.allocation_id]
+        half_path_size = self.getPathSize(allocation_path)/2.0
+
+        path_size = 0
+        for i in range(1,len(allocation_path)):
+            p1        = self.tree.graph_vertex_position[allocation_path[i-1]]
+            p2        = self.tree.graph_vertex_position[allocation_path[i]]
+            path_size += self.getDistance(p1, p2)
+            if(path_size > half_path_size):
+                return((p1[0] + p2[0])/2, (p1[1]+p2[1])/2)
+                continue
+
+
+    def isAllocated(self):
+
+        allocation, segmentation = self.getTreeAllocationPerSegment()
+        
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                return True
+        return False
 
     def getClosetPointToPath(self):
         
@@ -702,33 +785,40 @@ class Robot:
             return vec
 
     def highLevelControl(self):
+
+        if(not self.isAllocated()):
+            return 
         # print("control")
-        closest_point = robot.getClosetPointToPath()
+        closest_point = self.getClosetPointToPath()
         r = self.position['position']
 
 
         dist_to_segmentation = self.getDistance(r, closest_point)*self.map_resolution
         
+        alpha = self.getAllocationAlpha()
         #  
         #  Chose the high level navigation or the gradient allocation
         #
-        if(dist_to_segmentation > self.high_level_distance):
-            if(self.status == 1 or self.status == 0 or self.status == 2):
+        #print('info', dist_to_segmentation, alpha) 
+        if(dist_to_segmentation > self.high_level_distance or alpha < 0.1 or alpha > 0.9):
+            if(self.status == 1 or self.status == 0):
                 return
-
-            goal = (closest_point[0], (self.height-closest_point[1]))
+            goal_ = self.getCenterOfPath()
+            goal = (goal_[0], goal_[1])
             #goal = (19.695165209372934, 10.23384885215893)
-            print("Goal", goal)
+            #print("Goal ", goal, 'status ', self.status)
             self.sendDeployment(goal)
         
             #print(self.position['destination'])
         else:
             #print('status', self.status)
-            if(self.status == 3 or self.status == -1): #succed or pending
-                #self.control_(closest_point)
+            if(self.status == 1 or self.status == 0):
+                self.Stall()
+            else:
                 #print('control')
-                #self.control_holonomic(closest_point)
                 self.control_nonholonomic(closest_point)
+
+       
         self.position['started'] = 1
 
 
@@ -774,7 +864,7 @@ class Robot:
     def control_holonomic(self, closest_point):
         r = self.position['position']
 
-        neighbors_ids = robot.getNeighborsIDs()
+        neighbors_ids = self.getNeighborsIDs()
 
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
@@ -825,7 +915,7 @@ class Robot:
     def control_nonholonomic(self, closest_point):
         r = self.position['position']
 
-        neighbors_ids = robot.getNeighborsIDs()
+        neighbors_ids = self.getNeighborsIDs()
 
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
@@ -894,7 +984,7 @@ class Robot:
         r = self.position['position']
         #r = (math.ceil(r[0]), math.ceil(r[1]))
         #closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
-        closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = robot.getClosetPointToTree()
+        closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = self.getClosetPointToTree()
 
             
         
@@ -904,7 +994,7 @@ class Robot:
         #
         #
 
-        neighbors_positions = robot.getNeighbors()
+        neighbors_positions = self.getNeighbors()
         neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
         neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
 

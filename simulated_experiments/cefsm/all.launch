@@ -1,0 +1,9 @@
+<launch>
+<include file="$(env EXP_DIR)/../cefsm/robot0.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot1.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot2.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot3.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot4.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot5.launch" />
+<include file="$(env EXP_DIR)/../cefsm/robot6.launch" />
+</launch>
