@@ -9,6 +9,8 @@ import netifaces
 import hashlib
 import json
 import time
+import os
+
 
 class Routing:
   def __init__(self, essid, yaml_file):
@@ -29,7 +31,7 @@ class Routing:
     self.ip_list = dict()
     self.last_routing_hash = ''
     #
-    self.setupInterface(self.ifname, self.my_ip, self.network_name, self.network_cell, self.channel)
+    #self.setupInterface(self.ifname, self.my_ip, self.network_name, self.network_cell, self.channel)
     #self.setupInterfaceMonitor(self.ifname)
     #
   def getMyMacAddr(self):
@@ -134,9 +136,10 @@ class Routing:
 
   def createRoute(self, graph): # routing = [routing_through_0, routing_through_1]
 
-    hash = hashlib.sha1(json.dumps(graph, sort_keys=True)).hexdigest()
-    if(hash == self.last_routing_hash):
-      return
+    #hash = hashlib.sha1(json.dumps(graph, sort_keys=True)).hexdigest()
+    #print(hash)
+    #if(hash == self.last_routing_hash):
+    #  return
 
     self.last_routing_hash = hash
     self.flushRouting()
@@ -144,9 +147,11 @@ class Routing:
     route = {}
     self.createRouteAux(graph, self.my_id, set([]), -1, graph[self.my_id], route)
     
-    for id in graph:
-      if(id != self.my_id and not id in graph[self.my_id]):
-        self.addRoute(self.config_data[id]['ip'], self.config_data[route[robot]]['ip'])
+    print(route)
+    for next_hop in route:
+      if(next_hop != self.my_id and not next_hop in graph[self.my_id]):
+        print(self.config_data[next_hop]['ip'], self.config_data[route[next_hop]]['ip'])
+        self.addRoute(self.config_data[next_hop]['ip'], self.config_data[route[next_hop]]['ip'])
 
       
 
@@ -156,7 +161,7 @@ class Routing:
         next_hop = node
       #
       if(not node in visited):
-        createRoute(graph, node, visited.union([id]), next_hop, next_hop_list, route)
+        self.createRouteAux(graph, node, visited.union([id]), next_hop, next_hop_list, route)
     #
     route[id] = next_hop
 
@@ -164,6 +169,9 @@ class Routing:
 #m = Routing('teste4', 'data.yaml')
 
 if __name__ == "__main__":
-  routing = Routing('teste4','../../configs/data.yaml')
-  while(True):
-    time.sleep(1)
+
+  home = os.path.expanduser("~")
+  routing = Routing('teste4',home + '/NetworkedRobotsProject/configs/data.yaml')
+  graph = {1: set([2]), 2: set([1, 3]), 3: set([2, 4]), 4: set([3, 5]), 5: set([4])}
+  
+  routing.createRoute(graph)
