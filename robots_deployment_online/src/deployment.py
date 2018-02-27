@@ -42,7 +42,7 @@ class Robot:
         #     self.config_file     = rospy.get_param("~config_file")
         #     self.routing         = Routing('teste4', self.config_file)
         #     self.rss_measure     = RSSMeasure('teste4', self.config_file)
-
+        self.log_rss             = False
 
         id                       = rospy.get_param("~id")
 
@@ -54,6 +54,7 @@ class Robot:
         self.high_level_distance = 3
         self.sent_goal           = 0
 
+        self.covariance = np.matrix([[0.0, 0.0], [0.0, 0.0]])
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
@@ -85,6 +86,7 @@ class Robot:
         self.deployment_position = []
 
         self.status              = -1
+        self.allocation_position = -1
 
         self.ros_id              = self.id - self.robots_ids_start
         prefix                   = "/robot_"+str(self.ros_id)
@@ -138,9 +140,17 @@ class Robot:
             #simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3.5], 10.0, variance, self.log_rss)
 
-            if(real_metric > self.rss_measure.MAX):
+            if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
+
+                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                derivative = self.distanceDerivative(x, y, data_id)
+                d = np.matrix([[x, y]])
+                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
+                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+
                 self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
 
 
@@ -150,8 +160,17 @@ class Robot:
             real_metric      = self.rss_measure.getMeasurement(vertex)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
-            if(real_metric > self.rss_measure.MAX):
+                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 3.5], 10.0, variance, self.log_rss)
+
+            if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
+                #caculate the variance
+                x = abs(self.position['position'][0] - self.tree.graph_vertex_position[vertex][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.tree.graph_vertex_position[vertex][1])*self.map_resolution
+                derivative = self.distanceDerivative(x, y, vertex)
+                d = np.matrix([[x, y]])
+                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
+                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+
                 self.metric_kalman[vertex].addMeasurement(real_distance, real_metric)
 
 
@@ -169,13 +188,21 @@ class Robot:
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3], 10.0, variance)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3], 10.0, variance, self.log_rss)
 
 
             m, P = self.metric_kalman[data_id].getResult()
             #print(m)
+            if(real_distance > 1.0):
+                #caculate the variance
+                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                derivative = self.distanceDerivative(x, y, data_id)
+                d = np.matrix([[x, y]])
+                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
+                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
 
-            self.metric_kalman[data_id].addMeasurement(real_distance, simulated_metric)
+                self.metric_kalman[data_id].addMeasurement(real_distance, simulated_metric)
 
 
         #for the tree
@@ -185,10 +212,19 @@ class Robot:
             #self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 2.4], 10.0, variance)
+                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 2.4], 10.0, variance, self.log_rss)
 
-            self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
+            
+            if(real_distance > 1.0):
+                #caculate the variance
+                x = abs(self.position['position'][0] - self.tree.graph_vertex_position[vertex][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.tree.graph_vertex_position[vertex][1])*self.map_resolution
+                derivative = self.distanceDerivative(x, y, vertex)
+                d = np.matrix([[x, y]])
+                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
+                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
 
+                self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
 
 
     def createRoutingGraph(self):
@@ -277,6 +313,15 @@ class Robot:
             Pose.pose.pose.orientation.w)
         orientation_euler = tf.transformations.euler_from_quaternion(orientation)
 
+        #the variance for the kalman filter
+        xx = Pose.pose.covariance[0]
+        xy = Pose.pose.covariance[1]
+        yx = Pose.pose.covariance[6]
+        yy = Pose.pose.covariance[7]
+
+        self.covariance = np.matrix([[xx, xy], [yx, yy]])
+
+
         self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
         
         if(self.neigh_0 < 0 or self.neigh_1 < 0):
@@ -361,6 +406,12 @@ class Robot:
                 if(r < allocation_sum[j]):
                     allocation[j].append(r+self.robots_ids_start)
                     break
+
+
+        for alloc_id in allocation:
+            if(self.id in allocation[alloc_id]):
+                self.allocation_position = allocation[alloc_id].index(self.id)
+                break
 
 
         return allocation, segmentation
@@ -799,7 +850,7 @@ class Robot:
         #  Chose the high level navigation or the gradient allocation
         #
         #print('info', dist_to_segmentation, alpha) 
-        if(dist_to_segmentation > self.high_level_distance or alpha < 0.1 or alpha > 0.9):
+        if(dist_to_segmentation > self.high_level_distance or alpha < 0.1 or alpha > 0.90):
             if(self.status == 1 or self.status == 0):
                 return
             goal_ = self.getCenterOfPath()
@@ -881,19 +932,33 @@ class Robot:
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1], neighbors_ids[0])
-        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1], neighbors_ids[1])
+        x1 = (r[0] -neighbors_positions[0][0])*self.map_resolution
+        y1 = (self.height - r[1] -neighbors_positions[0][1])*self.map_resolution
+        derivative_neighbor_1_distance = self.distanceDerivative(x1, y1, neighbors_ids[0])
         
 
+        x2 = (r[0] -neighbors_positions[1][0])*self.map_resolution
+        y2 = (self.height - r[1] -neighbors_positions[1][1])*self.map_resolution
+        derivative_neighbor_2_distance = self.distanceDerivative(x2, y2, neighbors_ids[1])
+
         #print(neighbor_1_distance - neighbor_2_distance)
-        beta = 0.1
+        beta = 1
         d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
-        df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
-        df = self.limitVector(df, 2)
+        df = ((neighbor_1_distance - neighbor_2_distance)*d1[0],(neighbor_1_distance - neighbor_2_distance)*d1[1])
+        #df = self.limitVector(df, 2)
 
+        
+        path_distance = max(path_distance, 2)
+        alpha =  10*(abs(neighbor_1_distance - neighbor_2_distance)/path_distance + path_distance)
 
-        alpha = 6
-        final_direction = (alpha*path_direction[0] +df[0], alpha*path_direction[1] -df[1])
+        #print(alpha)
+
+        #print(alpha, path_distance,a , abs(neighbor_1_distance - neighbor_2_distance) )
+
+        K_p = 0.05
+        final_direction = (K_p*(alpha*path_direction[0] + df[0]) , K_p*(alpha*path_direction[1] + df[1]))
+        final_direction = self.limitVector(final_direction, 2)
+        #final_direction = (alpha*path_direction[0] +df[0], alpha*path_direction[1] +df[1])
 
       
         ##
@@ -932,23 +997,36 @@ class Robot:
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
 
-        derivative_neighbor_1_distance = self.distanceDerivative(r[0] -neighbors_positions[0][0], r[1]-neighbors_positions[0][1], neighbors_ids[0])
-        derivative_neighbor_2_distance = self.distanceDerivative(r[0] -neighbors_positions[1][0], r[1]-neighbors_positions[1][1], neighbors_ids[1])
+        x1 = (r[0] -neighbors_positions[0][0])*self.map_resolution
+        y1 = (self.height - r[1] -neighbors_positions[0][1])*self.map_resolution
+        derivative_neighbor_1_distance = self.distanceDerivative(x1, y1, neighbors_ids[0])
         
 
+        x2 = (r[0] -neighbors_positions[1][0])*self.map_resolution
+        y2 = (self.height - r[1] -neighbors_positions[1][1])*self.map_resolution
+        derivative_neighbor_2_distance = self.distanceDerivative(x2, y2, neighbors_ids[1])
+
         #print(neighbor_1_distance - neighbor_2_distance)
-        beta = 0.1
+        beta = 1
         d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
-        df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[1])
-        df = self.limitVector(df, 2)
+        df = ((neighbor_1_distance - neighbor_2_distance)*d1[0],(neighbor_1_distance - neighbor_2_distance)*d1[1])
+        #df = self.limitVector(df, 2)
 
+        
+        path_distance = max(path_distance, 1)
+        alpha =  20*(abs(neighbor_1_distance - neighbor_2_distance)/path_distance + path_distance)
 
-        alpha = 6
-        final_direction = (alpha*path_direction[0] +df[0], alpha*path_direction[1] -df[1])
+        #print(alpha)
+
+        #print(alpha, path_distance,a , abs(neighbor_1_distance - neighbor_2_distance) )
+
+        K_p = 0.010
+        final_direction = (K_p*(alpha*path_direction[0] + df[0]) , K_p*(alpha*path_direction[1] + df[1]))
+        final_direction = self.limitVector(final_direction, 1)
         
         robot_angle = r[2]
     
-        theta = 0.1*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
+        theta = 0.6*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
         linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
     
         cmd_vel = Twist()
@@ -961,6 +1039,7 @@ class Robot:
         self.vel_pub.publish(cmd_vel)
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
+        print('control')
 
 
     def segmentInsideSgment(self, segment1, segment2):
@@ -1056,6 +1135,7 @@ class Robot:
 if __name__ == "__main__":
     robot = Robot()
     robot.getTreeAllocationPerSegment()
+    time.sleep(10 + robot.allocation_position*5)
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():
         now = rospy.get_rostime()

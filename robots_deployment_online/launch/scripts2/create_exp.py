@@ -8,7 +8,7 @@ robot_exp = '''
     <param name="id" value="ID" />
     <param name="tree_file" value="/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat" />
     <param name="map_resolution" value="0.05" />
-    <param name="ray" value="150.0"/>
+    <param name="ray" value="100.0"/>
   </node> 
 
 

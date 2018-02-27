@@ -3,12 +3,14 @@
 import threading
 import subprocess as sub
 import yaml
+import time
+import os
 
 class RSSMeasure:
   def __init__(self, essid, yaml_file, max_value = -1000):
     #
     with open(yaml_file, 'r') as stream:
-      self.config_data  = yaml.load(stream)
+      self.config_data  = yaml.load(stream)['robots']
     #
     self.macaddress_map = dict()
     #create a map from mac to id
@@ -21,7 +23,7 @@ class RSSMeasure:
     self.MAX            = max_value
     self.alpha          = 0.3
     self.essid          = essid
-    self.thread          = threading.Thread(target=self.tcpdump)
+    self.thread         = threading.Thread(target=self.tcpdump)
     self.thread.start()
     self.signal_dict    = dict()
     #
@@ -54,6 +56,16 @@ class RSSMeasure:
       return self.MAX
 
 
+
+if __name__ == "__main__":
+
+  home = os.path.expanduser("~")
+  rssmeasure = RSSMeasure('teste4',home + '/NetworkedRobotsProject/configs/data.yaml')
+  
+  while True:
+    for id in range(5):
+      print(id, rssmeasure.getMeasurement(id))
+    time.sleep(1)
 
 #m = RSSMeasure('teste4','data.yaml')
 

@@ -18,6 +18,7 @@ import glob
 
 import sys
 import signal
+import math
 
 import subprocess as sub
 
@@ -139,7 +140,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         #verify experiment exit
         
-        if((connected and num_connected > 0 and self.exit) or (self.exit and (self.finish_time.elapsed() > 600000 ))):
+        if((connected and num_connected > 1 and self.exit) or (self.exit and (self.finish_time.elapsed() > 600000 ))):
             self.closeRos()
             self.close()
 
@@ -281,11 +282,13 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         for id in self.network.rcv_data:
 
             if 'diff' in self.network.rcv_data[id]:
-                if abs(self.network.rcv_data[id]['diff']) > math.sqrt(8):
+                print(abs(self.network.rcv_data[id]['diff']))
+                if abs(self.network.rcv_data[id]['diff']) > 1:
                     connected = False
                 else:
                     if(self.network.rcv_data[id]['routing'] != []):
                         num_connected += 1
+                ended = True
 
             if 'state' in self.network.rcv_data[id]:
                 if self.network.rcv_data[id]['state'] == 3:

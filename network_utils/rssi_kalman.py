@@ -9,6 +9,8 @@ from numpy.linalg import pinv
 from numpy import dot
 import math
 from threading import Lock
+import os
+import glob
 
 class RSSIKalmanFilterRecursive:
 	def __init__(self, m, var, measurment_var, d0 = 1.0):
@@ -67,7 +69,7 @@ class RSSIKalmanFilterRecursive:
 		return self.gamma[1]
 
 class RSSIKalmanFilter:
-	def __init__(self, m, var, measurment_var, d0 = 1.0):
+	def __init__(self, m, var, measurment_var, log=False, d0 = 1.0):
 
 		self.m = np.transpose(np.matrix(m))
 		self.P = np.array([[var, 0],[0, var]])
@@ -78,8 +80,29 @@ class RSSIKalmanFilter:
 
 		self.gamma = self.m
 		self.mutex = Lock()
+		self.log   = log
+		if(self.log):
+			home = os.path.expanduser("~")
+
+			log_dir_ = home + '/NetworkedRobotsProject/RSSLog/'
+			folders  = glob.glob(log_dir_+'/*')
+			folder   = log_dir_ + '/log' + str(len(folders) + 1)
+			os.makedirs(folder)
+			self.log_data = folder + '/log.txt'
+			self.log_data_file  = open(self.log_data, 'a', 0)
+			print(self.log_data)
+
+
+	def setMeasurmentVar(self, measurment_var):
+		self.measurment_var = measurment_var
+
+	def saveLog(self, distance,measurement, measurment_var):
+		str_data = str(measurement) + ',' + str(distance) + ',' + str(measurment_var) + ',' + str(self.getGamma()) + '\n'
+		print(str_data)
+		self.log_data_file.write(str_data)
 
 	def addMeasurement(self, distance, measurement):
+
 		if(distance < self.d0):
 			return
 
@@ -95,11 +118,13 @@ class RSSIKalmanFilter:
 		self.m = dot(P,((1.0/self.measurment_var)*np.transpose(self.X)*y + dot(pinv(self.P),self.m)))
 		self.P = P
 
-		#print(self.m)
 
 		#print(self.P,self.m)
 		
 		self.mutex.release()
+		if(self.log):
+			self.saveLog(distance, measurement, self.measurment_var)
+
 
 		#print(self.X.shape, self.Y.shape)
 
@@ -117,7 +142,7 @@ class RSSIKalmanFilter:
 
 	def getMetricValue(self, distance):
 		if(distance < self.d0):
-			return self.m[0]
+			return self.m[0][0,0]
 
 		m, P = self.getResult()
 		t = -10.0*math.log(distance/self.d0)
