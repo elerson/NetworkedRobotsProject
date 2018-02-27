@@ -18,7 +18,7 @@ for dir_ in ${diretorios[@]}; do
 
 
 	cd simulated_experiments/gradient/
-	./create_exp.py 5 ${distancias[d]} 0.05
+	./create_exp.py 25 ${distancias[d]} 0.05
 	cd ../../
 
 	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05
