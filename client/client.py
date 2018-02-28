@@ -282,7 +282,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         for id in self.network.rcv_data:
 
             if 'diff' in self.network.rcv_data[id]:
-                print(abs(self.network.rcv_data[id]['diff']))
+                #print(abs(self.network.rcv_data[id]['diff']))
                 if abs(self.network.rcv_data[id]['diff']) > 1:
                     connected = False
                 else:

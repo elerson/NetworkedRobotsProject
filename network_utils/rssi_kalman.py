@@ -61,7 +61,7 @@ class RSSIKalmanFilterRecursive:
 
 		#print(m)
 		self.gamma = m
-		print('gamma', self.gamma)
+		#print('gamma', self.gamma)
 		return m[0] + t*m[1]
 
 
@@ -154,5 +154,8 @@ class RSSIKalmanFilter:
 
 
 	def getGamma(self):
-		return self.gamma[1]
+		return self.m[1,0]
+
+	def getPL(self):
+		return self.m[0,0]
 

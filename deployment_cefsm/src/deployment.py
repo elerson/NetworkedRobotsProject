@@ -260,7 +260,7 @@ class Robot:
                 derivative = self.distanceDerivative(x, y, vertex)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+                self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
 
                 self.metric_kalman[vertex].addMeasurement(real_distance, real_metric)
 
@@ -313,7 +313,7 @@ class Robot:
                 derivative = self.distanceDerivative(x, y, vertex)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+                self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
 
                 self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
 

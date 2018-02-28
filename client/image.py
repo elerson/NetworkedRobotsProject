@@ -71,12 +71,17 @@ class Image(QtGui.QWidget):
         pen_back = painter.pen()
         pen = QtGui.QPen()
         #print connections
-        color = QtGui.QColor(0,0,255)
+        color = QtGui.QColor(0,100,255)
         pen.setColor(color)
         pen.setWidth(2)
         painter.setPen(pen)
-
+        k = 1
         for segment in self.segments:
+            color = QtGui.QColor(k*30,100,255)
+            pen.setColor(color)
+            pen.setWidth(2 + k*2)
+            painter.setPen(pen)
+            k += 1
             for s in range(1,len(segment)):
                 i = segment[s-1]
                 j = segment[s]

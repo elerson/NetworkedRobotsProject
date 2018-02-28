@@ -364,6 +364,30 @@ class TreeSegmention:
             total_distance += distance
         return total_distance
 
+    def verifyAngle(self, path, radius):
+        print(path)
+        first = self.tree.graph_vertex_position[path[0]]
+        last  = self.tree.graph_vertex_position[path[-1]]
+
+        for i in range(1, len(path)):
+            p1 = self.tree.graph_vertex_position[path[i]]
+            p2 = self.tree.graph_vertex_position[path[i-1]]
+            n = self.getDistance(p1, p2)/radius
+            for j in range(int(n)):
+                x = p1[0] + j*(p2[0] - p1[0])
+                y = p1[1] + j*(p2[1] - p1[1])
+
+                ang1 = math.atan2(p1[1] - y, p1[0] -x)
+                ang2 = math.atan2(p2[1] - y, p2[0] -x)
+
+                if(ang1 > ang2):
+                    if (ang1-ang2) < 3.14/2.0:
+                        return True
+
+                if(ang1 < ang2):
+                    if (ang2-ang1) < 3.14/2.0:
+                        return True
+        return False
 
     # def evaluate_segmentation(self, radius):
 
@@ -430,6 +454,16 @@ class TreeSegmention:
 
             if(int(segmentation_total_cost[i]) != int(self.size)):
                 continue
+
+            #verify angle
+            for path in (self.segmentaion_paths[i]):
+                if(self.verifyAngle(path, radius)):
+                    not_selected = True
+                    break
+
+            if(not_selected):
+                continue   
+
             if(max_diff_index == -1):
                 max_diff_index = i
             #print(i, segmentation_costs[i])
