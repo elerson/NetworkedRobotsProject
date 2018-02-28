@@ -456,10 +456,10 @@ class TreeSegmention:
                 continue
 
             #verify angle
-            for path in (self.segmentaion_paths[i]):
-                if(self.verifyAngle(path, radius)):
-                    not_selected = True
-                    break
+            #for path in (self.segmentaion_paths[i]):
+            #    if(self.verifyAngle(path, radius)):
+            #        not_selected = True
+            #        break
 
             if(not_selected):
                 continue   
