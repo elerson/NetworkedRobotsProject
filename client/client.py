@@ -70,7 +70,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.tree_segmentation   = TreeSegmention(self.tree)
         self.tree_segmentation.segmentation_search([], [])
         #print(tree_segmentation.segmentaion_paths)
-        #segmentation = self.tree_segmentation.evaluate_segmentation(200)
+        segmentation = self.tree_segmentation.evaluate_segmentation(100)
 
         self.widget_image.setSegementation(segmentation)
 
