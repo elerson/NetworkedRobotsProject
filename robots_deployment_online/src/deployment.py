@@ -852,7 +852,7 @@ class Robot:
         #
         #print('info', dist_to_segmentation, alpha)
 
-        if((alpha < 0.1 or alpha > 0.90) and not self.started_control):
+        if((dist_to_segmentation > self.high_level_distance or (alpha < 0.1 or alpha > 0.90)) and not self.started_control):
             if(self.status == 1 or self.status == 0):
                 return
             goal_ = self.getCenterOfPath()
