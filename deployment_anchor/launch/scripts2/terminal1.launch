@@ -1,0 +1,11 @@
+
+<launch>
+	<group ns = "terminal_1">
+	  <node pkg="deployment_anchor" type="terminal.py" name="ros_terminal_1" output="screen">
+	    <param name="radius" value="150" />
+	    <param name="id" value="1" />
+	    <param name="config_file" value="/home/elerson/NetworkedRobotsProject/configs/data.yaml" />
+	  </node> 
+
+	</group>
+</launch>

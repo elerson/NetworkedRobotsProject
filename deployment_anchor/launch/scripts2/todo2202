@@ -1,0 +1,9 @@
+* Modificar o client para parar o experimento quando a rede estiver criada
+* Modificar o client para capturar as metricas avaliadas
+  -Custo de connexao minimo e maximo entre clientes
+  -Tempo para criar a solução
+* criar um script e arquivos necessário para experimentos nos diferentes maps e parametros
+	-distancia de comunicação
+        -mapas 
+
+	
