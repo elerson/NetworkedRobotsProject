@@ -1,6 +1,6 @@
 #!/bin/bash
 
-distancias=(160, 110, 70)
+distancias=(160 110 70)
 diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
 #diretorios=(1euclideanexperiment)
 experiments=(1 2 3 4 5)
