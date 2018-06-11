@@ -26,6 +26,9 @@ from network_utils.RSSMeasure import RSSMeasure
 import time
 import tf
 
+from network_utils.bspline import BSpline
+
+
         
 class Robot:
     def __init__(self):
@@ -58,11 +61,11 @@ class Robot:
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
-        self.radius                 = rospy.get_param("~ray", 120)
+        self.radius              = rospy.get_param("~ray", 120)
 
 
         self.map_resolution      = 0.5
-        self.height              = 0
+        self.height              = 529
 
         self.send_position_time  = rospy.get_time() 
 
@@ -111,6 +114,13 @@ class Robot:
         if(self.real_robot):
             self.updateRouting()
 
+    def getClientsIDs(self):
+
+        ids = self.tree.clients
+        positions = []
+        for id_ in ids:
+            positions.append(self.tree.graph_vertex_position[id_])
+        return positions, ids
 
     def updateRouting(self):
         threading.Timer(1, self.updateMap).start()
@@ -261,6 +271,7 @@ class Robot:
 
         self.map_resolution = MapData.resolution
         self.height         = MapData.height
+        #print(MapData.height, 'teste')
 
 
     def Stall(self):
@@ -375,18 +386,37 @@ class Robot:
   
     def getSegmentation(self):
         if(not self.tree_segmentation_segments == []):
-            return self.tree_segmentation_segments
+            return self.tree_segmentation_segments, self.splines
         self.tree_segmentation.segmentation_search([], [])
         #print(tree_segmentation.segmentaion_paths)
         segmentation = self.tree_segmentation.evaluate_segmentation(self.radius)
         self.tree_segmentation_segments = segmentation
-        return segmentation
+
+        #create the spline
+        self.splines = {}
+        i = 0
+        for segment in segmentation:
+            x = []
+            y = []
+            for index in segment:
+                p = self.tree.graph_vertex_position[index]
+                x.append(p[0])
+                y.append(p[1])
+                #print('teste', self.height)
+            #print(x, y)
+            self.splines[i] = BSpline(x,y, 10.0)
+            i += 1
+
+
+
+
+        return segmentation, self.splines
 
 
     def getTreeAllocationPerSegment(self):
 
         ##define the number of robots per segment
-        segmentation = self.getSegmentation()
+        segmentation, splines = self.getSegmentation()
         n_robots = {}
         allocation_sum = []
         sum_robots = 0
@@ -415,7 +445,7 @@ class Robot:
                 break
 
 
-        return allocation, segmentation
+        return allocation, segmentation, splines
 
 
 
@@ -423,7 +453,7 @@ class Robot:
     def getClosetPointToTree(self):
 
         #TODO: make it less cost
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
 
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
@@ -466,7 +496,7 @@ class Robot:
 
 
     def getAllocationAlpha(self):
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
                 self.allocation_id = alloc_id
@@ -492,7 +522,7 @@ class Robot:
 
 
     def getCenterOfPath(self):
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
                 self.allocation_id = alloc_id
@@ -512,7 +542,7 @@ class Robot:
 
     def isAllocated(self):
 
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
         
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
@@ -522,7 +552,7 @@ class Robot:
     def getClosetPointToPath(self):
         
         #TODO: make it less cost
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
 
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
@@ -581,7 +611,7 @@ class Robot:
 
         #get all robots that are from the same allocation
         #TODO: make it less cost
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
         #print(allocation)
         #get my allocation
 
@@ -643,8 +673,8 @@ class Robot:
 
         return neighbor_positions
 
-    def isTreeInternalNode(self, id):
-        if not id in self.tree.clients and id < self.robots_ids_start:
+    def isTreeInternalNode(self, id_):
+        if not id_ in self.tree.clients and id_ < self.robots_ids_start:
             return True
         return False
 
@@ -653,7 +683,7 @@ class Robot:
 
         #get all robots that are from the same allocation
         #TODO: make it less costy
-        allocation, segmentation = self.getTreeAllocationPerSegment()
+        allocation, segmentation, splines = self.getTreeAllocationPerSegment()
 
         #get my allocation
         for alloc_id in allocation:
@@ -741,6 +771,7 @@ class Robot:
         #get the closest from the other group - positive
         if(self.isTreeInternalNode(ids[neighbors[0]])):
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+
             selected_position = self.tree.graph_vertex_position[ids[neighbors[0]]]
             self_alpha   = dist_to_segment_alpha(p, q, positions[0])
             max_distance = float('inf')
@@ -764,6 +795,7 @@ class Robot:
         if(self.isTreeInternalNode(ids[neighbors[1]])):
 
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
+
             selected_position = self.tree.graph_vertex_position[ids[neighbors[1]]]
             self_alpha   = dist_to_segment_alpha(p, q, positions[0])
             max_distance = float('inf')
@@ -839,7 +871,7 @@ class Robot:
 
         if(not self.isAllocated()):
             return 
-        # print("control")
+        #print("control")
         closest_point = self.getClosetPointToPath()
         r = self.position['position']
 
@@ -869,7 +901,7 @@ class Robot:
                 self.Stall()
             else:
                 #print('control')
-                self.control_nonholonomic(closest_point)
+                self.control_nonholonomic()
 
        
         self.position['started'] = 1
@@ -941,13 +973,15 @@ class Robot:
             return d2_p
 
 
-    def control_holonomic(self, closest_point):
+    def control_holonomic(self):
         r = self.position['position']
 
         neighbors_ids = self.getNeighborsIDs()
 
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
+
+        #print(self.id, neighbors_ids)
 
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
@@ -956,40 +990,25 @@ class Robot:
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
         
-
-
+        t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
+        
+        tangent = (0, 0)
+        #print('out', self.allocation_id)
+        if(t > 0):
+            tangent      = self.splines[self.allocation_id].getDerivative(t)    
+            tangent      = (tangent[0], -tangent[1])
+            m            =  (neighbor_1_distance-neighbor_2_distance)
+            tangent      = (tangent[0]*m, tangent[1]*m)
+           
+            #print('teste', abs(neighbor_1_distance-neighbor_2_distance))
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
-
-        x1 = (r[0] -neighbors_positions[0][0])*self.map_resolution
-        y1 = (self.height - r[1] -neighbors_positions[0][1])*self.map_resolution
-        derivative_neighbor_1_distance = self.distanceDerivative(x1, y1, neighbors_ids[0])
         
-
-        x2 = (r[0] -neighbors_positions[1][0])*self.map_resolution
-        y2 = (self.height - r[1] -neighbors_positions[1][1])*self.map_resolution
-        derivative_neighbor_2_distance = self.distanceDerivative(x2, y2, neighbors_ids[1])
-
-        #print(neighbor_1_distance - neighbor_2_distance)
-        beta = 1
-        d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
-        df = ((neighbor_1_distance - neighbor_2_distance)*d1[0],(neighbor_1_distance - neighbor_2_distance)*d1[1])
-        #df = self.limitVector(df, 2)
-
-        
-        path_distance = max(path_distance, 1)
-        alpha =  20*(abs(neighbor_1_distance - neighbor_2_distance)/path_distance + path_distance)
-
-        #print(alpha)
-
-        #print(alpha, path_distance,a , abs(neighbor_1_distance - neighbor_2_distance) )
-
-        K_p = 0.30
-        final_direction = (K_p*(alpha*path_direction[0] - df[0]) , K_p*(alpha*path_direction[1] + df[1]))
-        final_direction = self.limitVector(final_direction, 1)
-        
-      
+        alpha = 0.5*(1.0/100.0)#1.0
+        beta  = 2.0#2.0
+        final_direction = (alpha*tangent[0] + beta*path_direction[0], alpha*tangent[1] + beta*path_direction[1])
+            
         ##
         ##  Coverting to non-holonomic
         ##
@@ -1005,7 +1024,7 @@ class Robot:
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
 
 
-    def control_nonholonomic(self, closest_point):
+    def control_nonholonomic(self):
         r = self.position['position']
 
         neighbors_ids = self.getNeighborsIDs()
@@ -1013,45 +1032,33 @@ class Robot:
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
 
+        #print(self.id, neighbors_ids)
+
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
-        #print('distance', neighbor_1_distance, ' ', neighbor_2_distance)
-
-
+        
+        t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
+        
+        tangent = (0, 0)
+        #print('out', self.allocation_id)
+        if(t > 0):
+            tangent      = self.splines[self.allocation_id].getDerivative(t)    
+            tangent      = (tangent[0], -tangent[1])
+            m            =  (neighbor_1_distance-neighbor_2_distance)
+            tangent      = (tangent[0]*m, tangent[1]*m)
+           
+            #print('teste', abs(neighbor_1_distance-neighbor_2_distance))
         closest_point_path = closest_point
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
-
-        x1 = (r[0] -neighbors_positions[0][0])*self.map_resolution
-        y1 = (self.height - r[1] -neighbors_positions[0][1])*self.map_resolution
-        derivative_neighbor_1_distance = self.distanceDerivative(x1, y1, neighbors_ids[0])
         
-
-        x2 = (r[0] -neighbors_positions[1][0])*self.map_resolution
-        y2 = (self.height - r[1] -neighbors_positions[1][1])*self.map_resolution
-        derivative_neighbor_2_distance = self.distanceDerivative(x2, y2, neighbors_ids[1])
-
-        #print(neighbor_1_distance - neighbor_2_distance)
-        beta = 1
-        d1 = (beta*(derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0]), beta*(derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1]))
-        df = ((neighbor_1_distance - neighbor_2_distance)*d1[0],(neighbor_1_distance - neighbor_2_distance)*d1[1])
-        #df = self.limitVector(df, 2)
-
-        path_distance = max(path_distance, 1)
-        alpha =  15*(abs(neighbor_1_distance - neighbor_2_distance)/path_distance + path_distance)
-
-        #print(alpha)
-
-        #print(alpha, path_distance,a , abs(neighbor_1_distance - neighbor_2_distance) )
-
-        K_p = 0.005
-        final_direction = (K_p*(alpha*path_direction[0] - df[0]) , K_p*(alpha*path_direction[1] + df[1]))
-        final_direction = self.limitVector(final_direction, 1)
-        
+        alpha = 0.5*(1.0/100.0)#1.0
+        beta  = 2.0#2.0
+        final_direction = (alpha*tangent[0] + beta*path_direction[0], alpha*tangent[1] + beta*path_direction[1])
         robot_angle = r[2]
     
         theta = 0.6*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
@@ -1067,7 +1074,7 @@ class Robot:
         self.vel_pub.publish(cmd_vel)
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
-        print('control')
+        #print('control')
 
 
     def segmentInsideSgment(self, segment1, segment2):
@@ -1162,7 +1169,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    robot.getTreeAllocationPerSegment()
+    #robot.getTreeAllocationPerSegment()
     #time.sleep(10 + robot.allocation_position*5)
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():

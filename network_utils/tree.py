@@ -50,7 +50,7 @@ class Tree:
                             state = VERTEX
         self.getClients__()
         pass
-    def getClients__(self):
+    def getClients__(self):        
         for vertex in self.graph_adj_list:
             if(len(self.graph_adj_list[vertex]) == 1):
                 self.clients.append(vertex)
@@ -455,12 +455,13 @@ class TreeSegmention:
             if(int(segmentation_total_cost[i]) != int(self.size)):
                 continue
 
-            #verify angle
-            #for path in (self.segmentaion_paths[i]):
-            #    if(self.verifyAngle(path, radius)):
-            #        not_selected = True
-            #        break
 
+            #verify angle
+            # for path in (self.segmentaion_paths[i]):
+            #     if(self.verifyAngle(path, radius)):
+            #         not_selected = True
+            #         break
+            # print('teste', not_selected)
             if(not_selected):
                 continue   
 

@@ -1,15 +1,15 @@
 from PyQt4 import QtCore, QtGui, Qt# Import the PyQt4 module we'll need
 from PyQt4.QtCore import QPointF
 from math import ceil, log
-
-
+from network_utils.bspline import BSpline
+import numpy as np
 
 
 class Image(QtGui.QWidget):
     def __init__(self, widget):      
         super(Image, self).__init__()
         self.pressed             = False
-        self.press_position      = []
+        self.press_position      = QPointF(0, 0)
         self.offset              = QPointF(0, 0)
         self.offset_             = QPointF(0, 0)
         self.pressed_button      = -1
@@ -23,8 +23,9 @@ class Image(QtGui.QWidget):
         self.pixmap  = QtGui.QImage(960, 529, QtGui.QImage.Format_RGB32)
         self.communication_graph = {}
 
-    def setSegementation(self, segments):
+    def setSegementation(self, segments, splines):
         self.segments = segments
+        self.splines  = splines
 
     def setIdStart(self, start):
         self.robots_ids_start = start
@@ -90,6 +91,51 @@ class Image(QtGui.QWidget):
                 painter.drawLine(self.offset +  self.offset_ + initial_pose, self.offset +  self.offset_ + end_pose)
         painter.setPen(pen_back)
 
+    def paintSplines(self, painter):
+        pen_back = painter.pen()
+        pen = QtGui.QPen()
+        #print connections
+        color = QtGui.QColor(0,100,255)
+        pen.setColor(color)
+        pen.setWidth(2)
+        painter.setPen(pen)
+        k = 1
+        for spline in [0]:
+            color = QtGui.QColor(k*30,100,255)
+            pen.setColor(color)
+            pen.setWidth(2 + k*2)
+            painter.setPen(pen)
+            k += 1
+
+            for s in range(1,len(self.splines[spline].x)):
+
+                initial_pose = QPointF(self.splines[spline].x[s-1], self.splines[spline].y[s-1])
+                end_pose     = QPointF(self.splines[spline].x[s], self.splines[spline].y[s])
+                #painter.drawLine(self.offset +  self.offset_ + initial_pose, self.offset +  self.offset_ + end_pose)
+
+
+            tt = np.linspace(0.001, 0.999, num=1000)
+
+            for s in range(1,len(tt)):
+                x0, y0 = self.splines[spline].get(tt[s])
+                x1, y1 = self.splines[spline].get(tt[s])
+
+                initial_pose = QPointF(x0, y0)
+                end_pose     = QPointF(x1, y1)
+
+                painter.drawLine(self.offset +  self.offset_ + initial_pose, self.offset +  self.offset_ + end_pose)
+
+
+        color = QtGui.QColor(255, 0, 0)
+        pen.setColor(color)
+        pen.setWidth(8)
+        painter.setPen(pen)
+        #print(self.press_position.x)
+        t, closest_point = self.splines[spline].getClosestPoint(int(self.press_position.x()), int(self.press_position.y()))
+        painter.drawPoint(self.offset +  self.offset_ + QPointF(closest_point[0], closest_point[1]))
+        painter.setPen(pen_back)
+
+
     def paintTree(self, painter):
 
         pen_back = painter.pen()
@@ -132,7 +178,7 @@ class Image(QtGui.QWidget):
 
         self.paintTree(painter)
         #self.paintSegments(painter)
-
+        #self.paintSplines(painter)
         pen = QtGui.QPen()
         #print connections
         color = QtGui.QColor(255,215,0)
@@ -164,6 +210,10 @@ class Image(QtGui.QWidget):
         pen.setWidth(6)
         painter.setPen(pen)
         painter.drawPoint(self.offset +  self.offset_ + self.end_pose)
+
+        painter.drawPoint(self.offset +  self.offset_ + self.press_position)
+
+
 
         for robot_id in self.robots:
             position = QPointF(self.robots[robot_id][0], self.robots[robot_id][1])

@@ -20,7 +20,7 @@ class MSG(IntEnum):
     INIT_ACK                = 8
     PROBE                   = 9
     MOVETO                  = 10
-
+    INFO                    = 11
 
 
 class Terminal:
@@ -34,13 +34,16 @@ class Terminal:
 
         self.tree_file    = self.config_file['configs']['treefile']
 
-        self.sceneGraph   = sceneGraph(self.config_file['configs']['map'], self.radius)
-
-
-
 
         self.tree         = Tree(self.tree_file)
         self.tree_clients = set(self.tree.clients)
+
+        self.xoffset      = rospy.get_param("~xoffset", 0)
+        self.yoffset      = rospy.get_param("~yoffset", 0)
+
+        self.clients_pos  = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
+        self.sceneGraph   = sceneGraph(self.config_file['configs'], self.radius, self.clients_pos, (self.xoffset, self.yoffset))
+
         
         self.msg_id       = {}
         self.coord        = -1
@@ -49,7 +52,7 @@ class Terminal:
         self.links        = set([])
         self.is_anchor    = True
         self.solution_start = False
-        self.gateway_id   = 0
+        self.gateway_id   = 1
         self.in_messages_fifo = []
         self.last_probe   = 0
         self.last_message = 0
@@ -61,9 +64,12 @@ class Terminal:
         self.tree_clients_id = list(self.tree_clients)[self.client_id]
 
 
-        position = self.tree.graph_vertex_position[self.tree_clients_id]
-        position = (position[0], self.sceneGraph.heigh - position[1])
-        self.node_id = self.sceneGraph.getClosestNode(position)
+        position          = self.tree.graph_vertex_position[self.tree_clients_id]
+        position          = (position[0], position[1])
+        self.node_id      = self.sceneGraph.getClosestNode(position)
+        self.position     = (position[0],  position[1])
+
+        print('node id', self.node_id)
 
         self.network      = Network(self.client_id)
         self.network.addMessageCallback(self.receiveNetworkMessage)
@@ -88,9 +94,9 @@ class Terminal:
         if(len(self.in_messages_fifo) <= 0):
             return
 
-        print(len(self.in_messages_fifo), 'fifo size')
+        #print(len(self.in_messages_fifo), 'fifo size')
         message = self.in_messages_fifo.pop()
-        print(len(self.in_messages_fifo), 'fifo size')
+        #print(len(self.in_messages_fifo), 'fifo size')
 
         #print('rcvd msg', message)
         type_    = message['type']
@@ -100,7 +106,7 @@ class Terminal:
         if(self.client_id != self.gateway_id):
             return
         
-        print(message, type_ )
+        #print(message, type_ )
 
         if(type_ == MSG.INIT):
 
@@ -123,7 +129,7 @@ class Terminal:
         elif(type_ == MSG.SETTLE_COMPLETE):
             new_message = {}
             new_message['type'] = int(MSG.DISCOVERY_START)
-            print(self.solution_start, 'solution_start')
+            #print(self.solution_start, 'solution_start')
             self.replyMsg(id_, message)
 
 
@@ -157,6 +163,7 @@ class Terminal:
         message['links'] = list(self.links)
         message['idle']  = False
         message['start'] = self.solution_start
+        message['position'] = self.position
 
         self.network.sendMessage(message)
 

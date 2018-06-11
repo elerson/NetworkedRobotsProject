@@ -115,6 +115,9 @@ class Robot:
         self.route_to_disconected= {}
         self.disconnected        = -1
 
+        self.send_deployment     = 0
+        self.send_deployment_time_diff = 4.0
+
 
         self.ros_id              = self.id - self.robots_ids_start  
         prefix                   = "/robot_"+str(self.ros_id)
@@ -332,6 +335,11 @@ class Robot:
     def sendDeployment(self, deployment_position):
 
 
+        if(rospy.get_time() - self.send_deployment < self.send_deployment_time_diff):
+            return
+
+        self.send_deployment = rospy.get_time()
+
         #print(deployment_position)
         pose = PoseStamped()
         pose.header.frame_id = "map"
@@ -547,6 +555,7 @@ class Robot:
         disconnected = list(self.last_connected_clients - self.connected_clients)
         print('discon: ', disconnected, ' ', self.disconnected, 'last', self.last_connected_clients, self.connected_clients)
         if( disconnected != [] and self.disconnected != disconnected[0]):
+            self.send_deployment = 0
             self.disconnected = disconnected[0]
             self.sendDeployment(self.tree.graph_vertex_position[self.disconnected])
         if(disconnected == []):
@@ -673,9 +682,9 @@ class Robot:
 if __name__ == "__main__":
     robot = Robot()
     rate = rospy.Rate(25.0)
-    while not rospy.is_shutdown()
-        if(robot.started()):
-            break
+    #while not rospy.is_shutdown():
+    #    if(robot.started()):
+    #        break
 
     rate.sleep()
     time.sleep(20 + robot.ros_id*40)    

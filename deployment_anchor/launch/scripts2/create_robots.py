@@ -65,7 +65,7 @@ class CreateRobots():
     for x in range(1, numfiles):
       files[x] = "robot"+str(x-1)+".launch"
 
-    with open("all.launch", 'w') as f:
+    with open("all_robots.launch", 'w') as f:
       text = "<launch>\n"
       for x in range(1, numfiles):
         text += "<include file=\"$(find deployment_anchor)/launch/scripts2/"+files[x]+ "\" />\n"
@@ -78,5 +78,5 @@ class CreateRobots():
 
 
 if __name__ == "__main__":
-  exp = CreateRobots(75, 20, -1)
-  exp.create(5)
+  exp = CreateRobots(110, -30, -7)
+  exp.create(9)

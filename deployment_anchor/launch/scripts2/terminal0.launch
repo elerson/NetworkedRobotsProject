@@ -1,11 +1,15 @@
 
-<launch>
-	<group ns = "terminal_0">
-	  <node pkg="deployment_anchor" type="terminal.py" name="ros_terminal_0" output="screen">
-	    <param name="radius" value="150" />
-	    <param name="id" value="0" />
-	    <param name="config_file" value="/home/elerson/NetworkedRobotsProject/configs/data.yaml" />
-	  </node> 
 
-	</group>
+
+<launch>
+  <group ns = "terminal_0">
+    <node pkg="deployment_anchor" type="terminal.py" name="ros_terminal_0" output="screen">
+      <param name="radius" value="110" />
+      <param name="xoffset" value="-30" />
+      <param name="yoffset" value="-7" />
+      <param name="id" value="0" />
+      <param name="config_file" value="/home/elerson/NetworkedRobotsProject/configs/data.yaml" />
+    </node> 
+
+  </group>
 </launch>

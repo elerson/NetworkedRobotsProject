@@ -99,6 +99,7 @@ class Steiner:
                 if i == j:
                     continue
                 result = {}
+                print(i,j)
                 self.dijkstra(self.graph, i, j, result, [], {}, {})
                 graph_[j] = result['cost']
                 self.paths[(i, j)] = result['path'][::-1]
@@ -113,5 +114,23 @@ class Steiner:
             self.steiner_vertices = self.steiner_vertices.union(set(self.paths[v]))
         self.steiner_vertices =  self.steiner_vertices - set(terminals)
         self.steiner_vertices = list(self.steiner_vertices)
+
+        self.neighbors = {}
+        print('paths', self.paths)
+        for v in self.steiner:
+            path = self.paths[v]
+            for i in range(1,len(path)-1):
+                if not path[i] in self.neighbors:
+                    self.neighbors[path[i]] = []
+
+                self.neighbors[path[i]].append(path[i-1])
+                self.neighbors[path[i]].append(path[i+1])
+
+
+        for node in self.neighbors:
+            self.neighbors[node] = list(set(self.neighbors[node]))
+
+        print('neighbors', self.neighbors)
+
 
         

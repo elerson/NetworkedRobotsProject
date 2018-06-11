@@ -1,4 +1,6 @@
 <launch>
 <include file="$(find deployment_anchor)/launch/scripts2/terminal0.launch" />
 <include file="$(find deployment_anchor)/launch/scripts2/terminal1.launch" />
+<include file="$(find deployment_anchor)/launch/scripts2/terminal2.launch" />
+<include file="$(find deployment_anchor)/launch/scripts2/terminal3.launch" />
 </launch>

@@ -46,5 +46,5 @@ class CreateTerminal():
 
 
 if __name__ == "__main__":
-  exp = CreateTerminal(75, 20, -1)
+  exp = CreateTerminal(110, -30, -7)
   exp.create(5)

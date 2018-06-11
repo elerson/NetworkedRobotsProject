@@ -7,6 +7,7 @@ from   network_utils.network import Network
 from   network_utils.tree    import Tree, TreeSegmention
 import client_ui # This file holds our MainWindow and all design related things
               # it also keeps events etc that we defined in Qt Designer
+from network_utils.bspline import BSpline
 
 import os
 import subprocess as sub
@@ -69,10 +70,14 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         print(self.tree.getSize(), 'size')
         self.tree_segmentation   = TreeSegmention(self.tree)
         self.tree_segmentation.segmentation_search([], [])
-        #print(tree_segmentation.segmentaion_paths)
-        segmentation = self.tree_segmentation.evaluate_segmentation(100)
+        self.tree_segmentation_segments = []
+        self.radius = 110
+        segmentation, splines = self.getSegmentation()
 
-        self.widget_image.setSegementation(segmentation)
+        #print(tree_segmentation.segmentaion_paths)
+        #segmentation = self.tree_segmentation.evaluate_segmentation(100)
+
+        self.widget_image.setSegementation(segmentation, splines)
 
         self.widget_image.addTree(self.tree.graph_adj_list, self.tree.graph_vertex_position, self.tree.clients)
 
@@ -99,6 +104,35 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         self.commnand_id = 0
         self.updateALL()
+
+
+    def getSegmentation(self):
+        if(not self.tree_segmentation_segments == []):
+            return self.tree_segmentation_segments, self.splines
+        self.tree_segmentation.segmentation_search([], [])
+        #print(tree_segmentation.segmentaion_paths)
+        segmentation = self.tree_segmentation.evaluate_segmentation(self.radius)
+        self.tree_segmentation_segments = segmentation
+
+        #create the spline
+        self.splines = {}
+        i = 0
+        for segment in segmentation:
+            x = []
+            y = []
+            for index in segment:
+                p = self.tree.graph_vertex_position[index]
+                x.append(p[0])
+                y.append(p[1])
+                #print('teste', self.height)
+            #print(x, y)
+            self.splines[i] = BSpline(x,y, 10.0)
+            i += 1
+
+
+
+
+        return segmentation, self.splines
 
     def createLog(self):
         log_dir_ = os.environ['LOG_DIR']

@@ -1,10 +1,10 @@
  <launch>
    <param name ="/use_sim_time" value="true"/>
-   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find deployment_cefsm)/launch/map/icex.world" >
+   <node name="Simulation" pkg="stage_ros" type="stageros" args="$(find deployment_anchor)/launch/map/icex.world" >
    </node>
 
    <!--Map server -->
-   <arg name="map_file" default="$(find deployment_cefsm)/launch/map/icex.yaml"/>
+   <arg name="map_file" default="$(find deployment_anchor)/launch/map/icex.yaml"/>
    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
  

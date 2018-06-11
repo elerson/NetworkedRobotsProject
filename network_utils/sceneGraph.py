@@ -2,20 +2,22 @@ from scipy import misc
 from math import floor, sqrt, sin, cos, pi, ceil
 import numpy as np
 import tsp
+from tree import Tree, TreeSegmention
 
 class sceneGraph:
-    def __init__(self, config_file, comm_radius, dimensions = [], offset=(0, 0)):
+    def __init__(self, config_file, comm_radius, client_pos, offset=(0, 0)):
         self.map_file         = config_file['map']
-        self.map              = misc.imread(map_file, 'L')
+        self.map              = misc.imread(self.map_file, 'L')
         self.comm_radius      = int(ceil(sqrt(((comm_radius-2)**2)/2.0)))
         self.graph            = {}
         self.vertice_position = {}
+        self.client_pos       = client_pos
         self.offset           = offset
         self.obst_dist        = 20
-        self.getMinMax(dimensions)
+        self.getMinMax(client_pos)
 
         #self.createGraph()
-        self.createGraphTree(config_file['tree'])
+        self.createGraphTree(config_file['treefile'])
 
     def getMinMax(self, dimensions):
         self.min_ = [float('inf'), float('inf')]
@@ -59,8 +61,67 @@ class sceneGraph:
 
         return False
 
-    def createGraphTree(self, treefile):
-        self.tree = Tree(tree_file)
+    def createGraphTree(self, tree_file):
+
+        dimensions = self.map.shape
+        self.heigh = dimensions[0]
+
+        self.tree                = Tree(tree_file)
+        self.tree_segmentation   = TreeSegmention(self.tree)
+
+
+
+        allocation = np.matrix(self.tree_segmentation.doAllocation(self.comm_radius))
+
+
+        #print('a', self.positions - [[1,2]], [[self.vertice_position[0][0], self.vertice_position[0][1]]])
+        positions = np.empty(shape=[0, 2])
+
+        id_ = 0
+        for client in self.client_pos:
+
+            client_pos = (client[0], client[1])
+            distance = float('inf')
+            for i in range(allocation.shape[0]):
+                d = sqrt((allocation[i,0]-client[0])**2 + (allocation[i,1]-client[1])**2)
+                distance = min(d, distance)
+
+            if(distance < 30):
+                continue
+
+            self.vertice_position[id_] = (client[0], client[1])            
+
+            positions = np.append(positions, [[client[0], client[1]]], axis=0)
+            self.graph[id_] = []
+            id_ += 1
+        #print(positions)
+
+        for i in range(allocation.shape[0]):
+            self.vertice_position[id_] = (allocation[i,0], allocation[i,1])
+            positions = np.append(positions, [[allocation[i,0], allocation[i,1]]], axis=0)
+            self.graph[id_] = []
+            id_ += 1
+        self.positions = positions
+        #print(positions)
+        comm_radius = int(sqrt(self.comm_radius**2 + self.comm_radius**2))+1
+
+
+        for id in self.graph:
+
+            #print('teste', [[self.vertice_position[id][0], self.vertice_position[id][1]]])
+            distance    = np.sqrt(np.sum(np.power(self.positions - [[self.vertice_position[id][0], self.vertice_position[id][1]]],2), axis=1))
+            #print(self.comm_radius)
+            connections = np.where(distance <= comm_radius)[0].tolist()
+            graph_      = {}
+
+            for conn_id in connections:
+                if(conn_id != id):
+                    graph_[conn_id] = int(distance[conn_id])
+
+            self.graph[id] = graph_
+
+        print(self.graph)
+
 
     def createGraph(self):
         dimensions = self.map.shape
@@ -104,6 +165,9 @@ class sceneGraph:
 
             self.graph[id] = graph_
 
+    def getDistanceFromId(self, position, id):
+        return sqrt((self.positions[id][0]-position[0]) + (self.positions[id][1] - position[0])**2)
+
     def getClosestNode(self, position):
         distance    = np.sqrt(np.sum(np.power(self.positions - [[position[0], position[1]]],2), axis=1))
         #print(self.positions, 'distance')
@@ -127,7 +191,6 @@ class sceneGraph:
             while pred != None:
                 path.append(pred)
                 pred=predecessors.get(pred,None)
-
             result['path'] = path
             result['cost'] = distances[dest]
 
@@ -170,6 +233,7 @@ class sceneGraph:
                 if i == j:
                     continue
                 result = {}
+                #print('testee', i, j)
                 self.dijkstra(self.graph, i, j, result, [], {}, {})
                 graph_[j] = result['cost']
             self.full_graph[i] = graph_

@@ -9,27 +9,22 @@ for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
   for dist in ${distancias[@]}; do
     for exp in ${experiments[@]}; do
-	export LOG_DIR=$dir_$'_gradient_'$dist'/'
-	#export LOG_DIR=$dir_$'_cefsm_'$dist'/'
-	./client/client.py &
+	export LOG_DIR=$dir_$'anchor'$dist'/'
+
+	#./client_anchor/client.py &
 	
- 	#cd simulated_experiments/cefsm/
-	#./create_exp.py 7 ${distancias[d]} 0.05
-	#cd ../../
-
-
-	cd simulated_experiments/gradient/
+	cd simulated_experiments/anchor/
 	./create_exp.py 7 $dist 0.05
 	cd ../../
-
-	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05
 
 	roslaunch simulated_experiments/simulation.launch &
 
 	sleep 5
 
-	#roslaunch simulated_experiments/cefsm/all.launch
-	roslaunch simulated_experiments/gradient/all.launch
+	roslaunch simulated_experiments/anchor/all_terminals.launch &
+
+	sleep 5
+	roslaunch simulated_experiments/anchor/all_robots.launch
 
     done
   done
