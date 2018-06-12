@@ -5,4 +5,17 @@
 <include file="$(env EXP_DIR)/../gradient/robot3.launch" />
 <include file="$(env EXP_DIR)/../gradient/robot4.launch" />
 <include file="$(env EXP_DIR)/../gradient/robot5.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot6.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot7.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot8.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot9.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot10.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot11.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot12.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot13.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot14.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot15.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot16.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot17.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot18.launch" />
 </launch>
