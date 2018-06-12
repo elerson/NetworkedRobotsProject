@@ -28,11 +28,11 @@ robot_exp = '''
    <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
 
-   <rosparam file="$(find robots_deployment_online)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
-   <rosparam file="$(find robots_deployment_online)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
-   <rosparam file="$(find robots_deployment_online)/launch/local_costmap_params.yaml" command="load" />
-   <rosparam file="$(find robots_deployment_online)/launch/global_costmap_params.yaml" command="load" />
-   <rosparam file="$(find robots_deployment_online)/launch/base_local_planner_params.yaml" command="load" />
+   <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
+   <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
+   <rosparam file="$(find deployment_anchor)/launch/local_costmap_params.yaml" command="load" />
+   <rosparam file="$(find deployment_anchor)/launch/global_costmap_params.yaml" command="load" />
+   <rosparam file="$(find deployment_anchor)/launch/base_local_planner_params.yaml" command="load" />
 
    <param name="planner_file_dir" value="$(env EXP_DIR)/"/>
    <param name="planner_file_1" value="steinerData1.dat"/>
