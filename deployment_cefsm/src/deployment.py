@@ -137,6 +137,7 @@ class Robot:
 
         self.metric_kalman       = {}
         self.gamma               = 3
+        self.status              = -1 
         
         if(self.real_robot):
             self.updateRouting()
@@ -335,10 +336,10 @@ class Robot:
     def sendDeployment(self, deployment_position):
 
 
-        if(rospy.get_time() - self.send_deployment < self.send_deployment_time_diff):
-            return
+        # if(rospy.get_time() - self.send_deployment < self.send_deployment_time_diff):
+        #     return
 
-        self.send_deployment = rospy.get_time()
+        # self.send_deployment = rospy.get_time()
 
         #print(deployment_position)
         pose = PoseStamped()
@@ -346,12 +347,12 @@ class Robot:
         pose.pose.position.x = deployment_position[0]*self.map_resolution
         pose.pose.position.y = (self.height - deployment_position[1])*self.map_resolution
 
-        print(pose.pose.position)
+        #print(pose.pose.position)
 
         #for debug
         self.position['destination'] = (deployment_position[0], deployment_position[1])
 
-        print(pose.pose.position.x, pose.pose.position.y)
+        #print(pose.pose.position.x, pose.pose.position.y)
         q = tf.transformations.quaternion_from_euler(0, 0, 0)
         pose.pose.orientation = Quaternion(*q)
 
@@ -504,7 +505,7 @@ class Robot:
         clients_connections = {}
         
         connected_clients = self.searchGraph(self.graph, self.id, set([]), clients_connections)
-        print('connected clients', connected_clients)
+        #print('connected clients', connected_clients)
         
         self.clients_connections = clients_connections
 
@@ -530,7 +531,8 @@ class Robot:
 
     def getClosestDisconnected(self):
         disconnected_clients = self.clients - self.connected_clients
-        #print('disconnected ', disconnected_clients, self.connected_clients)
+        if(self.ros_id == 3):
+            print('disconnected ', disconnected_clients, self.connected_clients)
         min_id   = -1
         min_dist = float('inf')
         for client in disconnected_clients:
@@ -544,7 +546,8 @@ class Robot:
     def Move(self):
         #get closest disconnected client
         closet_client = self.getClosestDisconnected()
-        #print(closet_client)
+        if(self.ros_id == 3):
+            print('teste', closet_client, self.closet_client, self.status)
         if(closet_client != self.closet_client):
             self.closet_client = closet_client
             if(closet_client >= 0):
@@ -553,7 +556,7 @@ class Robot:
 
     def MoveBackwards(self):
         disconnected = list(self.last_connected_clients - self.connected_clients)
-        print('discon: ', disconnected, ' ', self.disconnected, 'last', self.last_connected_clients, self.connected_clients)
+        #print('discon: ', disconnected, ' ', self.disconnected, 'last', self.last_connected_clients, self.connected_clients)
         if( disconnected != [] and self.disconnected != disconnected[0]):
             self.send_deployment = 0
             self.disconnected = disconnected[0]
@@ -565,7 +568,7 @@ class Robot:
     def Stall(self):
         goal = GoalID()
         goal.id = str(self.current_goal_id-1)
-        print('stall', self.current_goal_id-1)
+        #print('stall', self.current_goal_id-1)
         self.cancel_pub.publish(goal)
 
     ##  
@@ -583,7 +586,9 @@ class Robot:
 
 
     def AllClientsConnected(self):
-        print('connected ', self.connected_clients)
+        if(self.ros_id == 4):
+            print('connected ', self.connected_clients, self.state)
+
         if self.clients == self.connected_clients:
             self.position['ended'] = 1
             return True
@@ -591,14 +596,16 @@ class Robot:
 
     def DisconnectedToClient(self):
         if((self.last_connected_clients - self.connected_clients) != set([])):
-            print("disconnect", self.last_connected_clients, self.connected_clients, self.clients_connections)
+            if(self.ros_id == 4):
+                print("disconnect", self.last_connected_clients, self.connected_clients, self.clients_connections, self.state)
             #self.disconnected = list(self.last_connected_clients - self.connected_clients)[0]
 
             return True
         return False
 
     def ReconnectedToClient(self):
-        print('reconnected ', self.last_connected_clients, self.connected_clients)
+        if(self.ros_id == 4):
+            print('reconnected ', self.last_connected_clients, self.connected_clients, self.id, self.state)
         if(self.last_connected_clients - self.connected_clients == set([])):
             return True
         return False
@@ -615,7 +622,7 @@ class Robot:
 
 
     def RouteToClientChanged(self):
-        print("route change", self.route_to_disconected, self.neighbors)
+        #print("route change", self.route_to_disconected, self.neighbors)
         if(self.route_to_disconected == self.neighbors):
             return False
         return True
@@ -637,7 +644,7 @@ class Robot:
 
     def CEFSM(self):
         self.precomputeGraph() #muda estado da classe
-        print('State ', self.state, self.ros_id )
+        #print('State ', self.state, self.ros_id )
         if self.state == State.IDLE:
             if(not self.AllClientsConnected()):
                 self.state = State.MOVE
@@ -646,7 +653,7 @@ class Robot:
         elif self.state == State.MOVE:
             self.Move()
 
-            print('allclient', self.AllClientsConnected(),'win', self.WinVote(), 'belong', self.BelongsToSolution())
+            #print('allclient', self.AllClientsConnected(),'win', self.WinVote(), 'belong', self.BelongsToSolution())
             if(self.DisconnectedToClient()):#muda estado da classe
                 self.MoveBackwards()
                 self.state = State.DISCONNECT 
