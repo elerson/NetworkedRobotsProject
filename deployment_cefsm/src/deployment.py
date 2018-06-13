@@ -80,7 +80,7 @@ class Robot:
 
         self.state = State.IDLE
 
-        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
+        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.15)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
         self.vote_distance       = 0.2
@@ -511,8 +511,9 @@ class Robot:
         # 1 2 3 - 2 3, 2 3 - 1 2 3
 
         if(self.state == State.MOVE):
+            self.last_connected_clients.union(connected_clients) 
             #if(self.last_connected_clients - connected_clients == set([])):
-            self.last_connected_clients = connected_clients
+            #    self.last_connected_clients = connected_clients
 
         if(self.connected_clients - connected_clients == set([])):
             self.connected_clients = connected_clients
@@ -692,7 +693,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    rate = rospy.Rate(25.0)
+    rate = rospy.Rate(100.0)
     #while not rospy.is_shutdown():
     #    if(robot.started()):
     #        break
