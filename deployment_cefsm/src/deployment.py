@@ -83,7 +83,7 @@ class Robot:
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
-        self.vote_distance       = 1
+        self.vote_distance       = 0.2
 
         self.map_resolution      = 0.5
         self.height              = 0
@@ -531,7 +531,7 @@ class Robot:
 
     def getClosestDisconnected(self):
         disconnected_clients = self.clients - self.connected_clients
-        if(self.ros_id == 3):
+        if(self.ros_id == 4):
             print('disconnected ', disconnected_clients, self.connected_clients)
         min_id   = -1
         min_dist = float('inf')
@@ -586,7 +586,7 @@ class Robot:
 
 
     def AllClientsConnected(self):
-        if(self.ros_id == 4):
+        if(self.ros_id == 3):
             print('connected ', self.connected_clients, self.state)
 
         if self.clients == self.connected_clients:
@@ -629,11 +629,14 @@ class Robot:
 
 
     def WinVote(self):
-        for id in self.network.rcv_data:
-            if(self.network.rcv_data[id]['state'] == State.DISCONNECT or self.network.rcv_data[id]['state'] == State.MOVE):
-                if(id != self.id):
-                    if(self.getDistance(self.position['position'], self.network.rcv_data[id]['position'])*self.map_resolution < self.vote_distance):
-                        if(self.id > id):
+        for id_ in self.network.rcv_data:
+            if(id_ < self.robots_ids_start):
+                continue
+
+            if(self.network.rcv_data[id_]['state'] == State.DISCONNECT or self.network.rcv_data[id_]['state'] == State.MOVE):
+                if(id_ != self.id):
+                    if(self.getDistance(self.position['position'], self.network.rcv_data[id_]['position'])*self.map_resolution < self.vote_distance):
+                        if(self.id > id_):
                             return False
         return True
 
