@@ -694,7 +694,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    rate = rospy.Rate(100.0)
+    rate = rospy.Rate(20.0)
     #while not rospy.is_shutdown():
     #    if(robot.started()):
     #        break

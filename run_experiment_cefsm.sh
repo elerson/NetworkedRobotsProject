@@ -9,7 +9,7 @@ for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
   for dist in ${distancias[@]}; do
     for exp in ${experiments[@]}; do
-	export LOG_DIR=$dir_$'_cefsm5_'$dist'/'
+	export LOG_DIR=$dir_$'_cefsm6_'$dist'/'
 	#export LOG_DIR=$dir_$'_cefsm_'$dist'/'
 	./client/client.py &
 	
