@@ -80,7 +80,7 @@ class Robot:
 
         self.state = State.IDLE
 
-        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.25)
+        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.15)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
         self.vote_distance       = 0.2
@@ -467,6 +467,7 @@ class Robot:
             for neigbor in self.network.rcv_data[id]['routing']:
                 graph[neigbor] = graph[neigbor].union(set([id]))
 
+
         if(with_my_self):
             graph[self.id] = graph[self.id].union(self.neighbors)
 
@@ -676,11 +677,11 @@ class Robot:
 
         elif self.state == State.DISCONNECT:
             self.MoveBackwards()
-            if(self.ReconnectedToClient() and (self.RouteToClientChanged() or self.LoseVote())):
+            if(self.ReconnectedToClient() and (self.RouteToClientChanged())):#or self.LoseVote())):
                 #TODO: update neigbor state
                 self.state = State.MOVE 
 
-            elif(self.ReconnectedToClient() and self.WinVote()):
+            elif(self.ReconnectedToClient()): #and self.WinVote()):
                 self.Stall()
                 self.state = State.CONNECT
 
