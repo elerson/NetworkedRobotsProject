@@ -607,8 +607,8 @@ class Robot:
         return False
 
     def ReconnectedToClient(self):
-        if(self.ros_id == 4):
-            print('reconnected ', self.last_connected_clients, self.connected_clients, self.id, self.state)
+        #if(self.ros_id == 4):
+        print('reconnected ', self.last_connected_clients, self.connected_clients, self.id, self.state)
         if(self.last_connected_clients - self.connected_clients == set([])):
             return True
         return False
