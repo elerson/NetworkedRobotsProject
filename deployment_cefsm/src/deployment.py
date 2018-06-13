@@ -80,7 +80,7 @@ class Robot:
 
         self.state = State.IDLE
 
-        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.15)
+        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.6)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
         self.vote_distance       = 0.2
