@@ -508,10 +508,11 @@ class Robot:
         #print('connected clients', connected_clients)
         
         self.clients_connections = clients_connections
+        # 1 2 3 - 2 3, 2 3 - 1 2 3
 
         if(self.state == State.MOVE):
-            if(self.last_connected_clients - connected_clients == set([])):
-                self.last_connected_clients = connected_clients
+            #if(self.last_connected_clients - connected_clients == set([])):
+            self.last_connected_clients = connected_clients
 
         if(self.connected_clients - connected_clients == set([])):
             self.connected_clients = connected_clients
