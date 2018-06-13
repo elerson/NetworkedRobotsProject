@@ -677,11 +677,11 @@ class Robot:
 
         elif self.state == State.DISCONNECT:
             self.MoveBackwards()
-            if(self.ReconnectedToClient() and (self.RouteToClientChanged())):#or self.LoseVote())):
+            if(self.ReconnectedToClient() and (self.RouteToClientChanged() or self.LoseVote())):
                 #TODO: update neigbor state
                 self.state = State.MOVE 
 
-            elif(self.ReconnectedToClient()): #and self.WinVote()):
+            elif(self.ReconnectedToClient() and self.WinVote()):
                 self.Stall()
                 self.state = State.CONNECT
 
