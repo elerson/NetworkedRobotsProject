@@ -44,6 +44,8 @@ class Network:
         self.message_callback = None
         self.msg_num = 0
 
+        self.lock = threading.Lock()
+
     def addCommandCallback(self, callback):
         self.command_callback = callback
 
@@ -99,7 +101,9 @@ class Network:
                 else:
 
                     if(rcv_data['_type_'] == TYPE.NOWAITREPLY):
+                        self.lock.acquire()
                         self.rcv_data[id]   = rcv_data
+                        self.lock.release()
 
                         if self.message_callback != None:
                             self.message_callback(rcv_data)
@@ -107,6 +111,19 @@ class Network:
                 self.rcv_command[id] = rcv_data
                 if self.command_callback != None:
                     self.command_callback()
+
+    def getDataIds(self):
+        self.lock.acquire()
+        keys = list(self.rcv_data.keys())
+        self.lock.release()
+        return keys
+
+
+    def getData(self, id):
+        self.lock.acquire()
+        data = self.rcv_data[id].copy()
+        self.lock.release()
+        return data
 
     def addMessage(self, message):
         self.rcv_data[message['id']] = message

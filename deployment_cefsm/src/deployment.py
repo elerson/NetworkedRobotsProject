@@ -80,7 +80,7 @@ class Robot:
 
         self.state = State.IDLE
 
-        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.6)
+        self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.3)
         self.tree_file           = rospy.get_param("~tree_file")
         self.radius              = rospy.get_param("~radius", 10)
         self.vote_distance       = 0.2
@@ -167,16 +167,16 @@ class Robot:
     
     def createRoutingGraph(self):
         graph = {}
-        for id in self.network.rcv_data:
+        for id in self.network.getDataIds():
             graph[id] = set([])
 
         graph[self.id] = set([])
 
-        for id in self.network.rcv_data:
-            if(self.network.rcv_data[id]['state'] != State.CONNECT):
+        for id in self.network.getDataIds():
+            if(self.network.getData(id)['state'] != State.CONNECT):
                 continue
-            graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
-            for neigbor in self.network.rcv_data[id]['routing']:
+            graph[id] = graph[id].union(set(self.network.getData(id)['routing']))
+            for neigbor in self.network.getData(id)['routing']:
                 graph[neigbor] = graph[neigbor].union(set([id]))
 
         if(with_my_self):
@@ -186,7 +186,7 @@ class Robot:
                 graph[neigbor] = graph[neigbor].union(set([self.id]))
 
 
-        for id in self.network.rcv_data:
+        for id in self.network.getDataIds():
             graph[id] = list(graph[id])
         return graph
 
@@ -227,10 +227,10 @@ class Robot:
 
         variance = 10.0
         #for the robots
-        for data_id in self.network.rcv_data:
+        for data_id in self.network.getDataIds():
             #if(data_id == self.id):
             #    continue
-            real_distance    = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
+            real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
             real_metric      = self.rss_measure.getMeasurement(data_id)
             #simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
@@ -239,8 +239,8 @@ class Robot:
 
             if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
 
-                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
                 derivative = self.distanceDerivative(x, y, data_id)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
@@ -273,10 +273,10 @@ class Robot:
 
         variance = 10.0
         #for the robots
-        for data_id in self.network.rcv_data:
+        for data_id in self.network.getDataIds():
             #if(data_id == self.id):
             #    continue
-            real_distance    = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
+            real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
             simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
 
@@ -290,8 +290,8 @@ class Robot:
             #print(m)
             if(real_distance > 1.0):
                 #caculate the variance
-                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
                 derivative = self.distanceDerivative(x, y, data_id)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
@@ -419,7 +419,7 @@ class Robot:
         return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
     def distance_metric(self, id):
-        p0       = self.network.rcv_data[id]['position']
+        p0       = self.network.getData(id)['position']
         p1       = self.position['position']
         distance = self.getDistance(p0, p1)*self.map_resolution
         #print('distance ', distance, 'id ', id)
@@ -430,7 +430,7 @@ class Robot:
 
     def defineNeighbors(self):
         neighbors = []
-        for id in self.network.rcv_data:
+        for id in self.network.getDataIds():
             if(id == self.id):
                 continue
             if(not id in self.neighbor_state):
@@ -443,7 +443,7 @@ class Robot:
 
 
             if(self.neighbor_state[id] == NeighborState.DISCONNECTED):
-                if(self.distance_metric(id) > self.higher_threshold and self.network.rcv_data[id]['state'] == State.CONNECT):
+                if(self.distance_metric(id) > self.higher_threshold and self.network.getData(id)['state'] == State.CONNECT):
                     self.neighbor_state[id] = NeighborState.CONNECTED
 
             if(self.neighbor_state[id] == NeighborState.CONNECTED):
@@ -455,16 +455,16 @@ class Robot:
 
     def defineGraph(self, with_my_self=True):
         graph = {}
-        for id in self.network.rcv_data:
+        for id in self.network.getDataIds():
             graph[id] = set([])
 
         graph[self.id] = set([])
 
-        for id in self.network.rcv_data:
-            if(self.network.rcv_data[id]['state'] != State.CONNECT):
+        for id in self.network.getDataIds():
+            if(self.network.getData(id)['state'] != State.CONNECT):
                 continue
-            graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
-            for neigbor in self.network.rcv_data[id]['routing']:
+            graph[id] = graph[id].union(set(self.network.getData(id)['routing']))
+            for neigbor in self.network.getData(id)['routing']:
                 graph[neigbor] = graph[neigbor].union(set([id]))
 
 
@@ -475,7 +475,7 @@ class Robot:
                 graph[neigbor] = graph[neigbor].union(set([self.id]))
 
 
-        for id in self.network.rcv_data:
+        for id in self.network.getDataIds():
             graph[id] = list(graph[id])
         return graph
 
@@ -632,13 +632,14 @@ class Robot:
 
 
     def WinVote(self):
-        for id_ in self.network.rcv_data:
+
+        for id_ in self.network.getDataIds():
             if(id_ < self.robots_ids_start):
                 continue
 
-            if(self.network.rcv_data[id_]['state'] == State.DISCONNECT or self.network.rcv_data[id_]['state'] == State.MOVE):
+            if(self.network.getData(id_)['state'] == State.DISCONNECT or self.network.getData(id_)['state'] == State.MOVE):
                 if(id_ != self.id):
-                    if(self.getDistance(self.position['position'], self.network.rcv_data[id_]['position'])*self.map_resolution < self.vote_distance):
+                    if(self.getDistance(self.position['position'], self.network.getData(id_)['position'])*self.map_resolution < self.vote_distance):
                         if(self.id > id_):
                             return False
         return True
@@ -694,7 +695,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    rate = rospy.Rate(20.0)
+    rate = rospy.Rate(15.0)
     #while not rospy.is_shutdown():
     #    if(robot.started()):
     #        break
