@@ -14,7 +14,7 @@ for dir_ in ${diretorios[@]}; do
 	./client/client.py &
 	
 	cd simulated_experiments/cefsm/
-	./create_exp.py 9 $dist 0.05
+	./create_exp.py 20 $dist 0.05
 	cd ../../
 
 	roslaunch simulated_experiments/simulation.launch &
