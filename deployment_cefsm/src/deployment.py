@@ -469,10 +469,15 @@ class Robot:
 
 
         if(with_my_self):
-            graph[self.id] = graph[self.id].union(self.neighbors)
+            for neigbor in self.neighbors:
+                if(neigbor < self.robots_ids_start and len(graph[neigbor]) > 0):
+                    continue
 
-            for neigbor in self.neighbors:            
+
                 graph[neigbor] = graph[neigbor].union(set([self.id]))
+                graph[self.id].union(set([neigbor]))
+
+
 
 
         for id in self.network.getDataIds():
