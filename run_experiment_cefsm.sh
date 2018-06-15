@@ -1,8 +1,8 @@
 #!/bin/bash
 
-distancias=(70)
-#diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
-diretorios=(5euclideanexperiment)
+distancias=(60 90 110 140 170)
+diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
+#diretorios=(5euclideanexperiment)
 experiments=(1 2 3 4 5)
 
 for dir_ in ${diretorios[@]}; do
