@@ -475,7 +475,7 @@ class Robot:
 
 
                 graph[neigbor] = graph[neigbor].union(set([self.id]))
-                graph[self.id].union(set([neigbor]))
+                graph[self.id] = graph[self.id].union(set([neigbor]))
 
 
 
