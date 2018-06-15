@@ -470,7 +470,7 @@ class Robot:
 
         if(with_my_self):
             for neigbor in self.neighbors:
-                if(neigbor < self.robots_ids_start and len(graph[neigbor]) > 0):
+                if(neigbor < self.robots_ids_start and len(graph[neigbor]) > 0 and self.state != State.MOVE):
                     continue
 
 
