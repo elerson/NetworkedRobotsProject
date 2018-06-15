@@ -630,8 +630,8 @@ class Robot:
 
 
     def RouteToClientChanged(self):
-        #print("route change", self.route_to_disconected, self.neighbors)
-        if((self.route_to_disconected - self.clients) == (self.neighbors-self.clients)):
+        #print("route change", (self.route_to_disconected - self.clients), (self.neighbors-self.clients))
+        if((set(self.route_to_disconected) - set(self.clients)) == (set(self.neighbors)-set(self.clients))):
             return False
         return True
 
