@@ -1,15 +1,16 @@
 #!/bin/bash
 
-distancias=(160 110 70)
+distancias=(60 90 110 140 170)
 diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
-#diretorios=(1euclideanexperiment)
+#diretorios=(5euclideanexperiment)
 experiments=(1 2 3 4 5)
+
 
 for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
   for dist in ${distancias[@]}; do
     for exp in ${experiments[@]}; do
-	export LOG_DIR=$dir_$'_gradient_'$dist'/'
+	export LOG_DIR=$dir_$'\gradient\gradient_'$dist'/'
 	#export LOG_DIR=$dir_$'_cefsm_'$dist'/'
 	./client/client.py &
 	
