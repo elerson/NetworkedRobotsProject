@@ -143,10 +143,11 @@ class Robot:
 
         variance = 10.0
         #for the robots
-        for data_id in self.network.rcv_data:
+        data_ids = self.network.getDataIds()
+        for data_id in data_ids:
             #if(data_id == self.id):
             #    continue
-            real_distance    = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
+            real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
             real_metric      = self.rss_measure.getMeasurement(data_id)
             #simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
@@ -155,8 +156,8 @@ class Robot:
 
             if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
 
-                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
                 derivative = self.distanceDerivative(x, y, data_id)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
@@ -189,10 +190,11 @@ class Robot:
 
         variance = 10.0
         #for the robots
-        for data_id in self.network.rcv_data:
+        data_ids = self.network.getDataIds()
+        for data_id in data_ids:
             #if(data_id == self.id):
             #    continue
-            real_distance    = self.getDistance(self.position['position'], self.network.rcv_data[data_id]['position'])*self.map_resolution
+            real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
             simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
 
@@ -206,8 +208,8 @@ class Robot:
             #print(m)
             if(real_distance > 1.0):
                 #caculate the variance
-                x = abs(self.position['position'][0] - self.network.rcv_data[data_id]['position'][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.network.rcv_data[data_id]['position'][1])*self.map_resolution
+                x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
+                y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
                 derivative = self.distanceDerivative(x, y, data_id)
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
@@ -240,14 +242,15 @@ class Robot:
 
     def createRoutingGraph(self):
         graph = {}
-        for id in self.network.rcv_data:
+        data_ids = self.network.getDataIds()
+        for id in data_ids:
             graph[id] = set([])
 
         graph[self.id] = set([])
 
-        for id in self.network.rcv_data:
-            graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
-            for neigbor in self.network.rcv_data[id]['routing']:
+        for id in data_ids:
+            graph[id] = graph[id].union(set(self.network.getData(id)['routing']))
+            for neigbor in self.network.getData(id)['routing']:
                 graph[neigbor] = graph[neigbor].union(set([id]))
 
         if(with_my_self):
@@ -257,7 +260,7 @@ class Robot:
                 graph[neigbor] = graph[neigbor].union(set([self.id]))
 
 
-        for id in self.network.rcv_data:
+        for id in data_ids:
             graph[id] = list(graph[id])
         return graph
 
@@ -367,18 +370,18 @@ class Robot:
         robot_ids = []
         robot_positions.append(self.position['position'])
         robot_ids.append(self.id)
-
-        for data_id in self.network.rcv_data:
+        data_ids = self.network.getDataIds()
+        for data_id in data_ids:
             if(data_id != self.id and allocation == []):
-                position = self.network.rcv_data[data_id]['position']
+                position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
                 robot_ids.append(data_id)
             elif(data_id != self.id and data_id in allocation and not inverse):
-                position = self.network.rcv_data[data_id]['position']
+                position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
                 robot_ids.append(data_id)
             elif(data_id != self.id and inverse): #data_id not in allocation
-                position = self.network.rcv_data[data_id]['position']
+                position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
                 robot_ids.append(data_id)
 
@@ -941,7 +944,7 @@ class Robot:
             position = self.tree.graph_vertex_position[id]
             return position
         else:
-            return self.network.rcv_data[id]['position']
+            return self.network.getData(id)['position']
 
 
     def verifyMetricOnNeighbors(self, neighbors_ids):
