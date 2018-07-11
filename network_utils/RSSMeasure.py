@@ -21,7 +21,7 @@ class RSSMeasure:
     #  
     #
     self.MAX            = max_value
-    self.alpha          = 0.3
+    self.alpha          = 0.7
     self.essid          = essid
     self.thread         = threading.Thread(target=self.tcpdump)
     self.thread.start()
@@ -63,9 +63,9 @@ if __name__ == "__main__":
   rssmeasure = RSSMeasure('teste4',home + '/NetworkedRobotsProject/configs/data.yaml')
   
   while True:
-    for id in range(5):
+    for id in range(8):
       print(id, rssmeasure.getMeasurement(id))
-    time.sleep(1)
+    time.sleep(0.1)
 
 #m = RSSMeasure('teste4','data.yaml')
 

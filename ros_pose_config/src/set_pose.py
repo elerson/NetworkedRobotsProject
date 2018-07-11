@@ -2,14 +2,16 @@
 
 import rospy
 from network_utils.network import Network
-from network_utils.network import Routing
+from network_utils.Routing import Routing
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Quaternion 
 from enum import IntEnum
 import numpy as np
 import tf
+import os
 
+import yaml
 class COMMANDS(IntEnum):    
     SETINITALPOSE         = 0
 
@@ -26,6 +28,7 @@ class Robot:
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getPose)
         self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data.yaml')
         self.id = self.routing.getID()
+        print(self.id)
 
 
 

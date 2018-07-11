@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-#!/usr/bin/python
 import rospy
 from network_utils.tree import Tree
 from scipy.optimize import linear_sum_assignment
@@ -81,7 +80,10 @@ class Robot:
         self.xoffset         = rospy.get_param("~xoffset", 0)
         self.yoffset         = rospy.get_param("~yoffset", 0)
         self.clients_pos     = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
-        self.graph           = sceneGraph(self.config_file['configs'], self.radius, self.clients_pos, (self.xoffset, self.yoffset))
+
+        
+        graph_radius         = self.radius*(2.0/3.0)
+        self.graph           = sceneGraph(self.config_file['configs'], graph_radius, self.clients_pos, (self.xoffset, self.yoffset))
         self.height          =  self.graph.heigh
 
         #get the terminal nodes in the graph
@@ -119,6 +121,8 @@ class Robot:
 
         self.last_send_deplyment   = 0
         self.send_deployment_time  = 2.5
+        self.deploy_ended    = False
+        self.deploy_numbers  = 0
 
 
         self.candAnchor      = set([])
@@ -170,6 +174,7 @@ class Robot:
         self.measuments          = {}
         self.n_measurements      = {}
         self.gamma               = 3
+
 
 
         while(not self.initialized):
@@ -243,6 +248,7 @@ class Robot:
             print('steiner ', deployment_positions, self.terminals, self.links_graph, self.steiner.steiner)
             self.deployment_assignment, self.node_robot_assignment = self.getMinAssigment(self.robot_position_ids.keys(), deployment_positions)
             print(self.deployment_assignment, self.node_robot_assignment)
+            self.deploy_numbers = len(deployment_positions)
 
             self.robot_neighbors = {}
             for robot in self.deployment_assignment:
@@ -278,6 +284,8 @@ class Robot:
                     self.network.sendMessageTo(message['id'], new_message)
 
                 self.allow_go_next_node = last_node_id == self.getCurrentNode()
+            if self.deployVisit == []:
+                self.deploy_ended = True
             #print()
             #exit()
 
@@ -754,7 +762,9 @@ class Robot:
             message['type']      = int(MSG.INFO)
             message['id']        = self.id
             message['position']  = self.position['position']
-            message['routing']  = self.comm_route 
+            message['routing']   = self.comm_route 
+            message['ended']     = self.deploy_ended
+            message['deploy_n']  = self.deploy_numbers
             self.network.sendMessage(message)
             self.send_position_time = rospy.get_time()        
 

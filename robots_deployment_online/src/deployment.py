@@ -128,7 +128,7 @@ class Robot:
         self.routing.createRoute(graph)
 
         
-    def receiveNetworkCommand(self):
+    def receiveNetworkCommand(self, commnad):
         print(self.network.rcv_command)
 
     def createRoutingTable():

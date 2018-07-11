@@ -110,7 +110,7 @@ class Network:
             else:
                 self.rcv_command[id] = rcv_data
                 if self.command_callback != None:
-                    self.command_callback()
+                    self.command_callback(rcv_data)
 
     def getDataIds(self):
         self.lock.acquire()
