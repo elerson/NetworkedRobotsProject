@@ -83,6 +83,8 @@ class Robot:
         self.position['started'] = 0
         self.position['diff']    = -1
         self.position['s_size']  = 10000
+        self.position['radius']  = 0.1
+
         self.solution_size       = 10000
         
         self.metric_measurements = {}
@@ -143,7 +145,7 @@ class Robot:
 
     def realMetric(self, param):
 
-        variance = 10.0
+        variance = 2.0
         #for the robots
         data_ids = self.network.getDataIds()
         for data_id in data_ids:
@@ -190,7 +192,7 @@ class Robot:
 
     def simulationMetric(self, param):
 
-        variance = 10.0
+        variance = 2.0
         #for the robots
         data_ids = self.network.getDataIds()
         for data_id in data_ids:
@@ -1029,6 +1031,7 @@ class Robot:
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
         self.position['s_size']  = self.solution_size
+        self.position['radius']  = self.radius*self.map_resolution
 
 
 
@@ -1083,6 +1086,7 @@ class Robot:
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
         self.position['s_size']  = self.solution_size
+        self.position['radius']  = self.radius*self.map_resolution
 
         #print('control')
 
