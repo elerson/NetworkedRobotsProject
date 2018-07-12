@@ -319,7 +319,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
             if 'diff' in self.network.rcv_data[id]:
                 #print(abs(self.network.rcv_data[id]['diff']))
                 print(abs(self.network.rcv_data[id]['diff']))
-                if abs(self.network.rcv_data[id]['diff']) > 1.4:
+                if abs(self.network.rcv_data[id]['diff']) > 3.0:
                     connected = False
                 else:
                     if(self.network.rcv_data[id]['routing'] != []):
