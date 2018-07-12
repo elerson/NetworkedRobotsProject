@@ -82,6 +82,8 @@ class Robot:
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['started'] = 0
         self.position['diff']    = 10000
+        self.position['s_size']  = 10000
+        self.solution_size       = 10000
         
         self.metric_measurements = {}
 
@@ -432,6 +434,7 @@ class Robot:
             allocation_sum.append(sum_robots)
             i = i+1
 
+        self.solution_size = sum_robots
         allocation = {}
         for j in range(len(segmentation)):
             allocation[j] = []
@@ -1025,6 +1028,8 @@ class Robot:
         self.vel_pub.publish(cmd_vel)
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
+        self.position['s_size']  = self.solution_size
+
 
 
     def control_nonholonomic(self):
@@ -1077,6 +1082,8 @@ class Robot:
         self.vel_pub.publish(cmd_vel)
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
+        self.position['s_size']  = self.solution_size
+
         #print('control')
 
 

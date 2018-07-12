@@ -313,7 +313,8 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         connected = True
         ended     = False
         num_connected = 0
-        for id in self.network.rcv_data:
+        ids = self.network.getDataIds()
+        for id in ids:
 
             if 'diff' in self.network.rcv_data[id]:
                 #print(abs(self.network.rcv_data[id]['diff']))
@@ -332,6 +333,9 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
                     connected = False 
 
                 ended = ended or self.network.rcv_data[id]['ended']
+
+        if 'diff' in self.network.rcv_data[ids[0]]:
+            connected = connected and (num_connected >= self.network.rcv_data[ids[0]]['s_size'])
 
         connected = connected and ended
         return connected, num_connected
