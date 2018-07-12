@@ -30,7 +30,7 @@ class RSSIKalmanFilterRecursive:
 			return
 
 		y = measurement
-		t = -10.0*math.log(distance/self.d0)
+		t = -10.0*math.log10(distance/self.d0)
 		self.mutex.acquire()
 		
 		self.Y = np.append(self.Y, [y], axis=0)
@@ -57,7 +57,7 @@ class RSSIKalmanFilterRecursive:
 			return self.m[0]
 
 		m, P = self.getResult()
-		t = -10.0*math.log(distance/self.d0)
+		t = -10.0*math.log10(distance/self.d0)
 
 		#print(m)
 		self.gamma = m
@@ -107,7 +107,7 @@ class RSSIKalmanFilter:
 			return
 
 		y = measurement
-		t = -10.0*math.log(distance/self.d0)
+		t = -10.0*math.log10(distance/self.d0)
 		self.mutex.acquire()
 		
 		self.Y = np.array([y])
@@ -145,7 +145,7 @@ class RSSIKalmanFilter:
 			return self.m[0][0,0]
 
 		m, P = self.getResult()
-		t = -10.0*math.log(distance/self.d0)
+		t = -10.0*math.log10(distance/self.d0)
 
 		
 		self.gamma = m

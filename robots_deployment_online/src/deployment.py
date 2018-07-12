@@ -83,7 +83,7 @@ class Robot:
         self.position['started'] = 0
         self.position['diff']    = -1
         self.position['s_size']  = 10000
-        self.position['radius']  = 0.1
+        self.position['radius']  = 1
 
         self.solution_size       = 10000
         
@@ -141,7 +141,7 @@ class Robot:
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
             return -40
-        return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
+        return -40 -10*self.gamma*math.log10(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
     def realMetric(self, param):
 

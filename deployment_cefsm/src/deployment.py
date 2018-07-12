@@ -220,7 +220,7 @@ class Robot:
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
             return -40
-        return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
+        return -40 -10*self.gamma*math.log10(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
 
     def realMetric(self, param):

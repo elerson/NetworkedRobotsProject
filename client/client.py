@@ -321,8 +321,9 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
                 print(abs(self.network.rcv_data[id]['diff']))
                 distance = self.network.rcv_data[id]['radius']
                 gamma = 4.0
+                print('distance ', self.network.rcv_data[id]['radius'])
                 radius = 10*gamma*math.log(distance+0.1)-10*gamma*math.log(distance-0.1)
-                
+
                 if abs(self.network.rcv_data[id]['diff']) > radius:
                     connected = False
                 else:

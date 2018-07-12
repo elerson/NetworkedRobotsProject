@@ -72,7 +72,7 @@ class Create():
   def logNormalMetric(self, distance, variance):
     if(distance < 1):
       return -40
-    return -40 -10*self.gamma*math.log(distance)
+    return -40 -10*self.gamma*math.log10(distance)
 
 
   def create(self, numfiles, radius):
