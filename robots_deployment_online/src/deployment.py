@@ -81,7 +81,7 @@ class Robot:
         self.position['id']      = self.id
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['started'] = 0
-        self.position['diff']    = 10000
+        self.position['diff']    = -1
         self.position['s_size']  = 10000
         self.solution_size       = 10000
         
