@@ -41,7 +41,7 @@ class RSSMeasure:
         mac_addr = str_data.split('Broadcast ')[1].split(' ')[0] #str_data.split(' ')[14]
         #
         if('dBm' in signal and 'SA:' in mac_addr):
-          self.addRSS(mac_addr[3:], signal[0:3])
+          self.addRSS(mac_addr[3:], signal[:-3])
     #
   def addRSS(self, mac_addr, signal):
     if(mac_addr in self.signal_dict):
