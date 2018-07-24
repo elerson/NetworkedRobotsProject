@@ -24,6 +24,7 @@ class COMMANDS(IntEnum):
     SETINITALPOSE         = 0
     STARTDEPLOYMENT       = 1
     EXECCOMMAND           = 2
+    SETGOAL               = 3
 
 class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def __init__(self):
@@ -39,6 +40,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.pushButton_setInitialPos.clicked.connect(self.setInitialPos)
         self.pushButton_execCommand.clicked.connect(self.executeCommand)
         self.pushButton_startDeployment.clicked.connect(self.startDeployment)
+        self.pushButton_setGoal.clicked.connect(self.setGoal)
 
         home = os.path.expanduser("~")
         self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
@@ -79,12 +81,36 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.commnand_id        += 1
 
 
-        command['robot_id']     =  str(self.lineEdit_id.text())
-        command['initial_pose'] =  (initial_position.x(), initial_position.y())
+        command['robot_id']     =  int(str(self.lineEdit_id.text()))
+        print((initial_position.x(), initial_position.y()))
+        command['initial_pose'] =  (initial_position.x()*self.config_data['resolution'], (self.image.height() - initial_position.y())*self.config_data['resolution'])
         command['direction']    =  angle
 
         print(command)
         self.network.sendMessage(command)
+
+
+    def setGoal(self):
+        initial_position        = self.widget_image.initial_pose
+        end_position            = self.widget_image.end_pose
+
+        angle                   = math.atan2(-(end_position.y() - initial_position.y()),  end_position.x() - initial_position.x())
+        
+        command                 =  {}
+        command['id']           =  -1
+        command['command']      =  COMMANDS.SETGOAL
+        command['command_id']   =  self.commnand_id
+        self.commnand_id        += 1
+
+
+        command['robot_id']     =  int(str(self.lineEdit_id.text()))
+        print((initial_position.x(), initial_position.y()))
+        command['goal'] =  (initial_position.x()*self.config_data['resolution'], (self.image.height() - initial_position.y())*self.config_data['resolution'])
+        command['direction']    =  angle
+
+        print(command)
+        self.network.sendMessage(command)
+
 
     def executeCommand(self):
         
@@ -94,7 +120,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         command['command_id']   =  self.commnand_id
         self.commnand_id        += 1
 
-        command['robot_id']     =  str(self.lineEdit_id.text())
+        command['robot_id']     =  int(str(self.lineEdit_id.text()))
         command['execute']      =  str(self.lineEdit_command.text())
 
         print(command)
@@ -114,11 +140,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def loadImage(self):
         return QtGui.QImage(self.config_data['map'])
 
-    def close(self):
-        sub.Popen(('kill', '-9', str(os.getpid())))
 
-    def closeEvent(self, event):
-        sub.Popen(('kill', '-9', str(os.getpid())))
 
 def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)

@@ -34,10 +34,11 @@ class RSSMeasure:
     p = sub.Popen(('sudo', 'tcpdump', '-tt', '-U', '-e', '-i', 'moni0'), stdout=sub.PIPE)
     for row in iter(p.stdout.readline, b''):
       str_data = row.rstrip()
-      if(self.essid in str_data):
-        time     = str_data.split(' ')[0]
-        signal   = str_data.split(' ')[6]
-        mac_addr = str_data.split(' ')[14]
+      if(self.essid in str_data and 'Broadcast ' in str_data and ' signal' in str_data):
+        #time     = str_data.split(' ')[0]
+        signal   = str_data.split(' signal')[0].split(' ')[-1] #str_data.split(' ')[6]
+
+        mac_addr = str_data.split('Broadcast ')[1].split(' ')[0] #str_data.split(' ')[14]
         #
         if('dBm' in signal and 'SA:' in mac_addr):
           self.addRSS(mac_addr[3:], signal[0:3])

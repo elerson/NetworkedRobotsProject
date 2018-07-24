@@ -139,8 +139,8 @@ class Robot:
         self.gamma               = 3
         self.status              = -1 
         
-        if(self.real_robot):
-            self.updateRouting()
+        #if(self.real_robot):
+        #    self.updateRouting()
 
     def started(self):
         if not self.real_robot:

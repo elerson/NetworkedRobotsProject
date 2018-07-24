@@ -14,6 +14,9 @@ import os
 import yaml
 class COMMANDS(IntEnum):    
     SETINITALPOSE         = 0
+    STARTDEPLOYMENT       = 1
+    EXECCOMMAND           = 2
+    SETGOAL               = 3
 
 
 class Robot:
@@ -25,7 +28,8 @@ class Robot:
         self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
         self.network.addCommandCallback(self.receiveCommand)
         self.setpose_pub          = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=10)
-        rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getPose)
+        self.setgoal_pub          = rospy.Publisher("move_base_simple/goal", PoseStamped, queue_size=10)
+        rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getGoal)
         self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data.yaml')
         self.id = self.routing.getID()
         print(self.id)
@@ -37,14 +41,15 @@ class Robot:
         with open(config_file, 'r') as stream:
             return yaml.load(stream)['configs']
 
-    def getPose(self, msg):
+    def getGoal(self, msg):
         print(msg)
         pass
 
     def receiveCommand(self, command):
 
-        if (command['command_id'] == COMMANDS.SETINITALPOSE):
-            if (command['robot_id'] != self.id):
+        print(command['command'] == COMMANDS.SETINITALPOSE, command['robot_id'] == self.id, self.id, command['command'], command['robot_id'])
+        if (command['command'] == COMMANDS.SETINITALPOSE):
+            if (command['robot_id'] == self.id):
                 initial_pose = command['initial_pose']
                 angle        = command['direction']
 
@@ -56,13 +61,36 @@ class Robot:
 
                 q = tf.transformations.quaternion_from_euler(0, 0, angle)
                 pose.pose.pose.orientation = Quaternion(*q)
+                cov_ = np.array([0.0]*36)
+                cov_[0]  = 0.25
+                cov_[7]  = 0.25
+                cov_[35] = 0.068
+                print(cov_)
+                p_cov = cov_.reshape(6,6)
 
-                p_cov = np.array([0.0]*36).reshape(6,6)
                 pose.pose.covariance = tuple(p_cov.ravel().tolist())
 
                 self.setpose_pub.publish(pose)
 
-        print(command)
+                print(command)
+                if (command['command'] == COMMANDS.SETINITALPOSE):
+        
+        if (command['command'] == COMMANDS.SETGOAL):
+            if (command['robot_id'] == self.id):
+                goal = command['goal']
+                angle = command['direction']
+
+                pose = PoseStamped()
+                pose.header.frame_id = "/odom"
+                pose.pose.position.x = goal[0]
+                pose.pose.position.y = goal[1]
+
+
+                q = tf.transformations.quaternion_from_euler(0, 0, angle)
+                pose.pose.orientation = Quaternion(*q)
+                self.setgoal_pub.publish(pose)
+
+                print(command)
         return
 
 

@@ -62,6 +62,9 @@ class Ui_MainWindow(object):
         self.pushButton_setInitialPos.setSizePolicy(sizePolicy)
         self.pushButton_setInitialPos.setObjectName(_fromUtf8("pushButton_setInitialPos"))
         self.verticalLayout.addWidget(self.pushButton_setInitialPos)
+        self.pushButton_setGoal = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_setGoal.setObjectName(_fromUtf8("pushButton_setGoal"))
+        self.verticalLayout.addWidget(self.pushButton_setGoal)
         self.lineEdit_command = QtGui.QLineEdit(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -115,7 +118,18 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "ClientUI", None))
         self.lineEdit_id.setText(_translate("MainWindow", "0", None))
         self.pushButton_setInitialPos.setText(_translate("MainWindow", "Set Initial Pos", None))
+        self.pushButton_setGoal.setText(_translate("MainWindow", "Set Goal", None))
         self.pushButton_execCommand.setText(_translate("MainWindow", "Exec Command ", None))
         self.pushButton_startDeployment.setText(_translate("MainWindow", "Start Deployment", None))
 
 from image import Image
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    MainWindow = QtGui.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+

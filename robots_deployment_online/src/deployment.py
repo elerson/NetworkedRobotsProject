@@ -115,8 +115,8 @@ class Robot:
         self.metric_kalman       = {}
         self.gamma               = 4
 
-        if(self.real_robot):
-            self.updateRouting()
+        #if(self.real_robot):
+        #    self.updateRouting()
 
     def getClientsIDs(self):
 
@@ -162,7 +162,7 @@ class Robot:
 
                 x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
                 y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
-                derivative = self.distanceDerivative(x, y, data_id)
+
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
                 self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
@@ -182,7 +182,7 @@ class Robot:
                 #caculate the variance
                 x = abs(self.position['position'][0] - self.tree.graph_vertex_position[vertex][0])*self.map_resolution
                 y = abs(self.position['position'][1] - self.tree.graph_vertex_position[vertex][1])*self.map_resolution
-                derivative = self.distanceDerivative(x, y, vertex)
+
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
                 self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
@@ -214,7 +214,7 @@ class Robot:
                 #caculate the variance
                 x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
                 y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
-                derivative = self.distanceDerivative(x, y, data_id)
+
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
                 self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
@@ -236,7 +236,7 @@ class Robot:
                 #caculate the variance
                 x = abs(self.position['position'][0] - self.tree.graph_vertex_position[vertex][0])*self.map_resolution
                 y = abs(self.position['position'][1] - self.tree.graph_vertex_position[vertex][1])*self.map_resolution
-                derivative = self.distanceDerivative(x, y, vertex)
+
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
                 self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
@@ -413,9 +413,6 @@ class Robot:
             #print(x, y)
             self.splines[i] = BSpline(x,y, 10.0)
             i += 1
-
-
-
 
         return segmentation, self.splines
 
@@ -866,14 +863,6 @@ class Robot:
 
         return [neigh_0, neigh_1] 
 
-    def limitVector(self, vec, maxsize):
-
-        size = math.sqrt(vec[0]**2 + vec[1]**2)
-
-        if(size > maxsize):
-            return (maxsize*vec[0]/size, maxsize*vec[1]/size)
-        else:
-            return vec
 
     def highLevelControl(self):
 
@@ -914,31 +903,12 @@ class Robot:
        
         self.position['started'] = 1
 
-
-    def distanceDerivative(self, x, y, id):
-        gamma = self.metric_kalman[id].getGamma()
-        #print((x,y), (10*gamma*x/((x**2 + y**2)), 10*gamma*y/((x**2 + y**2))))
-
-        return (x, y)
-        
-        #print('gamma', id, gamma)
-        #return(x/(math.sqrt(x**2 + y**2)+0.01), y/(math.sqrt(x**2 + y**2)+0.01))
-        return(10*gamma*x/((x**2 + y**2)), 10*gamma*y/((x**2 + y**2)))
-        #return(5*self.gamma*x/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)), 5*self.gamma*y/(((x**2 + y**2))*self.logNormalMetric((x**2 + y**2)**(1.0/2),0)))
-
-
     def getDistanceByID(self, id):
-        #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
-        #print(self.metric_measurements)
         r = self.position['position']
         p = self.getPositionByID(id)
 
         distance = self.getDistance(r, p)*self.map_resolution
-        #print('robot', r)
 
-        # return self.logNormalMetric(dist, 0)
-        #return self.metric_measurements[id][4]
-        #print(self.metric_kalman[id].m)
         return self.metric_kalman[id].getMetricValue(distance)
 
 
@@ -954,31 +924,6 @@ class Robot:
 
     def verifyMetricOnNeighbors(self, neighbors_ids):
         return (neighbors_ids[0] in self.metric_kalman) and (neighbors_ids[1] in self.metric_kalman)      
-
-
-    def TreeOptimalDirection(self, p1, p2, path_direction):
-        x = p2[0] - p1[0]
-        y = p2[1] - p1[1]
-
-        d1_angle = math.atan2(y,x) + math.pi/2.0
-        d1_p = (-2.0*math.cos(d1_angle), (2.0*math.sin(d1_angle)))
-
-        d2_angle = math.atan2(y,x) - math.pi/2.0
-        d2_p = (-2.0*math.cos(d2_angle), (2.0*math.sin(d2_angle)))
-
-
-        p_angle = math.atan2(path_direction[1], path_direction[0])
-
-        diff = math.atan2(math.sin(d2_angle-p_angle), math.cos(d2_angle-p_angle))
-        #print(d1_angle*180/math.pi, d2_angle*180/math.pi, math.atan2(path_direction[1], path_direction[0])*180/math.pi)
-
-        print(diff , math.pi)
-        if(diff > 0):
-            print('opt1')
-            return d1_p
-
-        else:
-            return d2_p
 
 
     def control_holonomic(self):
@@ -1029,6 +974,7 @@ class Robot:
 
         self.vel_pub.publish(cmd_vel)
 
+        ##info
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
         self.position['s_size']  = self.solution_size
         self.position['radius']  = self.radius*self.map_resolution
@@ -1091,100 +1037,11 @@ class Robot:
         #print('control')
 
 
-    def segmentInsideSgment(self, segment1, segment2):
-        return segment1[0] in segment2 and segment1[1] in segment2
-
-
-    def getClosestNodeFromPoint(self, nodeSet, point):
-
-        distance = float('inf')
-        out_node = []
-        for node in nodeSet:
-            new_distance = self.getDistance(point, self.tree.graph_vertex_position[node])
-            if(new_distance < distance):
-                distance = new_distance
-                out_node = node
-        return out_node
-
-
-    def control(self):
-        r = self.position['position']
-        #r = (math.ceil(r[0]), math.ceil(r[1]))
-        #closest_point, closest_point_segment, closest_point_seg_allocation, allocated_segment
-        closest_point, closest_segment, closest_point_seg_allocation, allocated_segment = self.getClosetPointToTree()
-
-            
-        
-        #
-        #
-        #       Gradient to the neighbors
-        #
-        #
-
-        neighbors_positions = self.getNeighbors()
-        neighbor_1_distance = self.getDistance(r, neighbors_positions[0])*self.map_resolution + 0.001
-        neighbor_2_distance = self.getDistance(r, neighbors_positions[1])*self.map_resolution + 0.001
-
-        #print(neighbor_1_distance, neighbor_2_distance)
-        derivative_neighbor_1_distance = (-((r[0]-neighbors_positions[0][0])*self.map_resolution)/(neighbor_1_distance), (-(r[1]-neighbors_positions[0][1])*self.map_resolution)/(neighbor_1_distance))
-        derivative_neighbor_2_distance = (-((r[0]-neighbors_positions[1][0])*self.map_resolution)/(neighbor_2_distance), (-(r[1]-neighbors_positions[1][1])*self.map_resolution)/(neighbor_2_distance))
-
-
-        d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
-        df = (2*(neighbor_1_distance - neighbor_2_distance)*d1[0], 2*(neighbor_1_distance - neighbor_2_distance)*d1[0])
-
-        #first derivative
-        #d1 = (derivative_neighbor_1_distance[0]-derivative_neighbor_2_distance[0], derivative_neighbor_1_distance[1]-derivative_neighbor_2_distance[1])
-        #d1_f = (d1[0]*(neighbor_1_distance - neighbor_2_distance)/4, -d1[1]*(neighbor_1_distance - neighbor_2_distance)/4)
-
-
-        #second derivative
-        #d2 = (derivative_neighbor_2_distance[0]-derivative_neighbor_1_distance[0], derivative_neighbor_2_distance[1]-derivative_neighbor_1_distance[1])
-        #d2_f = (d2[0]*(neighbor_2_distance - neighbor_1_distance)/4, -d2[1]*(neighbor_2_distance - neighbor_1_distance)/4)
-
-        
-        #
-        #       Gradient to the tree
-        #
-        #
-        closest_point_path = closest_point
-        tree_distance = self.getDistance(r, closest_point_path)*self.map_resolution
-        # #print("closest ", r, closest_point_path)
-        tree_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
-
-        #segment direction
-        #distance_to_segment = min(distance_to_segment, 30)
-        #direction_to_segment = (direction_to_segment[0]*self.map_resolution, -direction_to_segment[1]*self.map_resolution)
-
-
-
-        #final_direction = (10*tree_direction[0] + direction_to_segment[0], 10*tree_direction[1] + direction_to_segment[1])
-        #final_direction = ( direction_to_segment[0],  direction_to_segment[1])
-        
-        #alpha = (self.getDistance((0,0), direction_to_segment)+0.01)/self.getDistance((0,0), tree_direction) + 3
-        #print("direction=", direction_to_segment, tree_direction, alpha)
-        alpha = 15
-
-        final_direction = (alpha*tree_direction[0] + df[0] , alpha*tree_direction[1] + df[1])
-        
-        #print("ROBOT AS OBSTACLES", robot_as_obstacles)
-        #final_direction =  robot_as_obstacles
-
-
-        cmd_vel = Twist()
-        #if(abs(robot_direction[0]) > 0.1):
-        cmd_vel.linear.x = final_direction[0]
-        #if(abs(robot_direction[1]) > 0.1):
-        cmd_vel.linear.y = final_direction[1]
-
-
-        self.vel_pub.publish(cmd_vel)
 
         
 if __name__ == "__main__":
     robot = Robot()
-    #robot.getTreeAllocationPerSegment()
-    #time.sleep(10 + robot.allocation_position*5)
+
     rate = rospy.Rate(25.0)
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
