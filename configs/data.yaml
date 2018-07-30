@@ -14,7 +14,7 @@ robots:
   3:
     id: 3
     ip: 192.168.0.3
-    macaddress: 1c:4b:d6:85:bc:20
+    macaddress: ec:08:6b:0d:68:ef
     cable_ip: 150.164.212.46
   4:
     id: 4
