@@ -500,7 +500,7 @@ static void exit_handler(void)
 	if (!conf.quiet && !conf.debug)
 		finish_display();
 
-	//msgctl(qid, IPC_RMID, NULL);
+	msgctl(qid, IPC_RMID, NULL);
 	ifctrl_finish();
 }
 
@@ -509,7 +509,7 @@ static void sigint_handler(__attribute__((unused)) int sig)
 	/* Only set an atomic flag here to keep processing in the interrupt
 	 * context as minimal as possible (at least all unsafe functions are
 	 * prohibited, see signal(7)). The flag is handled in the mainloop. */
-        //msgctl(qid, IPC_RMID, NULL);
+        msgctl(qid, IPC_RMID, NULL);
 	is_sigint_caught = 1;
 }
 
