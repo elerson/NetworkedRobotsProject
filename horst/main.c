@@ -346,6 +346,7 @@ void handle_packet(struct uwifi_packet* p)
 				p->wlan_qos_class,
 				p->wlan_retries);
 	}
+#ifdef QUEUE_COMM
 	//send message through queue
         struct vmsgbuf vmbuf;       
         memset(&vmbuf, 0, sizeof(vmbuf));
@@ -354,9 +355,9 @@ void handle_packet(struct uwifi_packet* p)
         memcpy(vmbuf.wlan_src, p->wlan_src, WLAN_MAC_LEN);
 	//vmbuf.ip_src = p->ip_src;
         //vmbuf.ip_dst = p->ip_src;
-     
+     	
         msgsnd(qid, (struct msgbuf *)&vmbuf, sizeof(unsigned char)*WLAN_MAC_LEN + sizeof(int), 0);
-   
+#endif   
 	
 	update_history(p);
 	update_statistics(p);
@@ -622,10 +623,10 @@ int main(int argc, char** argv)
 	clock_gettime(CLOCK_REALTIME, &time_real);
 
 	conf.intf.channel_idx = -1;
-
+#ifdef QUEUE_COMM
 	qid = msgget(1241, IPC_CREAT | 0777);
     	assert(qid != -1);
-
+#endif
 	if (conf.mac_name_lookup)
 		mac_name_file_read(conf.mac_name_file);
 
