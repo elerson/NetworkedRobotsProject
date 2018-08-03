@@ -21,7 +21,7 @@ from move_base_msgs.msg import MoveBaseActionGoal
 from util import dist_to_segment_alpha, dist_to_segment
 from network_utils.rssi_kalman import RSSIKalmanFilter
 from network_utils.Routing import Routing
-from network_utils.RSSMeasure import RSSMeasure
+from network_utils.rssmearure_v2 import RSSMeasure
 
 import time
 import tf
@@ -95,17 +95,18 @@ class Robot:
         self.status              = -1
         self.allocation_position = -1
         self.started_control     = False
+        self.max_linear_vel      = 0.4
 
         self.ros_id              = self.id - self.robots_ids_start
         prefix                   = "/robot_"+str(self.ros_id)
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
-        self.vel_pub             = rospy.Publisher(prefix+"/cmd_vel", Twist, queue_size=10)
+        self.vel_pub             = rospy.Publisher(prefix + "/cmd_vel", Twist, queue_size=10)
 
         self.cancel_pub          = rospy.Publisher(prefix + "/move_base/cancel", GoalID, queue_size=10)
         self.current_goal_id     = 0
-        self.goal_pub            = rospy.Publisher(prefix+"/move_base/goal", MoveBaseActionGoal, queue_size=10)
+        self.goal_pub            = rospy.Publisher(prefix + "/move_base/goal", MoveBaseActionGoal, queue_size=10)
 
-        rospy.Subscriber(prefix+"/move_base/status", GoalStatusArray, self.getStatus)
+        rospy.Subscriber(prefix + "/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
         rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
@@ -142,6 +143,28 @@ class Robot:
         if(distance < 1):
             return -40
         return -40 -10*self.gamma*math.log10(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
+
+    def realMetricCallback(self, data_id, rss):
+
+        m_var = 4.0
+        if( data_id not in self.metric_kalman):
+            self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3.5], 10.0, m_var, self.log_rss)
+
+        real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
+        real_metric    = rss
+
+
+        x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
+        y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
+        gamma = self.metric_kalman[data_id].getGamma()
+
+        d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
+        measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
+
+        self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+        self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
+
+
 
     def realMetric(self, param):
 
@@ -979,7 +1002,8 @@ class Robot:
         self.position['s_size']  = self.solution_size
         self.position['radius']  = self.radius*self.map_resolution
 
-
+    def truncateLinearVelocity(self, velocity):
+        return velocity if abs(velocity) < self.max_linear_vel else (velocity/abs(velocity))*self.max_linear_vel
 
     def control_nonholonomic(self):
         r = self.position['position']
@@ -1022,7 +1046,7 @@ class Robot:
         linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
     
         cmd_vel = Twist()
-        cmd_vel.linear.x = linear#final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
+        cmd_vel.linear.x = self.truncateLinearVelocity(linear)#final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
         cmd_vel.linear.y = 0#final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
         
         cmd_vel.angular.z = theta
