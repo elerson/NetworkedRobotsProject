@@ -1,0 +1,38 @@
+<launch>
+
+  <node pkg="tf" type="static_transform_publisher" name="static_publisher" args="0 0 0 0 0 0 base_footprint gyro_link 50"/>
+  <node pkg="tf" type="static_transform_publisher" name="static_publisher2" args="0.115 0 0 0 0 0 base_footprint base_laser 50"/> 
+
+  <node name="create" pkg="create_node" type="turtlebot_node.py" output="screen"> 
+  </node>
+
+
+  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+    <param name="output_frame" value="odom"/>
+    <param name="freq" value="30.0"/>
+    <param name="sensor_timeout" value="1.0"/>
+    <param name="odom_used" value="true"/>
+    <param name="imu_used" value="true"/>
+    <param name="vo_used" value="false"/>
+    <param name="debug" value="false"/>
+    <param name="self_diagnose" value="false"/>
+  </node>
+
+
+
+  <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+    <param name="ip_address" value=""/>
+    <param name="serial_port" value="/dev/ttyACM0"/>
+    <param name="serial_baud" value="115200"/>
+  </node>
+
+  <node name="pose_config" pkg="ros_pose_config" type="set_pose.py">
+  </node>
+
+
+
+
+
+
+</launch>
+

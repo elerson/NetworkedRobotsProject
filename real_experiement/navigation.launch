@@ -1,0 +1,43 @@
+<launch>
+  <master auto="start"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find navigation_roomba)/map.yaml"/>
+
+  <!-- Run AMCL -->
+  <include file="$(find navigation_roomba)/amcl_diff.launch" />
+
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find navigation_roomba)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find navigation_roomba)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find navigation_roomba)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigation_roomba)/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigation_roomba)/base_local_planner_params.yaml" command="load" />
+
+    <param name="~/global_costmap/robot_base_frame" value="base_footprint" />
+    <param name="~/local_costmap/robot_base_frame" value="base_footprint" />
+    <param name="~/local_costmap/global_frame" value="/map" />  
+   </node> 
+
+   <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base_robot" output="screen">
+    <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
+   
+    <rosparam file="$(find navigation_roomba)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find navigation_roomba)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find navigation_roomba)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigation_roomba)/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigation_roomba)/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find network_deployment_planner)/launch/networkplanner.yaml" command="load" />
+    <param name="planner_file_dir" value="$(find network_deployment_planner)/experiment/exp1/"/>
+
+    <param name="planner_file_dir" value="$(find network_deployment_planner)/experiment/exp1/"/>
+    <param name="planner_file_1" value="steinerData1.dat"/>
+    <param name="planner_file_2" value="steinerData2.dat"/>
+   
+    <param name="~/global_costmap/robot_base_frame" value="base_footprint" />
+    <param name="~/local_costmap/robot_base_frame" value="base_footprint" />
+    <param name="~/local_costmap/global_frame" value="/map" />  
+
+    </node> -->
+
+</launch>
