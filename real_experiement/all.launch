@@ -1,4 +1,4 @@
 <launch>
-<include file="~/NetworkedRobotsProject/real_experiement/minimal_create.launch" />
-<include file="~/NetworkedRobotsProject/real_experiement/navigation.launch" />
+<include file="minimal_create.launch" />
+<include file="navigation.launch" />
 </launch>
