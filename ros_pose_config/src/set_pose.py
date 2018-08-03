@@ -73,7 +73,7 @@ class Robot:
                 self.setpose_pub.publish(pose)
 
                 print(command)
-                if (command['command'] == COMMANDS.SETINITALPOSE):
+
         
         if (command['command'] == COMMANDS.SETGOAL):
             if (command['robot_id'] == self.id):
