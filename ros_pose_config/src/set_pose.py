@@ -54,7 +54,7 @@ class Robot:
                 angle        = command['direction']
 
                 pose = PoseWithCovarianceStamped()
-                pose.header.frame_id = "/odom"
+                pose.header.frame_id = "map"
                 pose.pose.pose.position.x = initial_pose[0]
                 pose.pose.pose.position.y = initial_pose[1]
 
@@ -81,7 +81,7 @@ class Robot:
                 angle = command['direction']
 
                 pose = PoseStamped()
-                pose.header.frame_id = "/odom"
+                pose.header.frame_id = "map"
                 pose.pose.position.x = goal[0]
                 pose.pose.position.y = goal[1]
 
