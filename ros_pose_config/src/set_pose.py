@@ -30,7 +30,7 @@ class Robot:
         self.setpose_pub          = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=10)
         self.setgoal_pub          = rospy.Publisher("move_base_simple/goal", PoseStamped, queue_size=10)
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getGoal)
-        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data.yaml')
+        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data.yaml', 'ra0')
         self.id = self.routing.getID()
         print(self.id)
 

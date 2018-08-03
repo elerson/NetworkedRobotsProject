@@ -13,13 +13,13 @@ import os
 
 
 class Routing:
-  def __init__(self, essid, yaml_file):
+  def __init__(self, essid, yaml_file, interface):
     #
     with open(yaml_file, 'r') as stream:
       self.config_data  = yaml.load(stream)
       self.config_data  = self.config_data['robots'] 
     #
-    self.ifname       = "wlan0"
+    self.ifname       = interface
     self.my_macaddr   = self.getMyMacAddr()
     self.my_ip        = self.getMyIp(self.my_macaddr)
     self.my_id        = self.getMyID(self.my_macaddr)

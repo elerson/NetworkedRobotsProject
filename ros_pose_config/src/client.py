@@ -48,7 +48,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         self.image       = self.loadImage()
         self.widget_image.setImage(self.image)
-        self.network     = Network(id=-1, broadcast_addr = "127.255.255.255", port = 46544)
+        self.network     = Network(id=-1,  broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
         
         self.log_timer  = QElapsedTimer()
         self.finish_time  = QElapsedTimer()
