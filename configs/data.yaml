@@ -28,12 +28,12 @@ robots:
     cable_ip: 150.164.212.46
 
 configs:
-  map: /home/elerson/catkin_ws/src/navigation_roomba/map.png
-  treefile: /home/elerson/catkin_ws/src/simulated_experiments/1euclideanexperiment/steinerData1.dat
-  resolution: 0.025000
-  exit: 1
-  simulation: 0
-  broadcast_address: 192.168.0.255
+  map: /home/elerson/catkin_ws/src/navigation_roomba/map.png #/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/exp1/ambiente.png  #
+  treefile:  /home/elerson/catkin_ws/src/navigation_roomba/steinerData1.dat # /home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/steinerData1.dat #
+  resolution: 0.05000 
+  exit: 0
+  simulation: 1
+  broadcast_address: 192.168.0.255 #127.255.255.255 #192.168.0.255
   algorithm_port: 39988
   configuration_port: 46544
 

@@ -69,8 +69,9 @@ class RSSIKalmanFilterRecursive:
 		return self.gamma[1]
 
 class RSSIKalmanFilter:
-	def __init__(self, m, var, measurment_var, log=False, d0 = 1.0):
+	def __init__(self, id_, m, var, measurment_var, log=False, d0 = 1.0):
 
+		self.id_ = id_
 		self.m = np.transpose(np.matrix(m))
 		self.P = np.array([[var, 0],[0, var]])
 		self.d0 = d0
@@ -97,7 +98,7 @@ class RSSIKalmanFilter:
 		self.measurment_var = measurment_var
 
 	def saveLog(self, distance,measurement, measurment_var):
-		str_data = str(measurement) + ',' + str(distance) + ',' + str(measurment_var) + ',' + str(self.getGamma()) + '\n'
+		str_data = str(self.id_) + ','+ str(measurement) + ',' + str(distance) + ',' + str(measurment_var) + ',' + str(self.getGamma()) + '\n'
 		print(str_data)
 		self.log_data_file.write(str_data)
 

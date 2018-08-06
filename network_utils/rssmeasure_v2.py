@@ -5,8 +5,14 @@ import subprocess as sub
 import yaml
 import time
 import os
-import sysv_ipc
 from struct import *
+import socket
+
+UDP_IP = "0.0.0.0"
+PORT   =  4320
+
+
+
 
 class RSSMeasure:
   def __init__(self, essid, yaml_file, max_value = -1000):
@@ -27,7 +33,10 @@ class RSSMeasure:
     self.MAX            = max_value
     self.alpha          = 0.7
     self.essid          = essid
-    self.mq             = sysv_ipc.MessageQueue(1241, sysv_ipc.IPC_CREAT)
+    
+    self.sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
+    self.sock.bind((UDP_IP, PORT))
     self.thread         = threading.Thread(target=self.readrss)
     self.thread.start()
     self.signal_dict    = dict()
@@ -40,8 +49,9 @@ class RSSMeasure:
     #
   def readrss(self):
     while True:
-      message = self.mq.receive()
-      rss, mac_str = unpack('i6s',message[0])
+    
+      message, addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes
+      rss, mac_str = unpack('i6s',message)
       mac = ''.join( [ "%02x:" % ord( x ) for x in mac_str ] ).strip()[:-1]
       self.addRSS(mac, rss)
       #print(mac, rss)

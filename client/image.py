@@ -48,6 +48,7 @@ class Image(QtGui.QWidget):
     def addRobots(self, robots):
         for robot_id in robots:
             self.robots[robot_id] = robots[robot_id]['position']
+            print(self.robots[robot_id])
 
     def addConnections(self, graph):
         self.communication_graph = graph
@@ -233,9 +234,9 @@ class Image(QtGui.QWidget):
 
     def mouseMoveEvent(self, e):
         
-        # if(self.pressed_button == QtCore.Qt.LeftButton):
-        #     self.offset = e.pos() - self.press_position
-        #     self.repaint()
+        if(self.pressed_button == QtCore.Qt.LeftButton):
+            self.offset = e.pos() - self.press_position
+            self.repaint()
 
         if(self.pressed_button == QtCore.Qt.RightButton):
             self.end_pose   = e.pos() - self.offset -  self.offset_
@@ -243,9 +244,9 @@ class Image(QtGui.QWidget):
 
 
     def mouseReleaseEvent(self, e):
-        # if(e.button() == QtCore.Qt.LeftButton):
-        #     self.offset   = QPointF(0, 0)
-        #     self.offset_ += e.pos() - self.press_position
+        if(e.button() == QtCore.Qt.LeftButton):
+            self.offset   = QPointF(0, 0)
+            self.offset_ += e.pos() - self.press_position
 
         if(e.button() == QtCore.Qt.RightButton):
             self.end_pose   = e.pos() - self.offset -  self.offset_

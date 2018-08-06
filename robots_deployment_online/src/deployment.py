@@ -5,6 +5,7 @@ from scipy.optimize import linear_sum_assignment
 from network_utils.network import Network
 import numpy as np
 import math
+import yaml
 
 
 #ROS Imports
@@ -21,7 +22,7 @@ from move_base_msgs.msg import MoveBaseActionGoal
 from util import dist_to_segment_alpha, dist_to_segment
 from network_utils.rssi_kalman import RSSIKalmanFilter
 from network_utils.Routing import Routing
-from network_utils.rssmearure_v2 import RSSMeasure
+from network_utils.rssmeasure_v2 import RSSMeasure
 
 import time
 import tf
@@ -34,20 +35,31 @@ class Robot:
     def __init__(self):
         rospy.init_node('robot_deployment', anonymous=True)
         #print("ROBOT")
-        self.network             = Network()
-        self.network.addCommandCallback(self.receiveNetworkCommand)
+
 
         ###
         ###         REAL ROBOT(1) OR SIMULATED (0)
         ###
         self.real_robot          = rospy.get_param("~real_robot", 0)
-        # if(self.real_robot):
-        #     self.config_file     = rospy.get_param("~config_file")
-        #     self.routing         = Routing('teste4', self.config_file)
-        #     self.rss_measure     = RSSMeasure('teste4', self.config_file)
-        self.log_rss             = False
+        self.config_file         = rospy.get_param("~config_file")
+        self.config              = self.readConfig(self.config_file)
 
-        id                       = rospy.get_param("~id")
+        self.real_robot          = not self.config['configs']['simulation'] 
+
+        if(self.real_robot):        	
+            self.routing         = Routing('teste4', self.config_file, 'ra0')
+            self.rss_measure     = RSSMeasure('teste4', self.config_file)
+            id                   = self.routing.getID()
+        else:
+       	    id                   = rospy.get_param("~id")
+
+
+       	#configure network
+        self.network             = Network(id=-1, broadcast_addr = self.config['configs']['broadcast_address'], port = self.config['configs']['algorithm_port'])
+        self.network.addCommandCallback(self.receiveNetworkCommand)
+
+        
+        self.log_rss             = False
 
         self.neigh_0             = -1
         self.neigh_1             = -1
@@ -57,7 +69,7 @@ class Robot:
         self.high_level_distance = 3
         self.sent_goal           = 0
 
-        self.covariance = np.matrix([[0.0, 0.0], [0.0, 0.0]])
+        self.covariance          = np.matrix([[0.0, 0.0], [0.0, 0.0]])
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
         self.tree_file           = rospy.get_param("~tree_file")
@@ -76,7 +88,12 @@ class Robot:
 
         self.robots_ids_start    = len(self.tree.vertices)
 
-        self.id                  = int(id) + self.robots_ids_start
+        if(self.real_robot):
+        	self.id              = int(id) - 1
+        else:
+        	self.id              = int(id) + self.robots_ids_start
+
+
         self.position            = {}
         self.position['id']      = self.id
         self.position['position']= (0.0, 0.0, 0.0)
@@ -98,7 +115,13 @@ class Robot:
         self.max_linear_vel      = 0.4
 
         self.ros_id              = self.id - self.robots_ids_start
-        prefix                   = "/robot_"+str(self.ros_id)
+
+        if(self.real_robot):
+            prefix               = rospy.get_param("~prefix")
+        else:
+            prefix               = "/robot_"+str(self.ros_id)
+
+
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.vel_pub             = rospy.Publisher(prefix + "/cmd_vel", Twist, queue_size=10)
 
@@ -109,7 +132,14 @@ class Robot:
         rospy.Subscriber(prefix + "/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
-        rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
+        self.start_real = True
+        if(self.real_robot):
+            self.start_real = False
+            self.rss_measure.addCallback(self.realMetricCallback)
+        else:
+            rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
+
+
         self.send_deployment     = 0
         self.send_deployment_time_diff = 4.0
 
@@ -119,8 +149,12 @@ class Robot:
         #if(self.real_robot):
         #    self.updateRouting()
 
-    def getClientsIDs(self):
+    def readConfig(self, config_file):
+        with open(config_file, 'r') as stream:
+            return yaml.load(stream)
 
+
+    def getClientsIDs(self):
         ids = self.tree.clients
         positions = []
         for id_ in ids:
@@ -134,7 +168,9 @@ class Robot:
 
         
     def receiveNetworkCommand(self, commnad):
-        print(self.network.rcv_command)
+        print(command)
+        if (command['command'] == COMMANDS.SETINITALPOSE):
+            self.start_real = True
 
     def createRoutingTable():
         neighbors_ids = self.getNeighborsIDs()
@@ -148,7 +184,7 @@ class Robot:
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
-            self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3.5], 10.0, m_var, self.log_rss)
+            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 10.0, m_var, self.log_rss)
 
         real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
         real_metric    = rss
@@ -163,54 +199,6 @@ class Robot:
 
         self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
         self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
-
-
-
-    def realMetric(self, param):
-
-        variance = 2.0
-        #for the robots
-        data_ids = self.network.getDataIds()
-        for data_id in data_ids:
-            #if(data_id == self.id):
-            #    continue
-            real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
-            real_metric      = self.rss_measure.getMeasurement(data_id)
-            #simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
-            
-            if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 3.5], 10.0, variance, self.log_rss)
-
-            if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
-
-                x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
-
-                d = np.matrix([[x, y]])
-                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
-
-                self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
-
-
-        #for the tree
-        for vertex in self.tree.graph_adj_list:
-            real_distance    = self.getDistance(self.position['position'], self.tree.graph_vertex_position[vertex])*self.map_resolution
-            real_metric      = self.rss_measure.getMeasurement(vertex)
-
-            if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 3.5], 10.0, variance, self.log_rss)
-
-            if(real_metric > self.rss_measure.MAX and real_distance > 1.0):
-                #caculate the variance
-                x = abs(self.position['position'][0] - self.tree.graph_vertex_position[vertex][0])*self.map_resolution
-                y = abs(self.position['position'][1] - self.tree.graph_vertex_position[vertex][1])*self.map_resolution
-
-                d = np.matrix([[x, y]])
-                measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
-
-                self.metric_kalman[vertex].addMeasurement(real_distance, real_metric)
 
 
     def simulationMetric(self, param):
@@ -228,7 +216,7 @@ class Robot:
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter([-40.0, 4], .1, variance, self.log_rss)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 4], .1, variance, self.log_rss)
 
 
             m, P = self.metric_kalman[data_id].getResult()
@@ -252,7 +240,7 @@ class Robot:
             #self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter([-40.0, 4], .1, variance, self.log_rss)
+                self.metric_kalman[vertex] =  RSSIKalmanFilter(self.id, [-40.0, 4], .1, variance, self.log_rss)
 
             
             if(real_distance > 1.0):
@@ -1067,6 +1055,11 @@ if __name__ == "__main__":
     robot = Robot()
 
     rate = rospy.Rate(25.0)
+
+    while(not robot.start_real and not rospy.is_shutdown()):
+        rate.sleep()
+
+
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
         #print('send')

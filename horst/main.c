@@ -31,6 +31,10 @@
 #include <sys/socket.h>
 #include <net/if.h>
 
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
 #include <uwifi/packet_sock.h>
 #include <uwifi/util.h>
 #include <uwifi/wlan_util.h>
@@ -53,6 +57,8 @@
 #include <sys/msg.h>
 #include <assert.h>
 
+#define PORT     4320
+
 struct list_head essids;
 struct history hist;
 struct statistics stats;
@@ -66,12 +72,12 @@ struct timespec time_real;
 
 static FILE* DF = NULL;
 
-int qid;
+int sockfd;
+struct sockaddr_in     servaddr;
 
 struct vmsgbuf {
-  long                  msg_id;
   int 			phy_signal;
-  unsigned char		wlan_src[WLAN_MAC_LEN];
+  unsigned char		wlan_src[6];
 };
 
 /* receive packet buffer
@@ -352,13 +358,10 @@ void handle_packet(struct uwifi_packet* p)
 	//send message through queue
         struct vmsgbuf vmbuf;       
         memset(&vmbuf, 0, sizeof(vmbuf));
-        vmbuf.msg_id = 10;
 	vmbuf.phy_signal = p->phy_signal;
         memcpy(vmbuf.wlan_src, p->wlan_src, WLAN_MAC_LEN);
-	//vmbuf.ip_src = p->ip_src;
-        //vmbuf.ip_dst = p->ip_src;
-     	
-        msgsnd(qid, (struct msgbuf *)&vmbuf, sizeof(unsigned char)*WLAN_MAC_LEN + sizeof(int), 0);
+
+        sendto(sockfd, &vmbuf, 10, MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
 #endif   
 	
 	update_history(p);
@@ -500,7 +503,7 @@ static void exit_handler(void)
 	if (!conf.quiet && !conf.debug)
 		finish_display();
 
-	msgctl(qid, IPC_RMID, NULL);
+
 	ifctrl_finish();
 }
 
@@ -509,7 +512,7 @@ static void sigint_handler(__attribute__((unused)) int sig)
 	/* Only set an atomic flag here to keep processing in the interrupt
 	 * context as minimal as possible (at least all unsafe functions are
 	 * prohibited, see signal(7)). The flag is handled in the mainloop. */
-        msgctl(qid, IPC_RMID, NULL);
+
 	is_sigint_caught = 1;
 }
 
@@ -626,8 +629,21 @@ int main(int argc, char** argv)
 
 	conf.intf.channel_idx = -1;
 #ifdef QUEUE_COMM
-	qid = msgget(1241, IPC_CREAT | 0777);
-    	assert(qid != -1);
+
+        
+ 
+        // Creating socket file descriptor
+        if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+          perror("socket creation failed");
+          exit(EXIT_FAILURE);
+        }
+ 
+        memset(&servaddr, 0, sizeof(servaddr));
+     
+        // Filling server information
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(PORT);
+        servaddr.sin_addr.s_addr = INADDR_ANY;
 #endif
 	if (conf.mac_name_lookup)
 		mac_name_file_read(conf.mac_name_file);

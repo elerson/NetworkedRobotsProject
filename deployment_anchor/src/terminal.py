@@ -29,8 +29,16 @@ class Terminal:
         self.config_file  = self.readConfig(rospy.get_param("~config_file"))
 
         self.radius       = rospy.get_param("~radius", 100)
+        self.real_robot   = not self.config_file['configs']['simulation']
 
-        self.client_id    = rospy.get_param("~id")
+        if(self.real_robot):            
+            self.routing         = Routing('teste4', self.config_file, 'ra0')
+            self.rss_measure     = RSSMeasure('teste4', self.config_file)
+            id                   = self.routing.getID()
+        else:
+            id                   = rospy.get_param("~id")
+
+        self.client_id    = id
 
         self.tree_file    = self.config_file['configs']['treefile']
 
@@ -42,6 +50,7 @@ class Terminal:
         self.yoffset      = rospy.get_param("~yoffset", 0)
 
         self.clients_pos  = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
+        self.radius       = (2.0/3.0)*self.radius
         self.sceneGraph   = sceneGraph(self.config_file['configs'], self.radius, self.clients_pos, (self.xoffset, self.yoffset))
 
         
@@ -71,7 +80,7 @@ class Terminal:
 
         print('node id', self.node_id)
 
-        self.network      = Network(self.client_id)
+        self.network      = Network(self.client_id,  broadcast_addr = self.config_file['configs']['broadcast_address'], port = self.config_file['configs']['algorithm_port'])
         self.network.addMessageCallback(self.receiveNetworkMessage)
 
 

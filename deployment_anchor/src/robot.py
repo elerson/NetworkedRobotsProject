@@ -67,9 +67,17 @@ class Robot:
         self.clients         = set(self.tree.clients)
 
         self.ros_id          = rospy.get_param("~id")
+        self.real_robot          = not self.config_file['configs']['simulation'] 
+        if(self.real_robot):            
+            self.routing         = Routing('teste4', self.config_file, 'ra0')
+            self.rss_measure     = RSSMeasure('teste4', self.config_file)
+            id                   = self.routing.getID()
+        else:
+            id                   = self.ros_id + len(self.clients)
 
-        self.id              = self.ros_id + len(self.clients)
 
+        self.id              = id
+        self.send_node       = -1
 
         self.node_id         = 0 
 
@@ -85,6 +93,7 @@ class Robot:
         graph_radius         = self.radius*(2.0/3.0)
         self.graph           = sceneGraph(self.config_file['configs'], graph_radius, self.clients_pos, (self.xoffset, self.yoffset))
         self.height          =  self.graph.heigh
+        print(graph_radius, self.radius)
 
         #get the terminal nodes in the graph
         self.terminals        = []
@@ -120,7 +129,7 @@ class Robot:
         self.probe_time      = 0.2
 
         self.last_send_deplyment   = 0
-        self.send_deployment_time  = 2.5
+        self.send_deployment_time  = 4.5
         self.deploy_ended    = False
         self.deploy_numbers  = 0
 
@@ -134,8 +143,10 @@ class Robot:
         self.sim             = -1
         self.phase_alg       = PHASE.INIT
 
-        self.network         = Network(self.id)
+        self.network         = Network(self.id, broadcast_addr = self.config_file['configs']['broadcast_address'], port = self.config_file['configs']['algorithm_port'])
         self.network.addMessageCallback(self.receiveMessage)
+        self.network.addCommandCallback(self.receiveNetworkCommand)
+
         self.init_tsp        = True
         self.allow_go_next_node = False
         
@@ -154,7 +165,12 @@ class Robot:
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.5)
         self.send_position_time      = 0.0
 
-        prefix                   = "/robot_"+str(self.ros_id)
+
+        if(self.real_robot):
+            prefix               = rospy.get_param("~prefix")
+        else:
+            prefix               = "/robot_"+str(self.ros_id)
+
 
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
   
@@ -171,14 +187,21 @@ class Robot:
         self.deploy_steps        = DEPLOYSTEP.INIT
         self.steiner             = []
 
-        self.measuments          = {}
+        self.measurements          = {}
         self.n_measurements      = {}
         self.gamma               = 3
 
-
+        self.start_real  = True
+        if(self.real_robot):
+            self.start_real = False
 
         while(not self.initialized):
             time.sleep(0.3)
+
+    def receiveNetworkCommand(self, commnad):
+        print(command)
+        if (command['command'] == COMMANDS.SETINITALPOSE):
+            self.start_real = True
 
     def logNormalMetric(self, distance, variance):
         if(distance < 1):
@@ -186,15 +209,20 @@ class Robot:
         return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
     def getRSSmeasurement(self, src):
-        if not src in self.measuments:
-            self.measuments[src] = 0
+        if not src in self.measurements:
+            self.measurements[src] = 0
             self.n_measurements[src]  = 0
 
         distance = self.graph.getDistanceFromId(self.position['position'], src)*self.map_resolution
-        self.measuments[src] += abs(self.logNormalMetric(distance, 1.0))
+        if(self.real_robot):
+            measurement = self.rss_measure.getMeasurement(src)
+        else:
+            measurement = abs(self.logNormalMetric(distance, 1.0))
+
+        self.measurements[src] += measurement
         self.n_measurements[src]  += 1
 
-        return (self.measuments[src]/self.n_measurements[src])
+        return (self.measurements[src]/self.n_measurements[src])
         
 
     def getMinAssigment(self, robots, deployment):
@@ -323,7 +351,7 @@ class Robot:
             self.robot_position_ids[message['id']] = message['src']
 
 
-        #print('step ', self.step)
+        print('step ', self.step)
 
         if self.step == STEP.DISCOVER:
             if(self.is_idle and self.discovery_start):
@@ -597,7 +625,8 @@ class Robot:
             self.is_coord  = message['value'] == 1
             self.is_idle   = True
             self.phase_alg = PHASE.SEARCH
-
+            self.Stall()
+            time.sleep(1)
             if(self.is_coord):
                 mylist = self.graph.graph.keys()
                 mylist.insert(0, self.getCurrentNode())
@@ -607,7 +636,7 @@ class Robot:
 
             self.message_fifo    = []
 
-            print('search phase') 
+            print('search phase', self.is_coord) 
             return
 
         if(not self.wait_init_ack):
@@ -651,9 +680,10 @@ class Robot:
         if(self.getCurrentNode() in walk and walk.index(self.getCurrentNode()) == 1):
             walk = walk[walk.index(self.getCurrentNode()):]
 
-        print(self.status, self.getCurrentNode(), 'go next')
 
-        if (self.status == 3 or self.status == 4 or  self.status == 5 or self.status == -1) and self.getCurrentNode() == walk[0]:
+        print(self.status, self.getCurrentNode(), walk, 'go next')
+
+        if (self.status == 3 or self.status == 4 or self.status == 2 or  self.status == 5 or self.status == -1) and self.getCurrentNode() == walk[0]:
 
             if (len(walk) == 1):
                 return []
@@ -665,9 +695,10 @@ class Robot:
             if( rospy.get_time() - self.last_go_next_time < waittime):
                 return walk
 
-            #print('go next node',  self.status , ' ', walk[1])
+            print('go next node',  self.status , ' ', self.getCurrentNode(), walk[1])
 
-            self.sendDeployment(self.graph.vertice_position[walk[1]])
+
+            self.sendDeployment(self.graph.vertice_position[walk[1]], walk[1])
 
             new_walk = walk[walk.index(self.node_id):]
             return new_walk
@@ -682,6 +713,12 @@ class Robot:
         return self.node_id
 
 
+    def Stall(self):
+        goal = GoalID()
+        goal.id = str(self.current_goal_id-1)
+        print('stall', self.current_goal_id-1)
+        self.cancel_pub.publish(goal)
+
 
     def getStatus(self, Status):
 
@@ -695,13 +732,13 @@ class Robot:
         self.height         = MapData.height
 
 
-    def sendDeployment(self, deployment_position):
+    def sendDeployment(self, deployment_position, node):
 
 
          
-        if(rospy.get_time() - self.last_send_deplyment < self.send_deployment_time):
+        if(rospy.get_time() - self.last_send_deplyment < self.send_deployment_time and self.send_node == node):
             return
-
+        self.send_node = node
         self.last_send_deplyment = rospy.get_time()
 
 
@@ -711,8 +748,8 @@ class Robot:
         pose.pose.position.x = deployment_position[0]*self.map_resolution
         pose.pose.position.y = (self.height - deployment_position[1])*self.map_resolution
 
-        #print("send deployment_position")
-        #print(pose.pose.position)
+        print("send deployment_position")
+        print(pose.pose.position)
 
         #for debug
         self.position['destination'] = (deployment_position[0], deployment_position[1])
@@ -774,6 +811,11 @@ class Robot:
 if __name__ == "__main__":
     robot = Robot()
     rate = rospy.Rate(200.0)
+    
+    while(not robot.start_real and not rospy.is_shutdown()):
+        rate.sleep()
+
+
     while not rospy.is_shutdown():
         
         robot.run()

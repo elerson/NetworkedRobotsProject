@@ -46,13 +46,13 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         home = os.path.expanduser("~")
         self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
 
-        if(self.config_data['simulation']):
-            dir_ = os.environ['EXP_DIR']
-            self.config_data['treefile'] = dir_ + '/steinerData1.dat'
-            self.config_data['map'] = dir_ + '/map/ambiente.png'
+        # if(self.config_data['simulation']):
+        #     dir_ = os.environ['EXP_DIR']
+        #     self.config_data['treefile'] = dir_ + '/steinerData1.dat'
+        #     self.config_data['map'] = dir_ + '/map/ambiente.png'
 
-            with open(dir_ +'/map/simple.yaml', 'r') as stream:
-                self.config_data['resolution'] = yaml.load(stream)['resolution']
+        #     with open(dir_ +'/map/simple.yaml', 'r') as stream:
+        #         self.config_data['resolution'] = yaml.load(stream)['resolution']
 
 
         self.resolution  = self.config_data['resolution']
@@ -65,7 +65,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         self.image       = self.loadImage()
         self.widget_image.setImage(self.image)
-        self.network     = Network()
+        self.network     = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['algorithm_port'])
         self.tree        = Tree(self.treefile)
         print(self.tree.getSize(), 'size')
         self.tree_segmentation   = TreeSegmention(self.tree)
