@@ -166,7 +166,7 @@ class sceneGraph:
             self.graph[id] = graph_
 
     def getDistanceFromId(self, position, id):
-        return sqrt((self.positions[id][0]-position[0]) + (self.positions[id][1] - position[0])**2)
+        return sqrt((self.positions[id][0]-position[0]) + (self.positions[id][1] - position[1])**2)
 
     def getClosestNode(self, position):
         distance    = np.sqrt(np.sum(np.power(self.positions - [[position[0], position[1]]],2), axis=1))

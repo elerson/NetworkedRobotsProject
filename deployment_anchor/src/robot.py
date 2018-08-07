@@ -67,7 +67,7 @@ class Robot:
         self.clients         = set(self.tree.clients)
 
         self.ros_id          = rospy.get_param("~id")
-        self.real_robot          = not self.config_file['configs']['simulation'] 
+        self.real_robot      = not self.config_file['configs']['simulation'] 
         if(self.real_robot):            
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
@@ -96,16 +96,18 @@ class Robot:
         print(graph_radius, self.radius)
 
         #get the terminal nodes in the graph
-        self.terminals        = []
-        self.terminal_src_ids = {}
+        self.terminals       = []
+        self.terminal_src_ids= {}
         i = 0
         for client_id in self.tree.clients:
-            position          = self.tree.graph_vertex_position[client_id]
-            position          = (position[0], position[1])
+            position         = self.tree.graph_vertex_position[client_id]
+            position         = (position[0], position[1])
             self.terminals.append(self.graph.getClosestNode(position))
             self.terminal_src_ids[i] = self.graph.getClosestNode(position)
             i += 1
 
+        self.num_measurements = 10
+        self.measurment_time  = 0.1
 
         self.visited_nodes   = set([])
         self.wait_init_ack   = False
@@ -140,6 +142,7 @@ class Robot:
         self.links_graph     = {}
         self.walkPath        = set([])
         self.message_fifo    = []
+        self.measurement_link= {}
         self.sim             = -1
         self.phase_alg       = PHASE.INIT
 
@@ -199,7 +202,7 @@ class Robot:
             time.sleep(0.3)
 
     def receiveNetworkCommand(self, commnad):
-        print(command)
+        #print(command)
         if (command['command'] == COMMANDS.SETINITALPOSE):
             self.start_real = True
 
@@ -209,20 +212,16 @@ class Robot:
         return -40 -10*self.gamma*math.log(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
     def getRSSmeasurement(self, src):
-        if not src in self.measurements:
-            self.measurements[src] = 0
-            self.n_measurements[src]  = 0
-
+ 
         distance = self.graph.getDistanceFromId(self.position['position'], src)*self.map_resolution
         if(self.real_robot):
             measurement = self.rss_measure.getMeasurement(src)
         else:
             measurement = abs(self.logNormalMetric(distance, 1.0))
 
-        self.measurements[src] += measurement
-        self.n_measurements[src]  += 1
+        print('node dst and current', self.graph.getClosestNode(self.position['position']), src, self.getCurrentNode(), distance, measurement)
 
-        return (self.measurements[src]/self.n_measurements[src])
+        return measurement
         
 
     def getMinAssigment(self, robots, deployment):
@@ -323,6 +322,11 @@ class Robot:
         with open(config_file, 'r') as stream:
             return yaml.load(stream)
     
+    def alreadyMeasured(self, src, dst):
+        if(src in self.links_graph and dst in self.links_graph[src]):
+            return True
+        return False
+
     def addLink(self, src, dst, weigth):
         try:
             self.links_graph[src][dst] = weigth
@@ -345,13 +349,26 @@ class Robot:
 
         self.message_fifo.insert(0, message)
 
+        if(message['type'] == MSG.PROBE):
+            try:
+                self.measurement_link[self.getCurrentNode()].append(message['src'])
+            except:
+                self.measurement_link[self.getCurrentNode()] = [message['src']]                
+
+    def hasMeasumentsWaiting(self):
+        try:
+            return self.links_graph[self.getCurrentNode()].keys() == self.measurement_link[self.getCurrentNode()].keys()
+        except:
+            return False
+
+
     def searchPhaseCoor(self, message):
 
         if(message['type'] == MSG.PROBE and not message['terminal']):
             self.robot_position_ids[message['id']] = message['src']
 
 
-        print('step ', self.step)
+        #print('step ', self.step, self.status)
 
         if self.step == STEP.DISCOVER:
             if(self.is_idle and self.discovery_start):
@@ -367,16 +384,19 @@ class Robot:
                 self.is_idle            = False
                 self.discovery_start    = False
 
-            if self.isInDestination() and message['type'] == MSG.PROBE:
+            if self.isInDestination() and message['type'] == MSG.PROBE and not self.alreadyMeasured(self.getCurrentNode(), message['src']):
+                measurement = 0.0
+                for m_ in range(self.num_measurements):
+                    measurement += float(self.getRSSmeasurement(message['src']))
+                    time.sleep(self.measurment_time)
 
-                measurment = int(self.getRSSmeasurement(message['src']))
+                measurement = int(measurement/self.num_measurements)
 
-                if True: #measurment < self.radius:
+                if self.isInDestination(): #measurment < self.radius:
                     self.links      = self.links.union((self.getCurrentNode(), message['src']))
-                    self.addLink(self.node_id, message['src'], measurment)
-
-
-                    #print(message)
+                    self.addLink(self.getCurrentNode(), message['src'], measurement)
+                    print(self.links_graph, measurement)
+                    #time.sleep(2)
                     if(message['terminal']):
                         self.search_queue_level[self.getCurrentNode()] = 0
                         #print(message, 'terminal')
@@ -386,17 +406,15 @@ class Robot:
                         pass
 
 
-            self.dicover_walk = self.goNextNode(self.dicover_walk, 1)
-            print(self.dicover_walk, self.search_queue_level)
+            if not self.hasMeasumentsWaiting():
+                self.dicover_walk = self.goNextNode(self.dicover_walk, 1)
+            #print(self.dicover_walk, self.search_queue_level)
             #print(self.search_queue_level, self.getCurrentNode(), self.graph.getDistance(8, self.getCurrentNode()), 'discover walk')
             #if( 'src' in message):
             #    print(self.getCurrentNode(), self.graph.getDistance(message['src'], self.getCurrentNode()), 'new_walk')
 
             if(self.dicover_walk == []):
                 self.is_idle = False
-
-
-                
 
                 self.to_visit = list(set([k for k, v in self.search_queue_level.items() if self.level == v]) - self.visited_nodes)
                 print('to visit', self.to_visit)
@@ -492,15 +510,15 @@ class Robot:
 
         elif self.step == STEP.SETTLE:
 
-            print('b visiting settle', self.visiting)
+            #print('b visiting settle', self.visiting)
             #print(message, self.visiting, self.getCurrentNode())
             if((self.allow_go_next_node) or (message['type'] == MSG.PROBE and message['src'] in self.visiting) or (not self.getCurrentNode() in self.visiting)):
-                print('settle walk', self.settleWalk)
+                #print('settle walk', self.settleWalk)
                 last_node_id = self.getCurrentNode()               
                 self.settleWalk = self.goNextNode(self.settleWalk)
                 self.allow_go_next_node = last_node_id == self.getCurrentNode()
             
-            print('visiting settle', self.visiting)
+            #print('visiting settle', self.visiting)
 
             if message['type'] == MSG.PROBE:
                 if(self.settleWalk == []):
@@ -626,7 +644,7 @@ class Robot:
             self.is_idle   = True
             self.phase_alg = PHASE.SEARCH
             self.Stall()
-            time.sleep(1)
+            time.sleep(1.0)
             if(self.is_coord):
                 mylist = self.graph.graph.keys()
                 mylist.insert(0, self.getCurrentNode())
@@ -677,11 +695,13 @@ class Robot:
         if(walk == []):
             return []
 
+        new_walk__ = False
         if(self.getCurrentNode() in walk and walk.index(self.getCurrentNode()) == 1):
             walk = walk[walk.index(self.getCurrentNode()):]
+            new_walk__ = True
 
 
-        print(self.status, self.getCurrentNode(), walk, 'go next')
+        #print(self.status, self.getCurrentNode(), walk, 'go next')
 
         if (self.status == 3 or self.status == 4 or self.status == 2 or  self.status == 5 or self.status == -1) and self.getCurrentNode() == walk[0]:
 
@@ -695,13 +715,13 @@ class Robot:
             if( rospy.get_time() - self.last_go_next_time < waittime):
                 return walk
 
-            print('go next node',  self.status , ' ', self.getCurrentNode(), walk[1])
+            #print('go next node',  self.status , ' ', self.getCurrentNode(), walk[1])
 
 
             self.sendDeployment(self.graph.vertice_position[walk[1]], walk[1])
-
-            new_walk = walk[walk.index(self.node_id):]
-            return new_walk
+            if(not new_walk__):
+                new_walk = walk[walk.index(self.node_id):]
+                return new_walk
 
         return walk
 
@@ -741,7 +761,7 @@ class Robot:
         self.send_node = node
         self.last_send_deplyment = rospy.get_time()
 
-
+        self.status = -1
         #print(deployment_position)
         pose = PoseStamped()
         pose.header.frame_id = "map"
