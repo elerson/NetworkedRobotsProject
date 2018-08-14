@@ -37,6 +37,7 @@ class Terminal:
             id                   = self.routing.getID()
         else:
             id                   = rospy.get_param("~id")
+           
 
         self.client_id    = id
 

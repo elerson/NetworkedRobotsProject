@@ -213,7 +213,7 @@ class Robot:
 
     def getRSSmeasurement(self, src):
  
-        distance = self.graph.getDistanceFromId(self.position['position'], src)*self.map_resolution
+        distance = self.graph.getDistanceFromId((self.position['position'][0], self.position['position'][1]), src)*self.map_resolution
         if(self.real_robot):
             measurement = self.rss_measure.getMeasurement(src)
         else:
