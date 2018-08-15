@@ -7,24 +7,23 @@ robots:
 
   2:
     id: 2
-    ip: 192.168.0.2
-    macaddress: 1c:4b:d6:85:b0:67
+    ip: 192.168.0.5
+    macaddress: c4:e9:84:0b:8e:30
     cable_ip: 150.164.212.45
-  
   3:
     id: 3
-    ip: 192.168.0.3
-    macaddress: 1c:4b:d6:85:bc:20
+    ip: 192.168.0.6
+    macaddress: 30:b5:c2:1f:20:a1
     cable_ip: 150.164.212.46
   4:
     id: 4
-    ip: 192.168.0.4
-    macaddress: 48:5d:60:f5:48:8c
+    ip: 192.168.0.7
+    macaddress: 30:b5:c2:15:6e:7e
     cable_ip: 150.164.212.46
   5:
     id: 5
-    ip: 192.168.0.5
-    macaddress: 48:5d:60:f5:2c:54
+    ip: 192.168.0.8
+    macaddress: ec:08:6b:0d:5b:19
     cable_ip: 150.164.212.46
 
 configs:
