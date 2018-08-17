@@ -62,8 +62,8 @@ class Robot:
                 q = tf.transformations.quaternion_from_euler(0, 0, angle)
                 pose.pose.pose.orientation = Quaternion(*q)
                 cov_ = np.array([0.0]*36)
-                cov_[0]  = 0.25
-                cov_[7]  = 0.25
+                cov_[0]  = 0.10
+                cov_[7]  = 0.10
                 cov_[35] = 0.068
                 print(cov_)
                 p_cov = cov_.reshape(6,6)
