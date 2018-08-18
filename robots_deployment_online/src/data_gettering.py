@@ -99,6 +99,9 @@ class Robot:
             real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id-1))*self.map_resolution
             real_metric      = rss
 
+            print('my', self.position['position'], self.getPositionByID(measurement_id-1))
+
+
             m_var = 4.0
             position = self.getPositionByID(measurement_id-1)
             x = abs(self.position['position'][0] - position[0])*self.map_resolution
@@ -127,7 +130,7 @@ class Robot:
         ##Client or tree junctions id
         if(id < self.robots_ids_start):
             position = self.tree.graph_vertex_position[id]
-            print('my', position)
+
             return position
         else:
             return (0, 0)
