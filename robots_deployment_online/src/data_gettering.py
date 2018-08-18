@@ -41,7 +41,7 @@ class Robot:
         self.position['position'] = (0.0, 0.0, 0.0)
         self.position['covariance'] = (0.0, 0.0)
         self.height = 0
-        self.metric_kalmam      =  RSSIKalmanFilter(3, [-40.0, 3.5], 10.0, 4.0, True)
+        self.metric_kalman      =  RSSIKalmanFilter(3, [-40.0, 3.5], 10.0, 4.0, True)
         self.covariance         = np.matrix([[0.0, 0.0], [0.0, 0.0]])
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.05)
