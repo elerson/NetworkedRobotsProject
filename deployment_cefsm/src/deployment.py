@@ -207,17 +207,18 @@ class Robot:
 
 
     def realMetricCallback(self, data_id, rss):
-
         m_var = 4.0
         if( data_id not in self.metric_kalman):
             self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 10.0, m_var, self.log_rss)
 
-        real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
+        position = self.getPositionByID(data_id)
+
+        real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
         real_metric    = rss
 
 
-        x = abs(self.position['position'][0] - self.network.getData(data_id)['position'][0])*self.map_resolution
-        y = abs(self.position['position'][1] - self.network.getData(data_id)['position'][1])*self.map_resolution
+        x = abs(self.position['position'][0] - position[0])*self.map_resolution
+        y = abs(self.position['position'][1] - position[1])*self.map_resolution
         gamma = self.metric_kalman[data_id].getGamma()
 
         d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
