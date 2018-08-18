@@ -145,7 +145,7 @@ if __name__ == "__main__":
             distance = robot.getDistanceFrom()
 
             estimated_params = robot.getRSSParameters()
-            data = str(datetime.datetime.now().time()) + ";" + str(rss) +";"+ str(distance) +";" + str(estimated_params[0]) +";"+ str(estimated_params[1]) +';'
+            data = str(datetime.datetime.now().time()) + ";" + str(rss) +";"+ str(distance) +";" + str(estimated_params[0]) +";"+ str(estimated_params[1]) +'\n'
             
             #data +=  str(robot.position['position'])+ ";" + str(robot.position['covariance']) + "\n"
             print(data)
