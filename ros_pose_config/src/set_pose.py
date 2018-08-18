@@ -10,6 +10,8 @@ from enum import IntEnum
 import numpy as np
 import tf
 import os
+import subprocess as sub
+
 
 import yaml
 class COMMANDS(IntEnum):    
@@ -101,3 +103,5 @@ if __name__ == "__main__":
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
         rate.sleep()
+
+    sub.Popen(('kill', '-9', str(os.getpid())))
