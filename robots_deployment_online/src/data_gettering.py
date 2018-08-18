@@ -19,6 +19,9 @@ from network_utils.tree import Tree, TreeSegmention
 
 import datetime
 
+import os
+import subprocess as sub
+
 config_file = "/home/elerson/NetworkedRobotsProject/configs/data.yaml"
 measurement_id = 2
 
@@ -147,4 +150,7 @@ if __name__ == "__main__":
             print(data)
             text_file.write(data)
             rate.sleep()
+
+    
+    sub.Popen(('kill', '-9', str(os.getpid())))
        
