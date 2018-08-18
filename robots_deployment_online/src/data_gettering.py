@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import os
 import rospy
-from network import Network
 import tf
 
 from geometry_msgs.msg import Twist
