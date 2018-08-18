@@ -16,8 +16,6 @@ from network_utils.rssi_kalman import RSSIKalmanFilter
 
 import datetime
 
-
-rss_command = ''' cat /proc/net/wireless | awk 'END { print $4 }'| sed 's/\.$//' '''
 config_file = "/home/elerson/NetworkedRobotsProject/configs/data.yaml"
 measurement_id = 2
 
@@ -25,6 +23,9 @@ class Robot:
     def __init__(self):
 
         rospy.init_node('robot_data_gettering', anonymous=True)
+
+
+
         #print("ROBOT")
         self.map_resolution = 0.025
 
@@ -38,16 +39,24 @@ class Robot:
         self.position['covariance'] = (0.0, 0.0)
         self.height = 0
         self.metric_kalmam      =  RSSIKalmanFilter(3, [-40.0, 3.5], 10.0, 4.0, True)
-        self.covariance          = np.matrix([[0.0, 0.0], [0.0, 0.0]])
+        self.covariance         = np.matrix([[0.0, 0.0], [0.0, 0.0]])
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.05)
         self.send_position_time = rospy.get_time()
         self.config_file        = config_file
         self.rss_measure        = RSSMeasure('teste4', self.config_file)
+        self.config             = self.readConfig(config_file)
+
+        self.tree_file          = self.config['configs']['treefile']
+        self.tree               = Tree(self.tree_file)
+
 
         rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
+    def readConfig(self, config_file):
+        with open(config_file, 'r') as stream:
+            return yaml.load(stream)
 
     def getMap(self, MapData):
 
