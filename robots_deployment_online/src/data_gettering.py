@@ -96,11 +96,11 @@ class Robot:
 
     def addMeasurementKalman(self, rss):
 
-            real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id))*self.map_resolution
+            real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id-1))*self.map_resolution
             real_metric      = rss
 
             m_var = 4.0
-            position = self.getPositionByID(measurement_id)
+            position = self.getPositionByID(measurement_id-1)
             x = abs(self.position['position'][0] - position[0])*self.map_resolution
             y = abs(self.position['position'][1] - position[1])*self.map_resolution
 
@@ -113,7 +113,7 @@ class Robot:
             self.metric_kalman.addMeasurement(real_distance, real_metric)
 
     def getDistanceFrom(self):
-        real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id))*self.map_resolution
+        real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id-1))*self.map_resolution
         return real_distance
 
     def getDistance(self, p1, p2):
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             data = str(datetime.datetime.now().time()) + ";" + str(rss) +";"+ str(distance) +";" + str(estimated_params[0]) +";"+ str(estimated_params[1]) +'\n'
             
             #data +=  str(robot.position['position'])+ ";" + str(robot.position['covariance']) + "\n"
-            print(data)
+            print(distance)
             text_file.write(data)
             rate.sleep()
 
