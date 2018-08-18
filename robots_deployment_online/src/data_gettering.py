@@ -125,7 +125,7 @@ class Robot:
             position = self.tree.graph_vertex_position[id]
             return position
         else:
-            return self.network.getData(id)['position']
+            return (0, 0)
 
 
 if __name__ == "__main__":
