@@ -127,6 +127,7 @@ class Robot:
         ##Client or tree junctions id
         if(id < self.robots_ids_start):
             position = self.tree.graph_vertex_position[id]
+            print('my', position)
             return position
         else:
             return (0, 0)
