@@ -51,6 +51,7 @@ class Robot:
 
         self.tree_file          = self.config['configs']['treefile']
         self.tree               = Tree(self.tree_file)
+        self.robots_ids_start   = len(self.tree.vertices)
 
 
         rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.getPose)
