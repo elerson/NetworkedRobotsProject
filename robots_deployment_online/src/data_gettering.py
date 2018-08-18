@@ -146,7 +146,8 @@ if __name__ == "__main__":
 
             estimated_params = robot.getRSSParameters()
             data = str(datetime.datetime.now().time()) + ";" + str(rss) +";"+ str(distance) +";" + str(estimated_params[0]) +";"+ str(estimated_params[1]) +';'
-            data +=  str(robot.position['position'])+ ";" + str(robot.position['covariance']) + "\n"
+            
+            #data +=  str(robot.position['position'])+ ";" + str(robot.position['covariance']) + "\n"
             print(data)
             text_file.write(data)
             rate.sleep()
