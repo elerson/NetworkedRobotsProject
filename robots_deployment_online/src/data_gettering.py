@@ -111,6 +111,9 @@ class Robot:
         real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id))*self.map_resolution
         return real_distance
 
+    def getDistance(self, p1, p2):
+        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
     def getRSSParameters(self):
         return self.metric_kalman.getResult()
 
