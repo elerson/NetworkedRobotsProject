@@ -15,7 +15,7 @@ configs:
   resolution: 0.05
   exit: 1
   simulation: 1
-  broadcast_address: 192.168.0.255
+  broadcast_address: 127.255.255.255
   algorithm_port: 39988
   configuration_port: 46544
 '''
