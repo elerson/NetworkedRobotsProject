@@ -1,6 +1,7 @@
 from scipy import misc
 from math import floor, sqrt, sin, cos, pi, ceil
 import numpy as np
+import tsp
 from tree import Tree, TreeSegmention
 from pyChristofides import christofides
 
