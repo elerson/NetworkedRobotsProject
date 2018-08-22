@@ -9,7 +9,7 @@ robot_exp = '''
   <node pkg="deployment_cefsm" type="deployment.py" name="ros_deployment_ID" output="screen">
     <param name="pose_send_time" value="0.3" />
     <param name="id" value="ID" />
-    <param name="tree_file" value="$(env EXP_DIR)/steinerData1.dat" />
+    <param name="config_file" value="$(env EXP_DIR)/../config_sim.yaml" />
     <param name="lower_threshold" value="HIGH" />
     <param name="higher_threshold" value="LOW" />
   </node> 

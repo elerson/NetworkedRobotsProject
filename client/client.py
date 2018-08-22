@@ -20,8 +20,10 @@ import glob
 import sys
 import signal
 import math
+import argparse
 
 import subprocess as sub
+
 
 class COMMANDS(IntEnum):    
     SETINITALPOSE         = 0
@@ -43,9 +45,12 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.pushButton_execCommand.clicked.connect(self.executeCommand)
         self.pushButton_startDeployment.clicked.connect(self.startDeployment)
 
-        home = os.path.expanduser("~")
-        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
+        #home = os.path.expanduser("~")
 
+        #
+	global config
+        self.config_data = self.readConfig(config)
+        
         # if(self.config_data['simulation']):
         #     dir_ = os.environ['EXP_DIR']
         #     self.config_data['treefile'] = dir_ + '/steinerData1.dat'
@@ -361,4 +366,15 @@ def main():
    
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
+    global config
+    parser = argparse.ArgumentParser(description='Visualization script:\n "./client -c ~/data.yaml"')
+
+    parser.add_argument('-c', action='store', dest='config', help='Path where de data is at', required=True)
+
+    pargs = parser.parse_args()
+    
+    config = pargs.config   
     main()                              # run the main function
+
+
+

@@ -6,7 +6,7 @@ robot_exp = '''
   <node pkg="robots_deployment_online" type="deployment.py" name="ros_deployment_ID" output="screen">
     <param name="pose_send_time" value="0.3" />
     <param name="id" value="ID" />
-    <param name="tree_file" value="$(env EXP_DIR)/steinerData1.dat" />
+    <param name="config_file" value="$(env EXP_DIR)/../config_sim.yaml" />
     <param name="map_resolution" value="0.05" />
     <param name="ray" value="RADIUS"/>
   </node> 

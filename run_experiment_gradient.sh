@@ -1,9 +1,14 @@
 #!/bin/bash
 
-distancias=(60 90 110 140 170)
-diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
+#distancias=(60 90 110 140 170)
+#diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
 #diretorios=(5euclideanexperiment)
-experiments=(1 2 3 4 5)
+#experiments=(1 2 3 4 5)
+
+distancias=(160)
+#diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
+diretorios=(1euclideanexperiment)
+experiments=(1)
 
 
 for dir_ in ${diretorios[@]}; do
@@ -12,15 +17,18 @@ for dir_ in ${diretorios[@]}; do
     for exp in ${experiments[@]}; do
 	export LOG_DIR=$dir_$'/gradient/gradient_'$dist'/'
 	#export LOG_DIR=$dir_$'_cefsm_'$dist'/'
-	./client/client.py &
+	./client/client.py -c $EXP_DIR/../config_sim.yaml &
 	
  	#cd simulated_experiments/cefsm/
 	#./create_exp.py 7 ${distancias[d]} 0.05
 	#cd ../../
-
+	
+	cd simulated_experiments/
+	./create_config.py $EXP_DIR
+	cd ../
 
 	cd simulated_experiments/gradient/
-	./create_exp.py 20 $dist 0.05
+	./create_exp.py 4 $dist 0.05
 	cd ../../
 
 	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05

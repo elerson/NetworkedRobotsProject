@@ -1,8 +1,9 @@
 from scipy import misc
 from math import floor, sqrt, sin, cos, pi, ceil
 import numpy as np
-import tsp
 from tree import Tree, TreeSegmention
+from pyChristofides import christofides
+
 
 class sceneGraph:
     def __init__(self, config_file, comm_radius, client_pos, offset=(0, 0)):
@@ -245,6 +246,9 @@ class sceneGraph:
 
         return self.full_graph
 
+    def calcEclideanDist(self, p1, p2):
+        return sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2) 
+
     def calculateTSP(self, nodes):
 
         if(nodes == []):
@@ -258,22 +262,47 @@ class sceneGraph:
         n           = len(full_graph)
         dist_graph  = {}
         nodes_      = []
+
+
         for node in nodes:            
             nodes_.append(self.vertice_position[node])
 
-
+        distances = []
         for i in range(len(nodes_)):
+            dist_array = []
             for j in range(len(nodes_)):
-                if(i == j):
-                    continue
-                dist_graph[(i,j)] = full_graph[nodes[i]][nodes[j]]
+                dist = self.calcEclideanDist(nodes_[i], nodes_[j]) 
+                dist_array.append(dist)
+            distances.append(dist_array)
 
-        t = tsp.tsp(nodes_, dist_graph)
+        TSP = christofides.compute(distances)
+        t = TSP['Christofides_Solution']
+
         path = []
-        for p in t[1]:
+        for p in t:
             path.append(nodes[p])
 
         if(len(path) > 1):
             path.append(path[0])
         return path
+
+
+        # for node in nodes:            
+        #     nodes_.append(self.vertice_position[node])
+
+
+        # for i in range(len(nodes_)):
+        #     for j in range(len(nodes_)):
+        #         if(i == j):
+        #             continue
+        #         dist_graph[(i,j)] = full_graph[nodes[i]][nodes[j]]
+
+        # t = tsp.tsp(nodes_, dist_graph)
+        # path = []
+        # for p in t[1]:
+        #     path.append(nodes[p])
+
+        # if(len(path) > 1):
+        #     path.append(path[0])
+        # return path
 

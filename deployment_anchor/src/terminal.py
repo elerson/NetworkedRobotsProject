@@ -51,7 +51,7 @@ class Terminal:
         self.yoffset      = rospy.get_param("~yoffset", 0)
 
         self.clients_pos  = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
-        self.radius       = (2.0/3.0)*self.radius
+        self.radius       = (1.0/3.0)*self.radius
         self.sceneGraph   = sceneGraph(self.config_file['configs'], self.radius, self.clients_pos, (self.xoffset, self.yoffset))
 
         
@@ -68,8 +68,10 @@ class Terminal:
         self.last_message = 0
         self.probe_time   = 0.2
 
-        if self.client_id > len(self.tree.clients):
+        if self.client_id >= len(self.tree.clients):
             sys.exit(0)
+
+        print(self.client_id)
 
         self.tree_clients_id = list(self.tree_clients)[self.client_id]
 

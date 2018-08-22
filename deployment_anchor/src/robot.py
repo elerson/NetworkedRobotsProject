@@ -90,7 +90,7 @@ class Robot:
         self.clients_pos     = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
 
         
-        graph_radius         = self.radius*(2.0/3.0)
+        graph_radius         = self.radius*(1.0/3.0)
         self.graph           = sceneGraph(self.config_file['configs'], graph_radius, self.clients_pos, (self.xoffset, self.yoffset))
         self.height          =  self.graph.heigh
         print(graph_radius, self.radius)
@@ -199,6 +199,7 @@ class Robot:
             self.start_real = False
 
         while(not self.initialized):
+            print('waiting')
             time.sleep(0.3)
 
     def receiveNetworkCommand(self, commnad):
@@ -585,7 +586,7 @@ class Robot:
         message = {'type': None}
         if len(self.message_fifo) > 0:
             message = self.message_fifo.pop()
-        #print('phase alg', self.phase_alg)
+        print('phase alg', self.phase_alg)
         #print(message)
 
         if('src' in message):
@@ -619,17 +620,22 @@ class Robot:
 
 
     def InitPhase(self, message):
+        print('entrou')
         if(self.init_tsp):
+            print('1')
             mylist = self.graph.graph.keys()
             mylist.insert(0, self.getCurrentNode())
             to_visit = sorted(set(mylist), key=lambda x: mylist.index(x))
+            print('tsp in')
             self.graphWalk  = self.graph.calculateTSP(list(to_visit))
             self.init_tsp   = False
+            print('tsp out')
 
 
         #self.visited_nodes = self.visited_nodes.union(set([self.getCurrentNode()])) 
             
         if(message['type'] == MSG.PROBE and message['id'] == self.gateway_id):
+            print('2')
             self.gateway_src= message['src']
             new_message         = {}
             new_message['id']   = self.id
@@ -654,7 +660,8 @@ class Robot:
 
             self.message_fifo    = []
 
-            print('search phase', self.is_coord) 
+            print('search phase', self.is_coord)
+            print('saiu')
             return
 
         if(not self.wait_init_ack):
@@ -662,6 +669,7 @@ class Robot:
             print(self.graphWalk)
             print(self.node_id)
 
+        print('saiu')
     
 
     # def goNextNode(self, walk):
@@ -833,10 +841,11 @@ if __name__ == "__main__":
     rate = rospy.Rate(200.0)
     
     while(not robot.start_real and not rospy.is_shutdown()):
+        #print('sleep')
         rate.sleep()
 
 
     while not rospy.is_shutdown():
-        
+        #print('run')
         robot.run()
         rate.sleep()

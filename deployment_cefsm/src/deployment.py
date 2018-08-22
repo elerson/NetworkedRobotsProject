@@ -89,7 +89,7 @@ class Robot:
         self.state = State.IDLE
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.1)
-        self.tree_file           = rospy.get_param("~tree_file")
+        self.tree_file           = self.config['configs']['treefile']
         self.radius              = rospy.get_param("~radius", 10)
         self.vote_distance       = 0.5
 
@@ -209,7 +209,7 @@ class Robot:
     def realMetricCallback(self, data_id, rss):
         m_var = 4.0
         if( data_id not in self.metric_kalman):
-            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 10.0, m_var, self.log_rss)
+            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1 ,10.0, m_var, self.log_rss)
 
         position = self.getPositionByID(data_id)
 
@@ -243,7 +243,7 @@ class Robot:
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id,[-40.0, 3], 10.0, variance, self.log_rss)
+                self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id,[-40.0, 3], 1 ,10.0, variance, self.log_rss)
 
 
             m, P = self.metric_kalman[data_id].getResult()
@@ -267,7 +267,7 @@ class Robot:
             #self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
             if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter(self.id, [-40.0, 2.4], 10.0, variance, self.log_rss)
+                self.metric_kalman[vertex] =  RSSIKalmanFilter(self.id, [-40.0, 2.4], 1, 10.0, variance, self.log_rss)
 
             
             if(real_distance > 1.0):

@@ -11,10 +11,14 @@ for dir_ in ${diretorios[@]}; do
     for exp in ${experiments[@]}; do
 	export LOG_DIR=$dir_$'anchor'$dist'/'
 
-	./client_anchor/client.py $dist &
+	./client_anchor/client.py -c $EXP_DIR/../config_sim.yaml -r $dist &
 	
+	cd simulated_experiments/
+	./create_config.py $EXP_DIR
+	cd ../
+
 	cd simulated_experiments/anchor/
-	./create_exp.py 4 $dist 0.05
+	./create_exp.py 7 $dist 0.05
 	cd ../../
 
 	roslaunch simulated_experiments/simulation.launch &

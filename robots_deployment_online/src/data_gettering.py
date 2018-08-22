@@ -99,7 +99,7 @@ class Robot:
             real_distance    = self.getDistance(self.position['position'], self.getPositionByID(measurement_id-1))*self.map_resolution
             real_metric      = rss
 
-            print('my', self.position['position'], self.getPositionByID(measurement_id-1))
+            #print('my', self.position['position'], self.getPositionByID(measurement_id-1))
 
 
             m_var = 4.0
@@ -152,7 +152,7 @@ if __name__ == "__main__":
             data = str(datetime.datetime.now().time()) + ";" + str(rss) +";"+ str(distance) +";" + str(estimated_params[0]) +";"+ str(estimated_params[1]) +'\n'
             
             #data +=  str(robot.position['position'])+ ";" + str(robot.position['covariance']) + "\n"
-            print(distance)
+            print(data)
             text_file.write(data)
             rate.sleep()
 

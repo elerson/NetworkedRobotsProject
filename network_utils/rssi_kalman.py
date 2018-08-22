@@ -13,7 +13,7 @@ import os
 import glob
 
 class RSSIKalmanFilterRecursive:
-	def __init__(self, m, var, measurment_var, d0 = 1.0):
+	def __init__(self, id_, m, var, measurment_var, d0 = 1.0):
 
 		self.m = np.transpose(m)
 		self.P = np.array([[var, 0],[0, var]])
@@ -69,17 +69,17 @@ class RSSIKalmanFilterRecursive:
 		return self.gamma[1]
 
 class RSSIKalmanFilter:
-	def __init__(self, id_, m, var, measurment_var, log=False, d0 = 1.0):
+	def __init__(self, id_, m, var_L, var_alpha, measurement_var, log=False, d0 = 1.0):
 
 		self.id_ = id_
-		self.m = np.transpose(np.matrix(m))
-		self.P = np.array([[var, 0],[0, var]])
+		self.mu = np.transpose(np.matrix(m))
+		self.sigma = np.array([[var_L, 0],[0, var_alpha]])
 		self.d0 = d0
 		self.X = np.array([[0, 0]])
 		self.Y = np.array([0])
-		self.measurment_var = measurment_var
+		self.measurement_var = measurement_var
 
-		self.gamma = self.m
+		self.gamma = self.mu
 		self.mutex = Lock()
 		self.log   = log
 		if(self.log):
@@ -102,29 +102,51 @@ class RSSIKalmanFilter:
 		print(str_data)
 		self.log_data_file.write(str_data)
 
+
 	def addMeasurement(self, distance, measurement):
 
 		if(distance < self.d0):
 			return
-
-		y = measurement
-		t = -10.0*math.log10(distance/self.d0)
 		self.mutex.acquire()
-		
-		self.Y = np.array([y])
-		self.X = np.matrix([[1, t]])
-		
-		P = pinv(pinv(self.P) + (1.0/self.measurment_var)*dot(np.transpose(self.X), self.X))
-		#print(P)
-		self.m = dot(P,((1.0/self.measurment_var)*np.transpose(self.X)*y + dot(pinv(self.P),self.m)))
-		self.P = P
 
+		z = measurement
+		H = np.matrix([1, -10.0*math.log10(distance/self.d0)])
+		z_hat = np.dot(H,self.mu)
 
-		#print(self.P,self.m)
+		S = np.dot(H, np.dot(self.sigma, H.T)) + self.measurement_var
+		K = np.dot(self.sigma, np.dot(H.T, np.linalg.pinv(S)))
+
+		self.mu    = self.mu + K*(z - z_hat)
+		self.sigma = np.dot((np.eye(2) - np.dot(K, H)),self.sigma)
 		
 		self.mutex.release()
 		if(self.log):
 			self.saveLog(distance, measurement, self.measurment_var)
+
+
+	# def addMeasurement(self, distance, measurement):
+
+	# 	if(distance < self.d0):
+	# 		return
+
+	# 	y = measurement
+	# 	t = -10.0*math.log10(distance/self.d0)
+	# 	self.mutex.acquire()
+		
+	# 	self.Y = np.array([y])
+	# 	self.X = np.matrix([[1, t]])
+		
+	# 	P = pinv(pinv(self.P) + (1.0/self.measurment_var)*dot(np.transpose(self.X), self.X))
+	# 	#print(P)
+	# 	self.m = dot(P,((1.0/self.measurment_var)*np.transpose(self.X)*y + dot(pinv(self.P),self.m)))
+	# 	self.P = P
+
+
+	# 	#print(self.P,self.m)
+		
+	# 	self.mutex.release()
+	# 	if(self.log):
+	# 		self.saveLog(distance, measurement, self.measurment_var)
 
 
 		#print(self.X.shape, self.Y.shape)
@@ -139,11 +161,11 @@ class RSSIKalmanFilter:
 		#self.m = m
 		#m = dot(pinv(dot(np.transpose(self.X[1:]), self.X[1:])), dot(np.transpose(self.X[1:]), self.Y[1:]))
 		#self.mutex.release()
-		return (self.m, self.P)
+		return (self.mu, self.sigma)
 
 	def getMetricValue(self, distance):
 		if(distance < self.d0):
-			return self.m[0][0,0]
+			return self.mu[0][0,0]
 
 		m, P = self.getResult()
 		t = -10.0*math.log10(distance/self.d0)
@@ -155,8 +177,8 @@ class RSSIKalmanFilter:
 
 
 	def getGamma(self):
-		return self.m[1,0]
+		return self.mu[1,0]
 
 	def getPL(self):
-		return self.m[0,0]
+		return self.mu[0,0]
 
