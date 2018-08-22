@@ -351,6 +351,7 @@ class Robot:
         self.message_fifo.insert(0, message)
 
         if(message['type'] == MSG.PROBE):
+            exit(0)
             try:
                 self.measurement_link[self.getCurrentNode()].append(message['src'])
             except:
