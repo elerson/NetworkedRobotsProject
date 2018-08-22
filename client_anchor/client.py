@@ -79,7 +79,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
 
         #l = lambda r : math.exp((r - 40.0)/30.0)
-        self.radius = radius*(2.0/3.0)
+        self.radius = radius*(1.0/3.0)
 
         print(self.treefile)
         print(self.config_data)
