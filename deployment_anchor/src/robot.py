@@ -409,7 +409,7 @@ class Robot:
 
             if not self.hasMeasumentsWaiting():
                 self.dicover_walk = self.goNextNode(self.dicover_walk, 1)
-            #print(self.dicover_walk, self.search_queue_level)
+            print(self.dicover_walk, self.search_queue_level)
             #print(self.search_queue_level, self.getCurrentNode(), self.graph.getDistance(8, self.getCurrentNode()), 'discover walk')
             #if( 'src' in message):
             #    print(self.getCurrentNode(), self.graph.getDistance(message['src'], self.getCurrentNode()), 'new_walk')
@@ -620,16 +620,16 @@ class Robot:
 
 
     def InitPhase(self, message):
-        print('entrou')
+        #print('entrou')
         if(self.init_tsp):
             print('1')
             mylist = self.graph.graph.keys()
             mylist.insert(0, self.getCurrentNode())
             to_visit = sorted(set(mylist), key=lambda x: mylist.index(x))
-            print('tsp in')
+            #print('tsp in')
             self.graphWalk  = self.graph.calculateTSP(list(to_visit))
             self.init_tsp   = False
-            print('tsp out')
+            #print('tsp out')
 
 
         #self.visited_nodes = self.visited_nodes.union(set([self.getCurrentNode()])) 
@@ -661,7 +661,7 @@ class Robot:
             self.message_fifo    = []
 
             print('search phase', self.is_coord)
-            print('saiu')
+            #print('saiu')
             return
 
         if(not self.wait_init_ack):
@@ -669,7 +669,7 @@ class Robot:
             print(self.graphWalk)
             print(self.node_id)
 
-        print('saiu')
+        #print('saiu')
     
 
     # def goNextNode(self, walk):
