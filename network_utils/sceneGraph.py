@@ -252,6 +252,9 @@ class sceneGraph:
 
     def calculateTSP(self, nodes):
 
+        if(len(nodes) == 1):
+            return nodes
+
         if(nodes == []):
             return []
 
