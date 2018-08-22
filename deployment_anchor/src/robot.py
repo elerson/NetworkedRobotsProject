@@ -626,7 +626,7 @@ class Robot:
             mylist = self.graph.graph.keys()
             mylist.insert(0, self.getCurrentNode())
             to_visit = sorted(set(mylist), key=lambda x: mylist.index(x))
-            #print('tsp in')
+            print(list(to_visit), self.getCurrentNode())
             self.graphWalk  = self.graph.calculateTSP(list(to_visit))
             self.init_tsp   = False
             #print('tsp out')
