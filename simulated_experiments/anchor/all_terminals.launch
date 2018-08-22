@@ -1,0 +1,8 @@
+<launch>
+<include file="$(env EXP_DIR)/../anchor/terminal0.launch" />
+<include file="$(env EXP_DIR)/../anchor/terminal1.launch" />
+<include file="$(env EXP_DIR)/../anchor/terminal2.launch" />
+<include file="$(env EXP_DIR)/../anchor/terminal3.launch" />
+<include file="$(env EXP_DIR)/../anchor/terminal4.launch" />
+<include file="$(env EXP_DIR)/../anchor/terminal5.launch" />
+</launch>

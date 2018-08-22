@@ -1,0 +1,4 @@
+<launch>
+<include file="$(env EXP_DIR)/../anchor/all_robots.launch" />
+<include file="$(env EXP_DIR)/../anchor/all_terminals.launch" />
+</launch>

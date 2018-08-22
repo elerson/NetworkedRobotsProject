@@ -1,0 +1,13 @@
+
+<launch>
+  <group ns = "terminal_1">
+    <node pkg="deployment_anchor" type="terminal.py" name="ros_terminal_0" output="screen">
+      <param name="radius" value="160" />
+      <param name="xoffset" value="0" />
+      <param name="yoffset" value="0" />
+      <param name="id" value="1" />
+      <param name="config_file" value="$(env EXP_DIR)/../config_sim.yaml" />
+    </node> 
+
+  </group>
+</launch>

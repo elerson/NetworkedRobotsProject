@@ -1,0 +1,47 @@
+
+<launch>
+  <group ns = "robot_13">
+    <node pkg="deployment_anchor" type="robot.py" name="ros_robot_13" output="screen">
+      <param name="radius" value="160" />
+      <param name="xoffset" value="0" />
+      <param name="yoffset" value="0" />
+      <param name="id" value="13" />
+      <param name="config_file" value="/home/elerson/NetworkedRobotsProject/configs/data.yaml" />
+    </node> 
+
+
+    <node pkg="fake_localization" type="fake_localization" name="amclrobot_13" output="screen">
+     <!-- Publish scans from best pose at a max of 10 Hz -->
+     <param name="odom_model_type" value="omni"/>
+     <param name="base_frame_id" value="robot_13/base_link"/>
+     <param name="odom_frame_id" value="robot_13/odom"/>
+     <param name="global_frame_id" value="/map"/>
+    </node>
+
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+
+     <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
+     <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
+     <rosparam file="$(find deployment_anchor)/launch/local_costmap_params.yaml" command="load" />
+     <rosparam file="$(find deployment_anchor)/launch/global_costmap_params.yaml" command="load" />
+     <rosparam file="$(find deployment_anchor)/launch/base_local_planner_params.yaml" command="load" />
+     
+     <param name="planner_file_dir" value="/home/elerson/catkin_ws/src/networked_robots_experimetal_data/1euclideanexperiment/"/>
+     <param name="planner_file_1" value="steinerData1.dat"/>
+     <param name="planner_file_2" value="steinerData2.dat"/>
+
+     <param name="global_costmap/footprint" value="robot_13/base_footprint"/>
+     <param name="local_costmap/global_frame" value="robot_13/odom"/>
+     <param name="global_costmap/robot_base_frame" value="robot_13/base_footprint"/>
+
+     <param name="local_costmap/robot_base_frame" value="robot_13/base_footprint"/>
+     <param name="global_costmap/laser_scan_sensor/sensor_frame" value="robot_13/base_laser_link"/>
+     <param name="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" value="robot_13/base_laser_link"/>
+
+
+     <remap from="/robot_13/map" to="/map" />
+    </node>
+
+  </group>
+</launch>
