@@ -4,6 +4,7 @@ import numpy as np
 import tsp
 from tree import Tree, TreeSegmention
 from pyChristofides import christofides
+from collections import deque
 
 
 class sceneGraph:
@@ -283,11 +284,16 @@ class sceneGraph:
         t = TSP['Christofides_Solution']
 
         path = []
-        for p in t:
+        for p in t[:-1]:
             path.append(nodes[p])
 
-        #if(len(path) > 1):
-        #    path.append(path[0])
+        d=deque(path)
+        d.rotate(path.index(nodes[0])+1)
+
+        path = list(d)
+
+        if(len(path) > 1):
+            path.append(path[0])
         return path
 
 
