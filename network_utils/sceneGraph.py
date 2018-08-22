@@ -265,45 +265,45 @@ class sceneGraph:
         nodes_      = []
 
 
-        # for node in nodes:            
-        #     nodes_.append(self.vertice_position[node])
-
-        # distances = []
-        # for i in range(len(nodes_)):
-        #     dist_array = []
-        #     for j in range(len(nodes_)):
-        #         dist = self.calcEclideanDist(nodes_[i], nodes_[j]) 
-        #         dist_array.append(dist)
-        #     distances.append(dist_array)
-
-        # TSP = christofides.compute(distances)
-        # t = TSP['Christofides_Solution']
-
-        # path = []
-        # for p in t:
-        #     path.append(nodes[p])
-
-        # #if(len(path) > 1):
-        # #    path.append(path[0])
-        # return path
-
-
         for node in nodes:            
             nodes_.append(self.vertice_position[node])
 
-
+        distances = []
         for i in range(len(nodes_)):
+            dist_array = []
             for j in range(len(nodes_)):
-                if(i == j):
-                    continue
-                dist_graph[(i,j)] = full_graph[nodes[i]][nodes[j]]
+                dist = self.calcEclideanDist(nodes_[i], nodes_[j]) 
+                dist_array.append(dist)
+            distances.append(dist_array)
 
-        t = tsp.tsp(nodes_, dist_graph)
+        TSP = christofides.compute(distances)
+        t = TSP['Christofides_Solution']
+
         path = []
-        for p in t[1]:
+        for p in t:
             path.append(nodes[p])
 
-        if(len(path) > 1):
-            path.append(path[0])
+        #if(len(path) > 1):
+        #    path.append(path[0])
         return path
+
+
+        # for node in nodes:            
+        #     nodes_.append(self.vertice_position[node])
+
+
+        # for i in range(len(nodes_)):
+        #     for j in range(len(nodes_)):
+        #         if(i == j):
+        #             continue
+        #         dist_graph[(i,j)] = full_graph[nodes[i]][nodes[j]]
+
+        # t = tsp.tsp(nodes_, dist_graph)
+        # path = []
+        # for p in t[1]:
+        #     path.append(nodes[p])
+
+        # if(len(path) > 1):
+        #     path.append(path[0])
+        # return path
 
