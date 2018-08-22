@@ -408,7 +408,7 @@ class Robot:
 
 
             if not self.hasMeasumentsWaiting():
-                self.dicover_walk = self.goNextNode(self.dicover_walk, 3)
+                self.dicover_walk = self.goNextNode(self.dicover_walk, 1)
             print(self.dicover_walk, self.search_queue_level)
             #print(self.search_queue_level, self.getCurrentNode(), self.graph.getDistance(8, self.getCurrentNode()), 'discover walk')
             #if( 'src' in message):
@@ -838,7 +838,7 @@ class Robot:
         
 if __name__ == "__main__":
     robot = Robot()
-    rate = rospy.Rate(200.0)
+    rate = rospy.Rate(20.0)
     
     while(not robot.start_real and not rospy.is_shutdown()):
         #print('sleep')

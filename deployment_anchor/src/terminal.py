@@ -183,7 +183,7 @@ class Terminal:
         
 if __name__ == "__main__":
     terminal = Terminal()
-    rate = rospy.Rate(200.0)
+    rate = rospy.Rate(20.0)
     while not rospy.is_shutdown():
         
         terminal.run()
