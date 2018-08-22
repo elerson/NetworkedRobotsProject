@@ -282,8 +282,8 @@ class sceneGraph:
         for p in t:
             path.append(nodes[p])
 
-        if(len(path) > 1):
-            path.append(path[0])
+        #if(len(path) > 1):
+        #    path.append(path[0])
         return path
 
 

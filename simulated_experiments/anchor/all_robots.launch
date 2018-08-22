@@ -2,7 +2,4 @@
 <include file="$(env EXP_DIR)/../anchor/robot0.launch" />
 <include file="$(env EXP_DIR)/../anchor/robot1.launch" />
 <include file="$(env EXP_DIR)/../anchor/robot2.launch" />
-<include file="$(env EXP_DIR)/../anchor/robot3.launch" />
-<include file="$(env EXP_DIR)/../anchor/robot4.launch" />
-<include file="$(env EXP_DIR)/../anchor/robot5.launch" />
 </launch>
