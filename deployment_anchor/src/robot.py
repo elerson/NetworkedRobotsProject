@@ -586,7 +586,7 @@ class Robot:
         message = {'type': None}
         if len(self.message_fifo) > 0:
             message = self.message_fifo.pop()
-        print('phase alg', self.phase_alg)
+        #print('phase alg', self.phase_alg)
         #print(message)
 
         if('src' in message):
