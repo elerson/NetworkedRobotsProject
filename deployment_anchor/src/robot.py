@@ -408,7 +408,7 @@ class Robot:
 
 
             if not self.hasMeasumentsWaiting():
-                self.dicover_walk = self.goNextNode(self.dicover_walk, 1)
+                self.dicover_walk = self.goNextNode(self.dicover_walk, 3)
             print(self.dicover_walk, self.search_queue_level)
             #print(self.search_queue_level, self.getCurrentNode(), self.graph.getDistance(8, self.getCurrentNode()), 'discover walk')
             #if( 'src' in message):
