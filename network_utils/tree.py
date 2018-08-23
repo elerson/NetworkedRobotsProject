@@ -14,7 +14,7 @@ class Tree:
         self.readTree()
         pass
     def readTree(self):
-        VERTEX, VERTEX_CONNECTION, VERTEX_POSITION = range(3)
+        VERTEX, VERTEX_CONNECTION, VERTEX_POSITION, VERTEX_CLIENT = range(4)
 
         state = VERTEX
         vertex = -1
@@ -26,8 +26,18 @@ class Tree:
                 if(state == VERTEX_POSITION):
                     for i in range(len(self.graph_adj_list)):
                         self.graph_vertex_position[i] = (float(line_data[2*i]), float(line_data[2*i + 1]))
+                    state = VERTEX_CLIENT
+                    continue
+                    
 
-                    break
+                if(state == VERTEX_CLIENT):
+                    clients = map(int, line_data)
+                    for ii in range(len(clients)):
+                        if(clients[ii]):
+                            self.clients.append(ii)
+
+                    print('clients', self.clients)
+
 
                 #read the adjacence list
                 for data in line_data:
@@ -35,6 +45,11 @@ class Tree:
                     if(int(data) == -2):
                         state = VERTEX_POSITION
                         break
+
+                    #if(int(data) == -2 and state == VERTEX_POSITION):
+                        
+
+                    #    break
 
                     if(state == VERTEX): #read the vertex information
                         vertex = int(data)
@@ -50,9 +65,13 @@ class Tree:
                             state = VERTEX
         self.getClients__()
         pass
-    def getClients__(self):        
+    def getClients__(self):
+        define_clients = True
+        if(self.clients != []):
+            define_clients = False
+
         for vertex in self.graph_adj_list:
-            if(len(self.graph_adj_list[vertex]) == 1):
+            if(len(self.graph_adj_list[vertex]) == 1 and define_clients):
                 self.clients.append(vertex)
             self.vertices.append(vertex)
 
@@ -90,9 +109,10 @@ class TreeSegmention:
 
     
     def getClients__(self, used_vertex):
-        for vertex in tree.graph_adj_list:
-            if(len(tree.graph_adj_list[vertex]) == 1):
-                tree.clients.append(vertex)
+        return tree.clients
+        #for vertex in tree.graph_adj_list:
+        #    if(len(tree.graph_adj_list[vertex]) == 1):
+        #        tree.clients.append(vertex)
 
 
     # def breadth_first_search(self):

@@ -2,4 +2,7 @@
 <include file="$(env EXP_DIR)/../gradient/robot0.launch" />
 <include file="$(env EXP_DIR)/../gradient/robot1.launch" />
 <include file="$(env EXP_DIR)/../gradient/robot2.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot3.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot4.launch" />
+<include file="$(env EXP_DIR)/../gradient/robot5.launch" />
 </launch>

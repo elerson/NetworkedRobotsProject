@@ -13,7 +13,7 @@ configs:
   map: DIR_/map/ambiente.png
   treefile: DIR_/steinerData1.dat
   resolution: 0.05
-  exit: 1
+  exit: 0
   simulation: 1
   broadcast_address: 127.255.255.255
   algorithm_port: 39988

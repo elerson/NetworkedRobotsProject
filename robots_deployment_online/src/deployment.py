@@ -88,6 +88,7 @@ class Robot:
 
         self.robots_ids_start    = len(self.tree.vertices)
 
+
         if(self.real_robot):
         	self.id              = int(id) - 1
         else:

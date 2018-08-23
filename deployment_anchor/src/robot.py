@@ -834,7 +834,7 @@ class Robot:
             message['routing']   = self.comm_route 
             message['ended']     = self.deploy_ended
             message['deploy_n']  = self.deploy_numbers
-            #message['steiner']   = self.steiner_graph 
+            message['steiner']   = str(self.steiner_graph) 
             self.network.sendMessage(message)
             self.send_position_time = rospy.get_time()        
 
