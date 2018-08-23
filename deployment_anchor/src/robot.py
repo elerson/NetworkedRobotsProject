@@ -164,6 +164,7 @@ class Robot:
         self.position['position']= (0, 0, (0,0,0))
         self.steiner             = []
         self.comm_route          = []
+        self.steiner_graph       = {}
 
         self.send_position_time_diff = rospy.get_param("~pose_send_time", 0.5)
         self.send_position_time      = 0.0
@@ -274,6 +275,9 @@ class Robot:
 
             deployment_positions  = self.steiner.steiner_vertices
             print('steiner ', deployment_positions, self.terminals, self.links_graph, self.steiner.steiner)
+            self.steiner_graph = {'deploy': deployment_positions, 'terminals': self.terminals, 'graph': self.links_graph, 'steiner': self.steiner.steiner}
+
+
             self.deployment_assignment, self.node_robot_assignment = self.getMinAssigment(self.robot_position_ids.keys(), deployment_positions)
             print(self.deployment_assignment, self.node_robot_assignment)
             self.deploy_numbers = len(deployment_positions)
@@ -830,6 +834,7 @@ class Robot:
             message['routing']   = self.comm_route 
             message['ended']     = self.deploy_ended
             message['deploy_n']  = self.deploy_numbers
+            message['steiner']   = self.steiner_graph 
             self.network.sendMessage(message)
             self.send_position_time = rospy.get_time()        
 
