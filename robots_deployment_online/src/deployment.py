@@ -902,7 +902,7 @@ class Robot:
 
         if(not self.isAllocated()):
             return 
-        #print("control")
+        print("control")
         closest_point = self.getClosetPointToPath()
         r = self.position['position']
 
