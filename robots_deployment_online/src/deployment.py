@@ -413,11 +413,14 @@ class Robot:
         robot_ids = []
         robot_positions.append(self.position['position'])
         robot_ids.append(self.id)
+        print('ids teste 0')
         data_ids = self.network.getDataIds()
         for data_id in data_ids:
             if(data_id < 0):
                 continue
-                
+
+            print(data_id, 'teste1')
+
             if(data_id != self.id and allocation == []):
                 position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
@@ -430,6 +433,7 @@ class Robot:
                 position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
                 robot_ids.append(data_id)
+            print(data_id, 'teste3')
 
         return robot_positions, robot_ids
   
