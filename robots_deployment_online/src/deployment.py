@@ -939,7 +939,7 @@ class Robot:
                 self.Stall()
             else:
                 print('control 2')
-                #self.control_nonholonomic()
+                self.control_nonholonomic()
 
        
         self.position['started'] = 1
@@ -1025,9 +1025,9 @@ class Robot:
 
     def control_nonholonomic(self):
         r = self.position['position']
-
+        print('1 -- teste')
         neighbors_ids = self.getNeighborsIDs()
-
+        print('2 -- teste')
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
 
@@ -1039,7 +1039,7 @@ class Robot:
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
-        
+        print('3 -- teste')
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
         
         tangent = (0, 0)
