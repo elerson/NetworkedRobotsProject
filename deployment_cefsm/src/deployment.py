@@ -154,6 +154,9 @@ class Robot:
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
 
+        while (self.initialized == False and not rospy.is_shutdown()):
+            time.sleep(0.5)
+
         self.start_real = True
         if(self.real_robot):
             self.start_real = False
@@ -165,6 +168,10 @@ class Robot:
         self.metric_kalman       = {}
         self.gamma               = 3
         self.status              = -1 
+
+
+
+
         
         #if(self.real_robot):
         #    self.updateRouting()
@@ -207,6 +214,10 @@ class Robot:
 
 
     def realMetricCallback(self, data_id, rss):
+
+        if(not self.start_real):
+            return
+
         m_var = 4.0
         if( data_id not in self.metric_kalman):
             self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1 ,10.0, m_var, self.log_rss)

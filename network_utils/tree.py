@@ -108,8 +108,8 @@ class TreeSegmention:
         pass
 
     
-    def getClients__(self, used_vertex):
-        return tree.clients
+    def getClients__(self):
+        return self.tree.clients
         #for vertex in tree.graph_adj_list:
         #    if(len(tree.graph_adj_list[vertex]) == 1):
         #        tree.clients.append(vertex)
@@ -320,10 +320,12 @@ class TreeSegmention:
     ###
     ###
     def getLeafs(self, visited_set):
+        #return list(set(self.getClients__()) - set(visited_set))
+
         leafs = []
         for vertex in self.tree.graph_adj_list:            
-            if(len(self.tree.graph_adj_list[vertex])-visited_set.count(vertex)*2 == 1):
-                leafs.append(vertex)
+           if(len(self.tree.graph_adj_list[vertex])-visited_set.count(vertex)*2 == 1):
+               leafs.append(vertex)
         return (leafs)
 
 
@@ -332,7 +334,7 @@ class TreeSegmention:
     def segmentation_search(self, closed_list, paths):
         
         leafs = self.getLeafs(closed_list)
-        #print(leafs)
+        #print('leafs', leafs)
         seg_flag = False
         for node in leafs:
             self.segmentation_search_recursion(node, [node], closed_list, leafs, paths)
@@ -385,7 +387,7 @@ class TreeSegmention:
         return total_distance
 
     def verifyAngle(self, path, radius):
-        print(path)
+        #print(path)
         first = self.tree.graph_vertex_position[path[0]]
         last  = self.tree.graph_vertex_position[path[-1]]
 
@@ -453,6 +455,8 @@ class TreeSegmention:
         segmentation_total_cost = {}
         min_cost = float('inf')
         min_cost_index = -1
+        #print('segmentation paths', self.segmentaion_paths)
+
         for i in self.segmentaion_paths:
             segmentation_costs[i] = []
             segmentation = self.segmentaion_paths[i]

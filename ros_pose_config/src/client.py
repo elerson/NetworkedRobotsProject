@@ -43,7 +43,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.pushButton_setGoal.clicked.connect(self.setGoal)
 
         home = os.path.expanduser("~")
-        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
+        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data_real.yaml')
 
 
         self.image       = self.loadImage()

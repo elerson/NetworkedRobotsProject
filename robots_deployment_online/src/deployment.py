@@ -133,6 +133,9 @@ class Robot:
         rospy.Subscriber(prefix + "/move_base/status", GoalStatusArray, self.getStatus)
         rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
 
+        while (self.initialized == False and not rospy.is_shutdown()):
+            time.sleep(0.5)
+
         self.start_real = True
         if(self.real_robot):
             self.start_real = False
@@ -142,11 +145,14 @@ class Robot:
             rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
 
 
+
         self.send_deployment     = 0
         self.send_deployment_time_diff = 4.0
 
         self.metric_kalman       = {}
         self.gamma               = 4
+
+
 
         #if(self.real_robot):
         #    self.updateRouting()
@@ -183,6 +189,9 @@ class Robot:
         return -40 -10*self.gamma*math.log10(distance) + np.random.normal(0,math.sqrt(variance),1)[0]
 
     def realMetricCallback(self, data_id, rss):
+
+        if(not self.start_real):
+            return
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
