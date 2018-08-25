@@ -415,6 +415,9 @@ class Robot:
         robot_ids.append(self.id)
         data_ids = self.network.getDataIds()
         for data_id in data_ids:
+            if(data_id < 0):
+                continue
+                
             if(data_id != self.id and allocation == []):
                 position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
@@ -740,7 +743,7 @@ class Robot:
         #get all robots that are in the allocation
         print('ID teste 3')
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
-
+        print('ID teste 3.5')
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
         q = self.tree.graph_vertex_position[segmentation[self.allocation_id][-1]]
