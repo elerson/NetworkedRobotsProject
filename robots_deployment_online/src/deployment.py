@@ -42,7 +42,7 @@ class COMMANDS(IntEnum):
 class Robot:
     def __init__(self):
         rospy.init_node('robot_deployment', anonymous=True)
-        #print("ROBOT")
+        print("INITIALIZING ROBOT ....")
 
 
         ###
