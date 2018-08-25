@@ -205,12 +205,12 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def solutionStarted(self):
         if(self.solution_started):
             return True
-        if()
+
         started = 0
         for id in self.network.rcv_data:
             if(id < 0):
                 continue
-            
+
             started = max(started, self.network.rcv_data[id]['started'])
         self.solution_started = (started == 1)
 
@@ -247,9 +247,14 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def createRoutingGraph(self):
         graph = {}
         for id in self.network.rcv_data:
+            if id < 0:
+                continue
+                
             graph[id] = set([])
 
         for id in self.network.rcv_data:
+            if id < 0:
+                continue
             graph[id] = graph[id].union(set(self.network.rcv_data[id]['routing']))
             for neigbor in self.network.rcv_data[id]['routing']:
                 try:
@@ -259,6 +264,9 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
 
         for id in self.network.rcv_data:
+            if id < 0:
+                continue
+
             graph[id] = list(graph[id])
         return graph
 

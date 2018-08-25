@@ -47,8 +47,9 @@ class Image(QtGui.QWidget):
 
     def addRobots(self, robots):
         for robot_id in robots:
-            self.robots[robot_id] = robots[robot_id]['position']
-            print(self.robots[robot_id])
+            if (robot_id >= 0):
+                self.robots[robot_id] = robots[robot_id]['position']
+                print(self.robots[robot_id])
 
     def addConnections(self, graph):
         self.communication_graph = graph

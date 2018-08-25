@@ -187,7 +187,7 @@ class Robot:
         print(command)
         if (command['command'] == COMMANDS.STARTDEPLOYMENT):
             self.start_real = True
-            
+
 
     def createRoutingTable():
         neighbors_ids = self.getNeighborsIDs()
@@ -385,6 +385,7 @@ class Robot:
         #avoid to flood the network with messages
         if(rospy.get_time() - self.send_position_time > self.send_position_time_diff or not self.initialized):
             self.network.sendMessage(self.position)
+            print('send pose', self.position)
             self.send_position_time__ = rospy.get_time()
 
         self.initialized = True
