@@ -130,6 +130,10 @@ class Robot:
         else:
             prefix               = "/robot_"+str(self.ros_id)
 
+        self.map_info = False
+        rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
+        while(not self.map_info and not rospy.is_shutdown()):
+            time.sleep(0.5)
 
         rospy.Subscriber(prefix+"/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.vel_pub             = rospy.Publisher(prefix + "/cmd_vel", Twist, queue_size=10)
@@ -139,7 +143,7 @@ class Robot:
         self.goal_pub            = rospy.Publisher(prefix + "/move_base/goal", MoveBaseActionGoal, queue_size=10)
 
         rospy.Subscriber(prefix + "/move_base/status", GoalStatusArray, self.getStatus)
-        rospy.Subscriber("/map_metadata", MapMetaData, self.getMap)
+        
 
         while (self.initialized == False and not rospy.is_shutdown()):
             time.sleep(0.5)
@@ -312,7 +316,7 @@ class Robot:
         self.map_resolution = MapData.resolution
         self.height         = MapData.height
         #print(MapData.height, 'teste')
-
+        self.map_info = True
 
     def Stall(self):
         goal = GoalID()
