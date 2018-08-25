@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="robots_deployment_online" type="deployment.py" name="ros_deployment_0" output="screen">
+    <param name="pose_send_time" value="0.3" />
+    <param name="id" value="0" />
+    <param name="config_file" value="/home/elerson/NetworkedRobotsProject/configs/data_real.yaml" />
+    <param name="tree_file" value="/home/elerson/catkin_ws/src/navigation_roomba/steinerData1.dat" />
+    <param name="map_resolution" value="0.05" />
+    <param name="ray" value="100.0"/>
+    <param name="prefix" value=""/>
+  </node> 
+</launch>
