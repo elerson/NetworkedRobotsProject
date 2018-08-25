@@ -31,6 +31,11 @@ from network_utils.bspline import BSpline
 import os
 import subprocess as sub
 
+class COMMANDS(IntEnum):    
+    SETINITALPOSE         = 0
+    STARTDEPLOYMENT       = 1
+    EXECCOMMAND           = 2
+
 
         
 class Robot:
