@@ -727,8 +727,9 @@ class Robot:
 
         #get all robots that are from the same allocation
         #TODO: make it less costy
+        print('ID teste 1')
         allocation, segmentation, splines = self.getTreeAllocationPerSegment()
-
+        print('ID teste 2')
         #get my allocation
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
@@ -737,6 +738,7 @@ class Robot:
 
         #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
+        print('ID teste 3')
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
 
 
@@ -750,7 +752,7 @@ class Robot:
         positions.append(p)
         positions.append(q)
 
-
+        print('ID teste 4')
         alphas = []
         for position in positions:
 
@@ -765,7 +767,7 @@ class Robot:
         #position 0 is the self robot
         self_alpha = alphas[0]
         alphas = np.asfarray(alphas[1:]) - self_alpha
-
+        print('ID teste 5')
         #guarantee that the robot start the deployment only inside its path
         if(self_alpha < 0.05):
             neigh_0 = self.id
@@ -788,7 +790,7 @@ class Robot:
         negative_closest = alphas.copy()
         negative_closest[negative_closest > 0] = -np.inf
         
-        
+        print('ID teste 6')
         if(not np.isinf(positive_closest.min()) and not np.isinf(negative_closest.max())):
             #print('0')
             neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
@@ -811,7 +813,7 @@ class Robot:
         neigh_1 = ids[neighbors[1]]
 
        
-
+        print('ID teste 7')
         #get the closest from the other group - positive
         if(self.isTreeInternalNode(ids[neighbors[0]])):
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
@@ -834,7 +836,7 @@ class Robot:
             if(max_index >= 0):               
                 neigh_0 = ids_local[max_index]
 
-            
+        print('ID teste 8') 
         #get the closest from the other group - negative
         if(self.isTreeInternalNode(ids[neighbors[1]])):
 
