@@ -126,11 +126,11 @@ class Network:
 
 
     def getData(self, id):
-        print('lock ac 3')
+        print('lock ac 3', id)
         self.lock.acquire()
         data = self.rcv_data[id].copy()
         self.lock.release()
-        print('lock rl 3')
+        print('lock rl 3', id)
         return data
 
     def addMessage(self, message):
