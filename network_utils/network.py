@@ -113,9 +113,11 @@ class Network:
                     self.command_callback(rcv_data)
 
     def getDataIds(self):
+        print('get ids in')
         self.lock.acquire()
         keys = list(self.rcv_data.keys())
         self.lock.release()
+        print('get ids out')
         return keys
 
 
