@@ -373,7 +373,7 @@ class Robot:
 
         self.covariance = np.matrix([[xx, xy], [yx, yy]])
 
-
+        print(Pose.pose.pose.position.x, Pose.pose.pose.position.y, self.map_resolution, self.height)
         self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
         
         if(self.neigh_0 < 0 or self.neigh_1 < 0):
