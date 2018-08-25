@@ -383,9 +383,10 @@ class Robot:
 
         #print(self.position['position'])
         #avoid to flood the network with messages
+        print('send pose', self.position)
         if(rospy.get_time() - self.send_position_time > self.send_position_time_diff or not self.initialized):
             self.network.sendMessage(self.position)
-            print('send pose', self.position)
+            
             self.send_position_time__ = rospy.get_time()
 
         self.initialized = True
@@ -902,7 +903,7 @@ class Robot:
 
         if(not self.isAllocated()):
             return 
-        print("control")
+        #print("control")
         closest_point = self.getClosetPointToPath()
         r = self.position['position']
 
