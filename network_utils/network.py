@@ -21,6 +21,8 @@ class Network:
         self.port = port
         self.broadcast_addr = broadcast_addr
 
+        print('initializing network ...')
+
         #configure send socket
         self.send_socket = socket(AF_INET, SOCK_DGRAM, SOL_UDP)
         self.send_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
