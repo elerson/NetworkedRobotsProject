@@ -205,9 +205,12 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
     def solutionStarted(self):
         if(self.solution_started):
             return True
-
+        if()
         started = 0
         for id in self.network.rcv_data:
+            if(id < 0):
+                continue
+            
             started = max(started, self.network.rcv_data[id]['started'])
         self.solution_started = (started == 1)
 

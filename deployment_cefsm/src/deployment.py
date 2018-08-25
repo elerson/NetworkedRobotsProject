@@ -199,7 +199,7 @@ class Robot:
 
     def receiveNetworkCommand(self, command):
         print(command)
-        if (command['command'] == COMMANDS.SETINITALPOSE):
+        if (command['command'] == COMMANDS.STARTDEPLOYMENT):
             self.start_real = True
 
     def createRoutingTable(self):
