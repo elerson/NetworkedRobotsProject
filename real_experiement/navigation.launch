@@ -19,6 +19,10 @@
     <param name="~/local_costmap/global_frame" value="/map" />  
    </node> 
 
+ 
+   <node pkg="ros_pose_config" type="set_pose.py" respawn="false" name="pose_config" output="screen"> 
+   </node> 
+
    <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base_robot" output="screen">
     <param name="base_global_planner" value="network_planner/NetworkDeploymentPlanner"/>
    
