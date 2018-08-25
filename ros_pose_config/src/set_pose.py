@@ -25,14 +25,14 @@ class Robot:
     def __init__(self):
         
         home = os.path.expanduser("~")
-        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data.yaml')
+        self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data_real.yaml')
 
         self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
         self.network.addCommandCallback(self.receiveCommand)
         self.setpose_pub          = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=10)
         self.setgoal_pub          = rospy.Publisher("move_base_simple/goal", PoseStamped, queue_size=10)
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getGoal)
-        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data.yaml', 'ra0')
+        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data_real.yaml', 'ra0')
         self.id = self.routing.getID()
         print(self.id)
 
