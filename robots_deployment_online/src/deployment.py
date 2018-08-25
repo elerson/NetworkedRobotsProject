@@ -28,6 +28,8 @@ import time
 import tf
 
 from network_utils.bspline import BSpline
+import os
+import subprocess as sub
 
 
         
@@ -175,7 +177,7 @@ class Robot:
         self.routing.createRoute(graph)
 
         
-    def receiveNetworkCommand(self, commnad):
+    def receiveNetworkCommand(self, command):
         print(command)
         if (command['command'] == COMMANDS.SETINITALPOSE):
             self.start_real = True
@@ -1079,3 +1081,5 @@ if __name__ == "__main__":
         robot.highLevelControl()
         rate.sleep()
         #print(now-rospy.get_rostime())
+
+    sub.Popen(('kill', '-9', str(os.getpid())))

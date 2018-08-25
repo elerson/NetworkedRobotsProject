@@ -197,7 +197,7 @@ class Robot:
             message['routing']  = []
             self.network.addMessage(message) 
 
-    def receiveNetworkCommand(self, commnad):
+    def receiveNetworkCommand(self, command):
         print(command)
         if (command['command'] == COMMANDS.SETINITALPOSE):
             self.start_real = True
