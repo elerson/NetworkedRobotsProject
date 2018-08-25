@@ -23,6 +23,7 @@ from util import dist_to_segment_alpha, dist_to_segment
 from network_utils.rssi_kalman import RSSIKalmanFilter
 from network_utils.Routing import Routing
 from network_utils.rssmeasure_v2 import RSSMeasure
+from enum import IntEnum
 
 import time
 import tf
