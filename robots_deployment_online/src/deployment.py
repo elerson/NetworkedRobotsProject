@@ -927,13 +927,13 @@ class Robot:
             goal_ = self.getCenterOfPath()
             goal = (goal_[0], goal_[1])
             #goal = (19.695165209372934, 10.23384885215893)
-            #print("Goal ", goal, 'status ', self.status)
+            print("Goal ", goal, 'status ', self.status)
             self.sendDeployment(goal)
         
             #print(self.position['destination'])
         else:
             self.started_control = True
-            #print('status', self.status)
+            print('status', self.status)
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
