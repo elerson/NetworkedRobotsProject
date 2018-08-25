@@ -1092,7 +1092,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
-        #print('send')
+        print('send')
         robot.highLevelControl()
         rate.sleep()
         #print(now-rospy.get_rostime())
