@@ -383,7 +383,7 @@ class Robot:
 
         #print(self.position['position'])
         #avoid to flood the network with messages
-        print('send pose', self.position)
+        #print('send pose', self.position)
         if(rospy.get_time() - self.send_position_time > self.send_position_time_diff or not self.initialized):
             self.network.sendMessage(self.position)
             
@@ -919,6 +919,7 @@ class Robot:
         if((dist_to_segmentation > self.high_level_distance or (alpha < 0.1 or alpha > 0.90)) and not self.started_control):
             if(self.status == 1 or self.status == 0):
                 return
+            print('control 1')
             goal_ = self.getCenterOfPath()
             goal = (goal_[0], goal_[1])
             #goal = (19.695165209372934, 10.23384885215893)
@@ -932,7 +933,7 @@ class Robot:
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
-                #print('control')
+                print('control 2')
                 self.control_nonholonomic()
 
        
