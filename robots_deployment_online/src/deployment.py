@@ -938,8 +938,8 @@ class Robot:
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
-                #print('control 2')
-                self.control_nonholonomic()
+                print('control 2')
+                #self.control_nonholonomic()
 
        
         self.position['started'] = 1
