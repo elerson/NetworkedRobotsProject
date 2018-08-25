@@ -905,6 +905,7 @@ class Robot:
 
     def highLevelControl(self):
 
+        print('status 22', self.status)
         if(not self.isAllocated()):
             return 
         #print("control")
