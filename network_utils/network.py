@@ -103,9 +103,11 @@ class Network:
                 else:
 
                     if(rcv_data['_type_'] == TYPE.NOWAITREPLY):
+                        print('lock ac')
                         self.lock.acquire()
                         self.rcv_data[id]   = rcv_data
                         self.lock.release()
+                        print('lock rl')
 
                         if self.message_callback != None:
                             self.message_callback(rcv_data)
@@ -115,18 +117,20 @@ class Network:
                     self.command_callback(rcv_data)
 
     def getDataIds(self):
-        print('get ids in')
+        print('lock ac')
         self.lock.acquire()
         keys = list(self.rcv_data.keys())
         self.lock.release()
-        print('get ids out')
+        print('lock rl')
         return keys
 
 
     def getData(self, id):
+        print('lock ac')
         self.lock.acquire()
         data = self.rcv_data[id].copy()
         self.lock.release()
+        print('lock rl')
         return data
 
     def addMessage(self, message):
