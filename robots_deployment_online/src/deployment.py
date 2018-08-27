@@ -1039,7 +1039,7 @@ class Robot:
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
 
-        print('running', self.id, neighbors_ids)
+        
 
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
@@ -1047,6 +1047,8 @@ class Robot:
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
+
+        print('running', self.id, neighbors_ids, neighbor_1_distance, neighbor_2_distance)
 
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
         
