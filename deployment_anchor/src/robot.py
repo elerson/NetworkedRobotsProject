@@ -90,7 +90,7 @@ class Robot:
         self.clients_pos     = [ (self.tree.graph_vertex_position[i][0], self.tree.graph_vertex_position[i][1]) for i in self.tree.clients]
 
         
-        graph_radius         = self.radius*(1.0/3.0)
+        graph_radius         = self.radius*(2.0/3.0)
         self.graph           = sceneGraph(self.config_file['configs'], graph_radius, self.clients_pos, (self.xoffset, self.yoffset))
         self.height          =  self.graph.heigh
         print(graph_radius, self.radius)

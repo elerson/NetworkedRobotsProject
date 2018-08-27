@@ -65,7 +65,7 @@ class Network:
             data_string = self.rcv_socket.recvfrom(2048)
             #print(data_string[0])
             rcv_data = pickle.loads(data_string[0])
-            print(rcv_data)
+            #print(rcv_data)
             if not 'id' in rcv_data:
                 continue
             if(rcv_data['id'] == self.id and self.id > 0):
@@ -103,34 +103,40 @@ class Network:
                 else:
 
                     if(rcv_data['_type_'] == TYPE.NOWAITREPLY):
-                        print('lock ac 1')
+                        #print('lock ac 1')
+
                         self.lock.acquire()
-                        self.rcv_data[id]   = rcv_data
+                        data = rcv_data.copy()
+                        self.rcv_data[id] = data
                         self.lock.release()
-                        print('lock rl 1')
+                        #print('lock rl 1')
 
                         if self.message_callback != None:
-                            self.message_callback(rcv_data)
+                            self.message_callback(data)
             else:
-                self.rcv_command[id] = rcv_data
+                self.lock.acquire()
+                data = rcv_data.copy()
+                self.lock.release()
+
+                self.rcv_command[id] = data
                 if self.command_callback != None:
-                    self.command_callback(rcv_data)
+                    self.command_callback(data)
 
     def getDataIds(self):
-        print('lock ac 2')
+        #print('lock ac 2')
         self.lock.acquire()
         keys = list(self.rcv_data.keys())
         self.lock.release()
-        print('lock rl 2')
+        #print('lock rl 2')
         return keys
 
 
     def getData(self, id):
-        print('lock ac 3', id)
+        #print('lock ac 3', id)
         self.lock.acquire()
         data = self.rcv_data[id].copy()
         self.lock.release()
-        print('lock rl 3', id)
+        #print('lock rl 3', id)
         return data
 
     def addMessage(self, message):

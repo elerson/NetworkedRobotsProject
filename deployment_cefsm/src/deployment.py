@@ -77,7 +77,7 @@ class Robot:
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
             id                   = self.routing.getID()
-            self.log_rss = False
+            self.log_rss         = False
         else:
             id                   = rospy.get_param("~id")
 
