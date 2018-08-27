@@ -203,30 +203,28 @@ class Robot:
 
     def realMetricCallback(self, data_id, rss):
 
-        #if(not self.start_real):
-        #    return
+        if(not self.start_real or self.id == data_id):
+            return
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
             self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
-        print('1 get position by id', data_id)
         position = self.getPositionByID(data_id)
-        print('2 get position by id', data_id)
 
         real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
         real_metric    = rss
 
 
-        # x = abs(self.position['position'][0] - position[0])*self.map_resolution
-        # y = abs(self.position['position'][1] - position[1])*self.map_resolution
-        # gamma = self.metric_kalman[data_id].getGamma()
+        x = abs(self.position['position'][0] - position[0])*self.map_resolution
+        y = abs(self.position['position'][1] - position[1])*self.map_resolution
+        gamma = self.metric_kalman[data_id].getGamma()
 
-        # d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
-        # measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
+        d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
+        measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
 
-        # self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
-        # self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
+        self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+        self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
 
 
     def simulationMetric(self, param):
@@ -415,13 +413,13 @@ class Robot:
         robot_ids = []
         robot_positions.append(self.position['position'])
         robot_ids.append(self.id)
-        print('ids teste 0')
+        #print('ids teste 0')
         data_ids = self.network.getDataIds()
         for data_id in data_ids:
             if(data_id < 0):
                 continue
 
-            print(data_id, 'teste1')
+            #print(data_id, 'teste1')
 
             if(data_id != self.id and allocation == []):
                 position = self.network.getData(data_id)['position']
@@ -435,7 +433,7 @@ class Robot:
                 position = self.network.getData(data_id)['position']
                 robot_positions.append(position)
                 robot_ids.append(data_id)
-            print(data_id, 'teste3')
+            #print(data_id, 'teste3')
 
         return robot_positions, robot_ids
   
@@ -736,9 +734,9 @@ class Robot:
 
         #get all robots that are from the same allocation
         #TODO: make it less costy
-        print('ID teste 1')
+        
         allocation, segmentation, splines = self.getTreeAllocationPerSegment()
-        print('ID teste 2')
+
         #get my allocation
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
@@ -747,9 +745,8 @@ class Robot:
 
         #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
-        print('ID teste 3')
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
-        print('ID teste 3.5')
+
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
         q = self.tree.graph_vertex_position[segmentation[self.allocation_id][-1]]
@@ -761,7 +758,6 @@ class Robot:
         positions.append(p)
         positions.append(q)
 
-        print('ID teste 4')
         alphas = []
         for position in positions:
 
@@ -776,7 +772,6 @@ class Robot:
         #position 0 is the self robot
         self_alpha = alphas[0]
         alphas = np.asfarray(alphas[1:]) - self_alpha
-        print('ID teste 5')
         #guarantee that the robot start the deployment only inside its path
         if(self_alpha < 0.05):
             neigh_0 = self.id
@@ -799,7 +794,7 @@ class Robot:
         negative_closest = alphas.copy()
         negative_closest[negative_closest > 0] = -np.inf
         
-        print('ID teste 6')
+
         if(not np.isinf(positive_closest.min()) and not np.isinf(negative_closest.max())):
             #print('0')
             neighbors.append(positive_closest.argmin() + 1) # +1 -> the element 0 was desconsidered -> alphas = alphas[1:]
@@ -822,7 +817,7 @@ class Robot:
         neigh_1 = ids[neighbors[1]]
 
        
-        print('ID teste 7')
+
         #get the closest from the other group - positive
         if(self.isTreeInternalNode(ids[neighbors[0]])):
             positions, ids_local = self.getAllRobotsPositions(allocation[self.allocation_id], True)
@@ -845,7 +840,6 @@ class Robot:
             if(max_index >= 0):               
                 neigh_0 = ids_local[max_index]
 
-        print('ID teste 8') 
         #get the closest from the other group - negative
         if(self.isTreeInternalNode(ids[neighbors[1]])):
 
@@ -916,7 +910,7 @@ class Robot:
 
     def highLevelControl(self):
 
-        print('status 22', self.status)
+        #print('status 22', self.status)
         if(not self.isAllocated()):
             return 
         #print("control")
@@ -939,17 +933,17 @@ class Robot:
             goal_ = self.getCenterOfPath()
             goal = (goal_[0], goal_[1])
             #goal = (19.695165209372934, 10.23384885215893)
-            print("Goal ", goal, 'status ', self.status)
+            #print("Goal ", goal, 'status ', self.status)
             self.sendDeployment(goal)
         
             #print(self.position['destination'])
         else:
             self.started_control = True
-            print('status', self.status)
+            #print('status', self.status)
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
-                print('control 2')
+                #print('control 2')
                 self.control_nonholonomic()
 
        
@@ -1041,9 +1035,7 @@ class Robot:
 
 
         r = self.position['position']
-        print('1 -- teste')
         neighbors_ids = self.getNeighborsIDs()
-        print('2 -- teste')
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
 
@@ -1055,7 +1047,7 @@ class Robot:
         #neighbors_positions = self.getNeighbors()
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
-        print('3 -- teste')
+
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
         
         tangent = (0, 0)
@@ -1102,8 +1094,8 @@ if __name__ == "__main__":
 
     rate = rospy.Rate(25.0)
 
-    #while(not robot.start_real and not rospy.is_shutdown()):
-    #    rate.sleep()
+    while(not robot.start_real and not rospy.is_shutdown()):
+        rate.sleep()
 
 
     while not rospy.is_shutdown():
