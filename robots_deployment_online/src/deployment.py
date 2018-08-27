@@ -969,7 +969,10 @@ class Robot:
             position = self.tree.graph_vertex_position[id]
             return position
         else:
-            return self.network.getData(id)['position']
+            try:
+                return self.network.getData(id)['position']
+            except:
+                return (0,0)
 
 
     def verifyMetricOnNeighbors(self, neighbors_ids):
@@ -1033,6 +1036,8 @@ class Robot:
         return velocity if abs(velocity) < self.max_linear_vel else (velocity/abs(velocity))*self.max_linear_vel
 
     def control_nonholonomic(self):
+
+
         r = self.position['position']
         print('1 -- teste')
         neighbors_ids = self.getNeighborsIDs()
