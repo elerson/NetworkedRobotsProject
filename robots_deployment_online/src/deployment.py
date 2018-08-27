@@ -151,7 +151,7 @@ class Robot:
         self.start_real = True
         if(self.real_robot):
             self.start_real = False
-            self.log_rss    = True
+            self.log_rss    = False
             self.rss_measure.addCallback(self.realMetricCallback)
         else:
             rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
