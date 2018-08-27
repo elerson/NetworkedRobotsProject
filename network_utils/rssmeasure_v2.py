@@ -25,7 +25,7 @@ class RSSMeasure:
     #create a map from mac to id
     for robot in self.config_data:
       macaddress = self.config_data[robot]['macaddress']
-      id_        = self.config_data[robot]['id']
+      id_        = self.config_data[robot]['id'] - 1
       self.macaddress_map[id_] = macaddress
       self.id_map[macaddress] = id_
     #  
