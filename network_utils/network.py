@@ -116,11 +116,10 @@ class Network:
             else:
                 self.lock.acquire()
                 data = rcv_data.copy()
-                self.lock.release()
-
                 self.rcv_command[id] = data
                 if self.command_callback != None:
                     self.command_callback(data)
+                self.lock.release()
 
     def getDataIds(self):
         #print('lock ac 2')
