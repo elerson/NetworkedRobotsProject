@@ -173,7 +173,7 @@ class Robot:
         #    self.updateRouting()
 
 
-    def pose_callback(self):
+    def pose_callback(self, param):
         self.network.sendMessage(self.position)
         print('send pose')
 
