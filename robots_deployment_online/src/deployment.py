@@ -203,8 +203,8 @@ class Robot:
 
     def realMetricCallback(self, data_id, rss):
 
-        if(not self.start_real):
-            return
+        #if(not self.start_real):
+        #    return
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
