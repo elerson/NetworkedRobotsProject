@@ -77,7 +77,7 @@ class Robot:
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
             id                   = self.routing.getID()
-            self.log_rss         = False
+            self.log_rss         = True
         else:
             id                   = rospy.get_param("~id")
 
@@ -160,21 +160,26 @@ class Robot:
         self.start_real = True
         if(self.real_robot):
             self.start_real = False
+            self.log_rss    = True
             self.rss_measure.addCallback(self.realMetricCallback)
         else:
             rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
+
+        rospy.Timer(rospy.Duration(1.0), self.pose_callback)
 
 
         self.metric_kalman       = {}
         self.gamma               = 3
         self.status              = -1 
 
-
-
-
         
         #if(self.real_robot):
         #    self.updateRouting()
+
+    def pose_callback(self, param):
+        self.network.sendMessage(self.position)
+        #print('send pose')
+    
     def readConfig(self, config_file):
         with open(config_file, 'r') as stream:
             return yaml.load(stream)
@@ -215,12 +220,13 @@ class Robot:
 
     def realMetricCallback(self, data_id, rss):
 
-        if(not self.start_real):
+
+        if(not self.start_real or self.id == data_id):
             return
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
-            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1 ,10.0, m_var, self.log_rss)
+            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
         position = self.getPositionByID(data_id)
 
@@ -237,6 +243,7 @@ class Robot:
 
         self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
         self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
+
 
 
 

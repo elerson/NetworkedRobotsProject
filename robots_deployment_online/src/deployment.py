@@ -151,7 +151,7 @@ class Robot:
         self.start_real = True
         if(self.real_robot):
             self.start_real = False
-            self.log_rss    = False
+            self.log_rss    = True
             self.rss_measure.addCallback(self.realMetricCallback)
         else:
             rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
@@ -175,7 +175,7 @@ class Robot:
 
     def pose_callback(self, param):
         self.network.sendMessage(self.position)
-        print('send pose')
+        #print('send pose')
 
 
     def readConfig(self, config_file):
@@ -1055,7 +1055,7 @@ class Robot:
         neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
         neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
 
-        print('running', self.id, neighbors_ids, neighbor_1_distance, neighbor_2_distance)
+        #print('running', self.id, neighbors_ids, neighbor_1_distance, neighbor_2_distance)
 
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
         
@@ -1109,7 +1109,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         now = rospy.get_rostime()
-        print('send')
+        #print('send')
         robot.highLevelControl()
         rate.sleep()
         #print(now-rospy.get_rostime())
