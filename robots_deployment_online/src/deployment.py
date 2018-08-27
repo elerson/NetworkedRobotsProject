@@ -1095,8 +1095,8 @@ if __name__ == "__main__":
 
     rate = rospy.Rate(25.0)
 
-    while(not robot.start_real and not rospy.is_shutdown()):
-        rate.sleep()
+    #while(not robot.start_real and not rospy.is_shutdown()):
+    #    rate.sleep()
 
 
     while not rospy.is_shutdown():
