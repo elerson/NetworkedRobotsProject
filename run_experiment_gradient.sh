@@ -2,7 +2,7 @@
 
 distancias=(60 90 110 140 170)
 diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
-diretorios=(5euclideanexperiment)
+#diretorios=(5euclideanexperiment)
 experiments=(1 2 3 4 5)
 
 #distancias=(160)
@@ -28,7 +28,7 @@ for dir_ in ${diretorios[@]}; do
 	cd ../
 
 	cd simulated_experiments/gradient/
-	./create_exp.py 7 $dist 0.05
+	./create_exp.py 20 $dist 0.05
 	cd ../../
 
 	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05
