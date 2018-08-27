@@ -82,7 +82,7 @@ class RSSMeasure:
 if __name__ == "__main__":
 
   home = os.path.expanduser("~")
-  rssmeasure = RSSMeasure('teste4',home + '/NetworkedRobotsProject/configs/data.yaml')
+  rssmeasure = RSSMeasure('teste4',home + '/NetworkedRobotsProject/configs/data_real.yaml')
   
   while True:
     for id in range(8):
