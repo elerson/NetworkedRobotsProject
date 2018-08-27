@@ -210,7 +210,9 @@ class Robot:
         if( data_id not in self.metric_kalman):
             self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
+        print('1 get position by id', data_id)
         position = self.getPositionByID(data_id)
+        print('2 get position by id', data_id)
 
         real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
         real_metric    = rss
