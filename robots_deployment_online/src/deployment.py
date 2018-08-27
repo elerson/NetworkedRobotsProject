@@ -1039,7 +1039,7 @@ class Robot:
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
             return
 
-        #print(self.id, neighbors_ids)
+        print('running', self.id, neighbors_ids)
 
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
