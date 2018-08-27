@@ -157,6 +157,9 @@ class Robot:
             rospy.Timer(rospy.Duration(0.3), self.simulationMetric)
 
 
+        rospy.Timer(rospy.Duration(1.0), self.pose_callback)
+
+
 
         self.send_deployment     = 0
         self.send_deployment_time_diff = 4.0
@@ -168,6 +171,12 @@ class Robot:
 
         #if(self.real_robot):
         #    self.updateRouting()
+
+
+    def pose_callback(self):
+        self.network.sendMessage(self.position)
+        print('send pose')
+
 
     def readConfig(self, config_file):
         with open(config_file, 'r') as stream:
@@ -1037,9 +1046,7 @@ class Robot:
         r = self.position['position']
         neighbors_ids = self.getNeighborsIDs()
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
-            return
-
-        
+            return        
 
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
