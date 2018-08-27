@@ -210,21 +210,21 @@ class Robot:
         if( data_id not in self.metric_kalman):
             self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
-        position = self.getPositionByID(data_id)
+        # position = self.getPositionByID(data_id)
 
-        real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
-        real_metric    = rss
+        # real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
+        # real_metric    = rss
 
 
-        x = abs(self.position['position'][0] - position[0])*self.map_resolution
-        y = abs(self.position['position'][1] - position[1])*self.map_resolution
-        gamma = self.metric_kalman[data_id].getGamma()
+        # x = abs(self.position['position'][0] - position[0])*self.map_resolution
+        # y = abs(self.position['position'][1] - position[1])*self.map_resolution
+        # gamma = self.metric_kalman[data_id].getGamma()
 
-        d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
-        measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
+        # d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
+        # measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
 
-        self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
-        self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
+        # self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+        # self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
 
 
     def simulationMetric(self, param):
