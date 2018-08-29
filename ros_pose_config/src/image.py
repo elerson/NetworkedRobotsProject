@@ -39,7 +39,7 @@ class Image(QtGui.QWidget):
                 continue
             try:
                 self.robots[robot_id] = robots[robot_id]['position']
-                self.robots_cov[robot_id] = robots_cov[robot_id]['cov']
+                self.robots_cov[robot_id] = robots[robot_id]['cov']
             except:
                 pass
 
@@ -79,10 +79,10 @@ class Image(QtGui.QWidget):
 
         painter.drawPoint(self.offset +  self.offset_ + self.press_position)
 
-
+        size = 5
         color = QtGui.QColor(0, 0, 255)
         pen.setColor(color)
-        pen.setWidth(2)
+        pen.setWidth(size)
         painter.setPen(pen)
 
         for robot_id in self.robots:
@@ -91,7 +91,8 @@ class Image(QtGui.QWidget):
 
             position = QPointF(self.robots[robot_id][0], self.robots[robot_id][1])
             painter.drawPoint(self.offset +  self.offset_ + position)
-            painter.drawEllipse(position, self.robots_cov[robot_id][0], self.robots_cov[robot_id][3])
+            print(self.robots_cov)
+            painter.drawEllipse(self.offset +  self.offset_ + position, self.robots_cov[robot_id][0]*size*10, self.robots_cov[robot_id][3]*size*10)
 
 
     def mousePressEvent(self, e):

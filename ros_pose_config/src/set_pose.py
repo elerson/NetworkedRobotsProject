@@ -45,7 +45,7 @@ class Robot:
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['cov']     = (0.1, 0.0, 0.0, 0.1)
 
-        rospy.Timer(rospy.Duration(1.0), self.pose_callback)
+        rospy.Timer(rospy.Duration(1.5), self.pose_callback)
 
 
     def getPose(self, Pose):
@@ -70,7 +70,7 @@ class Robot:
 
     def pose_callback(self, param):
         self.network.sendMessage(self.position)
-        print ('send pose')
+        #print ('send pose')
 
     def readConfig(self, config_file):
         with open(config_file, 'r') as stream:
