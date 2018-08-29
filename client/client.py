@@ -149,6 +149,8 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         log_data = folder + '/log.txt'
         log_network = folder + '/network.txt'
 
+        print(log_folder, log_data, log_network)
+
         return log_folder, log_data, log_network
             
 
