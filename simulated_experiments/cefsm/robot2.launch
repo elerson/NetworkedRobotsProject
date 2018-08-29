@@ -7,8 +7,8 @@
     <param name="pose_send_time" value="0.3" />
     <param name="id" value="2" />
     <param name="config_file" value="$(env EXP_DIR)/../config_sim.yaml" />
-    <param name="lower_threshold" value="-50.3136376416" />
-    <param name="higher_threshold" value="-58.3136376416" />
+    <param name="lower_threshold" value="-55.5963754133" />
+    <param name="higher_threshold" value="-63.5963754133" />
   </node> 
 
 
