@@ -59,7 +59,9 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
 
     def updateALL(self):
-       
+        print(self.network.rcv_data)
+
+        self.widget_image.addRobots(self.network.rcv_data)
 
         threading.Timer(0.2, self.updateALL).start()
 

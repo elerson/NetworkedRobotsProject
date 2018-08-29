@@ -16,6 +16,7 @@ class Image(QtGui.QWidget):
         
 
         self.robots              = {}
+        self.robots_cov              = {}
 
         self.initial_pose        = QPointF(0, 0)
         self.end_pose            = QPointF(0, 0)
@@ -34,7 +35,13 @@ class Image(QtGui.QWidget):
 
     def addRobots(self, robots):
         for robot_id in robots:
-            self.robots[robot_id] = robots[robot_id]['position']
+            if robot_id < 0:
+                continue
+            try:
+                self.robots[robot_id] = robots[robot_id]['position']
+                self.robots_cov[robot_id] = robots_cov[robot_id]['cov']
+            except:
+                pass
 
 
     def getPositionByID(self, id):
@@ -73,10 +80,18 @@ class Image(QtGui.QWidget):
         painter.drawPoint(self.offset +  self.offset_ + self.press_position)
 
 
+        color = QtGui.QColor(0, 0, 255)
+        pen.setColor(color)
+        pen.setWidth(2)
+        painter.setPen(pen)
 
         for robot_id in self.robots:
+            if(robot_id < 0):
+                continue
+
             position = QPointF(self.robots[robot_id][0], self.robots[robot_id][1])
             painter.drawPoint(self.offset +  self.offset_ + position)
+            painter.drawEllipse(position, self.robots_cov[robot_id][0], self.robots_cov[robot_id][3])
 
 
     def mousePressEvent(self, e):

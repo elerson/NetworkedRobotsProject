@@ -27,18 +27,51 @@ class Robot:
         home = os.path.expanduser("~")
         self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data_real.yaml')
 
+        self.map_resolution = 0.05
+        self.height         = 618
+
+
         self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
         self.network.addCommandCallback(self.receiveCommand)
         self.setpose_pub          = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=10)
         self.setgoal_pub          = rospy.Publisher("move_base_simple/goal", PoseStamped, queue_size=10)
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getGoal)
+        rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.getPose)
         self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data_real.yaml', 'ra0')
         self.id = self.routing.getID()
-        print(self.id)
+        
+        self.position            = {}
+        self.position['id']      = self.id
+        self.position['position']= (0.0, 0.0, 0.0)
+        self.covariance['cov']   = (0.1, 0.0, 0.0, 0.1)
+
+        rospy.Timer(rospy.Duration(1.0), self.pose_callback)
+
+
+    def getPose(self, Pose):
+
+        orientation = (
+            Pose.pose.pose.orientation.x,
+            Pose.pose.pose.orientation.y,
+            Pose.pose.pose.orientation.z,
+            Pose.pose.pose.orientation.w)
+        orientation_euler = tf.transformations.euler_from_quaternion(orientation)
+
+        #the variance for the kalman filter
+        xx = Pose.pose.covariance[0]
+        xy = Pose.pose.covariance[1]
+        yx = Pose.pose.covariance[6]
+        yy = Pose.pose.covariance[7]
+
+        self.position['position'] = (Pose.pose.pose.position.x/self.map_resolution, self.height- Pose.pose.pose.position.y/self.map_resolution, orientation_euler[2])
+        self.position['cov']      = (xx,xy,yx,yy)
 
 
 
-    
+    def pose_callback(self, param):
+        self.network.sendMessage(self.position)
+        print ('send pose')
+
     def readConfig(self, config_file):
         with open(config_file, 'r') as stream:
             return yaml.load(stream)['configs']
