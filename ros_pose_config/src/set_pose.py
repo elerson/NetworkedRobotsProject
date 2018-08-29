@@ -43,7 +43,7 @@ class Robot:
         self.position            = {}
         self.position['id']      = self.id
         self.position['position']= (0.0, 0.0, 0.0)
-        self.covariance['cov']   = (0.1, 0.0, 0.0, 0.1)
+        self.position['cov']     = (0.1, 0.0, 0.0, 0.1)
 
         rospy.Timer(rospy.Duration(1.0), self.pose_callback)
 
