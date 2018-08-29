@@ -5,9 +5,9 @@ diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 5eucl
 #diretorios=(5euclideanexperiment)
 experiments=(1 2 3 4 5)
 
-distancias=(60)
-diretorios=(1euclideanexperiment)
-experiments=(1)
+#distancias=(60)
+#diretorios=(1euclideanexperiment)
+#experiments=(1)
 
 for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
@@ -23,7 +23,7 @@ for dir_ in ${diretorios[@]}; do
 	cd ../
 	
 	cd simulated_experiments/cefsm/
-	./create_exp.py 5 $dist 0.05
+	./create_exp.py 20 $dist 0.05
 	cd ../../
 
 	roslaunch simulated_experiments/simulation.launch &
