@@ -181,7 +181,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         #verify experiment exit
         
-        if((connected and num_connected > 1 and self.exit) or (self.exit and (self.finish_time.elapsed() > 600000 ))):
+        if((connected and num_connected > 1 and self.exit) or (self.exit and (self.finish_time.elapsed() > 1000000 ))):
             self.closeRos()
             self.close()
 
