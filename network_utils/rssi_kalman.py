@@ -98,7 +98,7 @@ class RSSIKalmanFilter:
 		self.measurment_var = measurment_var
 
 	def saveLog(self, distance,measurement, measurment_var):
-		str_data = str(self.id_) + ','+ str(measurement) + ',' + str(distance) + ',' + str(measurment_var) + ',' + str(self.getGamma()) + '\n'
+		str_data = str(self.id_) + ',' + str(measurement) + ',' + str(distance) + ',' + str(measurment_var) + ',' + str(self.getPL()) + ',' + str(self.getGamma()) + '\n'
 		print(str_data)
 		self.log_data_file.write(str_data)
 

@@ -30,6 +30,10 @@ class Robot:
         self.map_resolution = 0.05
         self.height         = 618
 
+        self.position            = {}
+        self.position['id']      = self.id
+        self.position['position']= (0.0, 0.0, 0.0)
+        self.position['cov']     = (0.1, 0.0, 0.0, 0.1)
 
         self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
         self.network.addCommandCallback(self.receiveCommand)
@@ -40,10 +44,7 @@ class Robot:
         self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data_real.yaml', 'ra0')
         self.id = self.routing.getID()
         
-        self.position            = {}
-        self.position['id']      = self.id
-        self.position['position']= (0.0, 0.0, 0.0)
-        self.position['cov']     = (0.1, 0.0, 0.0, 0.1)
+
 
         rospy.Timer(rospy.Duration(1.5), self.pose_callback)
 

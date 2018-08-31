@@ -43,6 +43,13 @@ class Robot:
     def __init__(self):
         rospy.init_node('robot_deployment', anonymous=True)
         print("INITIALIZING ROBOT ....")
+        ####
+        ####  ALGORITHM PARAMETERS
+        ####
+
+        self.alpha          = 0.5*(1.0/100.0)#1.0    ## the importance of following the objective
+        self.beta           = 2.0                     ## the importance of following the path
+        self.robot_center_y = 0.6                     ## how fast the robot turns
 
 
         ###
@@ -1072,12 +1079,13 @@ class Robot:
         path_distance = self.getDistance(r, closest_point_path)*self.map_resolution
         path_direction = (((closest_point_path[0] - r[0])*self.map_resolution), -(closest_point_path[1] - r[1])*self.map_resolution)
         
-        alpha = 0.5*(1.0/100.0)#1.0
-        beta  = 2.0#2.0
+        alpha = self.alpha
+        beta  = self.beta
         final_direction = (alpha*tangent[0] + beta*path_direction[0], alpha*tangent[1] + beta*path_direction[1])
         robot_angle = r[2]
     
-        theta = 0.6*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
+
+        theta  = self.robot_center_y*(final_direction[1]*math.cos(robot_angle) - final_direction[0]*math.sin(robot_angle))
         linear = final_direction[0]*math.cos(robot_angle) + final_direction[1]*math.sin(robot_angle)
     
         cmd_vel = Twist()
