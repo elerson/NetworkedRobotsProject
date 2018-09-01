@@ -6,6 +6,7 @@ from network_utils.network import Network
 import numpy as np
 import math
 import yaml
+from math import sqrt
 
 
 #ROS Imports
@@ -50,7 +51,7 @@ class Robot:
         self.alpha          = 0.45*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
         self.beta           = 1.8  #2.0               ## the importance of following the path
         self.robot_center_y = 0.6                     ## how fast the robot turns
-        self.dead_velocity  = 0.01
+        self.dead_velocity  = 0.15
 
 
         ###
@@ -65,7 +66,7 @@ class Robot:
         if(self.real_robot):        	
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
-            id                   = self.routing.getID()
+            id                   = self.routing.getID() - 1
         else:
        	    id                   = rospy.get_param("~id")
 
