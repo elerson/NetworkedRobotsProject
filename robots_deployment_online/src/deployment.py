@@ -777,7 +777,7 @@ class Robot:
         positions.append(p)
         positions.append(q)
 
-        print(positions, ids)
+
 
         alphas = []
         for position in positions:
@@ -793,6 +793,7 @@ class Robot:
         #position 0 is the self robot
         self_alpha = alphas[0]
         alphas = np.asfarray(alphas[1:]) - self_alpha
+        print(alphas, self_alpha)
         #guarantee that the robot start the deployment only inside its path
         if(self_alpha < 0.05):
             neigh_0 = self.id
