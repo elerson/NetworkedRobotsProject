@@ -111,9 +111,6 @@ class Robot:
         else:
         	self.id              = int(id) + self.robots_ids_start
 
-        print(self.id, int(id))
-        exit()
-
 
         self.position            = {}
         self.position['id']      = self.id
@@ -767,7 +764,7 @@ class Robot:
         #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
-        #print(positions, ids)
+        print(positions, ids)
 
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
