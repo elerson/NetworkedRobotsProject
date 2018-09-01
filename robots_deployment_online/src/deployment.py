@@ -764,7 +764,7 @@ class Robot:
         #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
-        print(positions, ids)
+        
 
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
@@ -776,6 +776,8 @@ class Robot:
         #append the clients positions to the positions list
         positions.append(p)
         positions.append(q)
+
+        print(positions, ids)
 
         alphas = []
         for position in positions:
