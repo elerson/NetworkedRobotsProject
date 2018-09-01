@@ -944,25 +944,25 @@ class Robot:
         #
         #print('info', dist_to_segmentation, alpha)
 
-        if((dist_to_segmentation > self.high_level_distance or (alpha < 0.1 or alpha > 0.90)) and not self.started_control):
-            if(self.status == 1 or self.status == 0):
-                return
-            #print('control 1')
-            goal_ = self.getCenterOfPath()
-            goal = (goal_[0], goal_[1])
-            #goal = (19.695165209372934, 10.23384885215893)
-            #print("Goal ", goal, 'status ', self.status)
-            self.sendDeployment(goal)
+        # if((dist_to_segmentation > self.high_level_distance or (alpha < 0.1 or alpha > 0.90)) and not self.started_control):
+        #     if(self.status == 1 or self.status == 0):
+        #         return
+        #     #print('control 1')
+        #     goal_ = self.getCenterOfPath()
+        #     goal = (goal_[0], goal_[1])
+        #     #goal = (19.695165209372934, 10.23384885215893)
+        #     #print("Goal ", goal, 'status ', self.status)
+        #     self.sendDeployment(goal)
         
-            #print(self.position['destination'])
-        else:
-            self.started_control = True
-            #print('status', self.status)
-            if(self.status == 1 or self.status == 0):
-                self.Stall()
-            else:
-                #print('control 2')
-                self.control_nonholonomic()
+        #     #print(self.position['destination'])
+        # else:
+        #     self.started_control = True
+        #     #print('status', self.status)
+        #     if(self.status == 1 or self.status == 0):
+        #         self.Stall()
+        #     else:
+        #         #print('control 2')
+        self.control_nonholonomic()
 
        
         self.position['started'] = 1
