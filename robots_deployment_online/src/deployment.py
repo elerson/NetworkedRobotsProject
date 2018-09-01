@@ -50,6 +50,7 @@ class Robot:
         self.alpha          = 0.45*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
         self.beta           = 1.8  #2.0               ## the importance of following the path
         self.robot_center_y = 0.6                     ## how fast the robot turns
+        self.dead_velocity  = 0.1
 
 
         ###
@@ -1095,7 +1096,8 @@ class Robot:
         cmd_vel.angular.z = theta
         #print('control')
 
-        self.vel_pub.publish(cmd_vel)
+        if(sqrt(final_direction[0]**2 +  final_direction[1]**2) > self.dead_velocity):
+            self.vel_pub.publish(cmd_vel)
 
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
         self.position['s_size']  = self.solution_size
