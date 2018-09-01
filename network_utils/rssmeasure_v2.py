@@ -22,6 +22,7 @@ class RSSMeasure:
     #
     self.signal_dict    = dict()
     self.macaddress_map = dict()
+    self.callback = None
     self.id_map = dict()
     #create a map from mac to id
     for robot in self.config_data:
@@ -40,7 +41,7 @@ class RSSMeasure:
     self.sock.bind((UDP_IP, PORT))
     self.thread         = threading.Thread(target=self.readrss)
     self.thread.start()    
-    self.callback = None
+    
     #
   def addCallback(self, callback):
     self.callback = callback
