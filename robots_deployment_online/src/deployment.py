@@ -994,7 +994,7 @@ class Robot:
 
 
     def verifyMetricOnNeighbors(self, neighbors_ids):
-        print(self.network.getDataIds())
+        #print(self.network.getDataIds())
         return (neighbors_ids[0] in self.metric_kalman) and (neighbors_ids[1] in self.metric_kalman)      
 
 
