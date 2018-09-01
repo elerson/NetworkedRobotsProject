@@ -111,7 +111,7 @@ class Robot:
         else:
         	self.id              = int(id) + self.robots_ids_start
 
-        print(self.id)
+        print(self.id, int(id))
         exit()
 
 
