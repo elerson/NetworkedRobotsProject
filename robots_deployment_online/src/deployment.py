@@ -47,8 +47,8 @@ class Robot:
         ####  ALGORITHM PARAMETERS
         ####
 
-        self.alpha          = 0.2*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
-        self.beta           = 0.8                     ## the importance of following the path
+        self.alpha          = 0.45*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
+        self.beta           = 1.8  #2.0               ## the importance of following the path
         self.robot_center_y = 0.6                     ## how fast the robot turns
 
 
