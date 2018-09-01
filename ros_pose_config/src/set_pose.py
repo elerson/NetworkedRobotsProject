@@ -30,20 +30,23 @@ class Robot:
         self.map_resolution = 0.05
         self.height         = 618
 
+
+
+        self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
+        self.network.addCommandCallback(self.receiveCommand)
+        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data_real.yaml', 'ra0')
+        self.id = self.routing.getID()
+        
         self.position            = {}
         self.position['id']      = self.id
         self.position['position']= (0.0, 0.0, 0.0)
         self.position['cov']     = (0.1, 0.0, 0.0, 0.1)
 
-        self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])
-        self.network.addCommandCallback(self.receiveCommand)
         self.setpose_pub          = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=10)
         self.setgoal_pub          = rospy.Publisher("move_base_simple/goal", PoseStamped, queue_size=10)
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.getGoal)
         rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.getPose)
-        self.routing = Routing('teste4', home+'/NetworkedRobotsProject/configs/data_real.yaml', 'ra0')
-        self.id = self.routing.getID()
-        
+       
 
 
         rospy.Timer(rospy.Duration(1.5), self.pose_callback)
