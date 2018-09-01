@@ -20,6 +20,7 @@ class RSSMeasure:
     with open(yaml_file, 'r') as stream:
       self.config_data  = yaml.load(stream)['robots']
     #
+    self.signal_dict    = dict()
     self.macaddress_map = dict()
     self.id_map = dict()
     #create a map from mac to id
@@ -38,8 +39,7 @@ class RSSMeasure:
                      socket.SOCK_DGRAM) # UDP
     self.sock.bind((UDP_IP, PORT))
     self.thread         = threading.Thread(target=self.readrss)
-    self.thread.start()
-    self.signal_dict    = dict()
+    self.thread.start()    
     self.callback = None
     #
   def addCallback(self, callback):
