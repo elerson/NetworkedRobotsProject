@@ -793,7 +793,7 @@ class Robot:
         #position 0 is the self robot
         self_alpha = alphas[0]
         alphas = np.asfarray(alphas[1:]) - self_alpha
-        #print(alphas, self_alpha)
+        print(alphas, self_alpha)
         #guarantee that the robot start the deployment only inside its path
         if(self_alpha < 0.05):
             neigh_0 = self.id
@@ -837,7 +837,7 @@ class Robot:
 
         neigh_0 = ids[neighbors[0]]
         neigh_1 = ids[neighbors[1]]
-        print(neigh_0, neigh_1, 'neig')
+        #print(neigh_0, neigh_1, 'neig')
        
 
         #get the closest from the other group - positive
