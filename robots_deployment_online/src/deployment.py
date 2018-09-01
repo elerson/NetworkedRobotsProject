@@ -111,6 +111,9 @@ class Robot:
         else:
         	self.id              = int(id) + self.robots_ids_start
 
+        print(self.id)
+        exit()
+
 
         self.position            = {}
         self.position['id']      = self.id
