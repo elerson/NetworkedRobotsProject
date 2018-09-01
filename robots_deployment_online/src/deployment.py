@@ -66,7 +66,7 @@ class Robot:
         if(self.real_robot):        	
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
-            id                   = self.routing.getID() - 1
+            id                   = self.routing.getID()
         else:
        	    id                   = rospy.get_param("~id")
 
@@ -764,6 +764,7 @@ class Robot:
         #print(allocation, self.allocation_id)
         #get all robots that are in the allocation
         positions, ids = self.getAllRobotsPositions(allocation[self.allocation_id])
+        #print(positions, ids)
 
 
         p = self.tree.graph_vertex_position[segmentation[self.allocation_id][0]]
