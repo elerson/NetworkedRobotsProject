@@ -48,10 +48,13 @@ class Robot:
         ####  ALGORITHM PARAMETERS
         ####
 
-        self.alpha          = 0.45*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
-        self.beta           = 1.8  #2.0               ## the importance of following the path
-        self.robot_center_y = 0.6                     ## how fast the robot turns
-        self.dead_velocity  = 0.15
+        self.alpha               = 0.5*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
+        self.beta                = 2.0  #2.0               ## the importance of following the path
+        self.robot_center_y      = 0.6                     ## how fast the robot turns
+        self.dead_velocity       = 0.15
+
+        self.max_linear_vel      = 0.18
+        self.max_angular_vel     = 0.14
 
 
         ###
@@ -130,7 +133,7 @@ class Robot:
         self.status              = -1
         self.allocation_position = -1
         self.started_control     = False
-        self.max_linear_vel      = 0.4
+
 
         self.ros_id              = self.id - self.robots_ids_start
 
@@ -966,7 +969,7 @@ class Robot:
                 self.Stall()
             else:
                 #print('control 2')
-        self.control_nonholonomic()
+                self.control_nonholonomic()
 
        
         self.position['started'] = 1
@@ -1054,6 +1057,10 @@ class Robot:
     def truncateLinearVelocity(self, velocity):
         return velocity if abs(velocity) < self.max_linear_vel else (velocity/abs(velocity))*self.max_linear_vel
 
+    def truncateAngularVelocity(self, velocity):
+        return velocity if abs(velocity) < self.max_angular_vel else (velocity/abs(velocity))*self.max_angular_vel
+
+
     def control_nonholonomic(self):
 
 
@@ -1099,7 +1106,7 @@ class Robot:
         cmd_vel.linear.x = self.truncateLinearVelocity(linear)#final_direction[0]*math.cos(robot_angle) - final_direction[1]*math.sin(robot_angle)
         cmd_vel.linear.y = 0#final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
         
-        cmd_vel.angular.z = theta
+        cmd_vel.angular.z = self.truncateAngularVelocity(theta)
         print('control', sqrt(final_direction[0]**2 +  final_direction[1]**2))
 
         if(sqrt(final_direction[0]**2 +  final_direction[1]**2) > self.dead_velocity):
