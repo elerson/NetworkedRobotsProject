@@ -1,15 +1,15 @@
 #!/bin/bash
 
-distancias=(160)
-#diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
-diretorios=(1euclideanexperiment)
+distancias=(60 90 110 140 170)
+diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 5euclideanexperiment)
+#diretorios=(1euclideanexperiment)
 experiments=(1)
 
 for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
   for dist in ${distancias[@]}; do
     for exp in ${experiments[@]}; do
-	export LOG_DIR=$dir_$'anchor'$dist'/'
+	export LOG_DIR=$dir_$'/anchor_final/anchor_'$dist'/'
 
 	./client_anchor/client.py -c $EXP_DIR/../config_sim.yaml -r $dist &
 	
@@ -18,7 +18,7 @@ for dir_ in ${diretorios[@]}; do
 	cd ../
 
 	cd simulated_experiments/anchor/
-	./create_exp.py 7 $dist 0.05
+	./create_exp.py 15 $dist 0.05
 	cd ../../
 
 	roslaunch simulated_experiments/simulation.launch &
