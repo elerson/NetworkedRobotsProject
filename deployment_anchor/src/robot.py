@@ -596,7 +596,7 @@ class Robot:
         if('src' in message):
             distance = self.graph.getDistance(message['src'], self.getCurrentNode())
             # rss = int(self.getRSSmeasurement(message['src']))
-            if(distance > self.radius):
+            if(distance > 2*self.radius):
                 message = {'type': None}
 
         if(message['type'] == MSG.INFO):
