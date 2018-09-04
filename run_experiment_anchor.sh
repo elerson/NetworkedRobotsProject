@@ -30,6 +30,9 @@ for dir_ in ${diretorios[@]}; do
 	sleep 5
 	roslaunch simulated_experiments/anchor/all_robots.launch
 
+	killall roslaunch
+	sleep 100
+
     done
   done
 done
