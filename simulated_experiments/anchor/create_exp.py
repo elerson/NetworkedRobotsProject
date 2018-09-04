@@ -14,7 +14,7 @@ robot_exp = '''
     </node> 
 
 
-    <node pkg="fake_localization" type="fake_localization" name="amclrobot_ID" output="screen">
+    <node pkg="fake_localization" type="fake_localization" name="amclrobot_ID">
      <!-- Publish scans from best pose at a max of 10 Hz -->
      <param name="odom_model_type" value="omni"/>
      <param name="base_frame_id" value="robot_ID/base_link"/>
@@ -23,7 +23,7 @@ robot_exp = '''
     </node>
 
 
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base">
 
      <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
      <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
