@@ -64,7 +64,11 @@ class Network:
         while(self.running):
             data_string = self.rcv_socket.recvfrom(2048)
             #print(data_string[0])
-            rcv_data = pickle.loads(data_string[0])
+            try:
+                rcv_data = pickle.loads(data_string[0])
+            except:
+                continue
+                
             #print(rcv_data)
             if not 'id' in rcv_data:
                 continue
