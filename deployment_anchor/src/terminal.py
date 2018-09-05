@@ -92,6 +92,9 @@ class Terminal:
             return yaml.load(stream)
 
     def receiveNetworkMessage(self, message):
+
+        if(message['type'] == MSG.INFO or message['type'] == MSG.PROBE):
+           return
         
         if(message['id'] != self.client_id):
             self.in_messages_fifo.insert(0, message)
