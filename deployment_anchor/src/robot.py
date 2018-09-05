@@ -592,11 +592,11 @@ class Robot:
             message = self.message_fifo.pop()
         #print('phase alg', self.phase_alg)
         #print(message)
-        # try:
-        #     if(message['type']  == int(MSG.PROBE)):
-        #        print(message)
-        # except:
-        #     pass
+        try:
+            if(message['type']  == int(MSG.PROBE)):
+               print(message)
+        except:
+            pass
 
         if('src' in message):
             distance = self.graph.getDistance(message['src'], self.getCurrentNode())
