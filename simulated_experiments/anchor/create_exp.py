@@ -129,7 +129,7 @@ if __name__ == "__main__":
   radius         = float(sys.argv[2])
   resolution     = float(sys.argv[3])
   terminals      = CreateTerminal()
-  terminals.create(7, radius)
+  terminals.create(5, radius)
 
   robots         = CreateRobots()
   robots.create(num_robots, radius)
