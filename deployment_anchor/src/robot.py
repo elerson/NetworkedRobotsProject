@@ -630,7 +630,7 @@ class Robot:
             mylist = self.graph.graph.keys()
             mylist.insert(0, self.getCurrentNode())
             to_visit = sorted(set(mylist), key=lambda x: mylist.index(x))
-            print(list(to_visit), self.getCurrentNode())
+            print('init tsp', list(to_visit), self.getCurrentNode())
             self.graphWalk  = self.graph.calculateTSP(list(to_visit))
             self.init_tsp   = False
             #print('tsp out')
@@ -670,8 +670,8 @@ class Robot:
 
         if(not self.wait_init_ack):
             self.graphWalk = self.goNextNode(self.graphWalk)
-            print(self.graphWalk)
-            print(self.node_id)
+            print('wait 1', self.graphWalk)
+            print('wait 2', self.node_id)
 
         #print('saiu')
     
