@@ -131,7 +131,7 @@ class Terminal:
             else:
                 new_message['value'] = 0
             self.replyMsg(id_, new_message)
-            print("init ack")
+            print("init ack", new_message)
 
         elif(type_ == MSG.DISCOVERY_COMPLETE):
             self.links = self.links.union(set(message['links']))

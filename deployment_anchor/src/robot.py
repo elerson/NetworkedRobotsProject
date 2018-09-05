@@ -358,7 +358,9 @@ class Robot:
             try:
                 self.measurement_link[self.getCurrentNode()].append(message['src'])
             except:
-                self.measurement_link[self.getCurrentNode()] = [message['src']]                
+                self.measurement_link[self.getCurrentNode()] = [message['src']]
+        else:
+            print(message)            
 
     def hasMeasumentsWaiting(self):
         try:
