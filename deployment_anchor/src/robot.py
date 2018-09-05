@@ -644,7 +644,7 @@ class Robot:
         #self.visited_nodes = self.visited_nodes.union(set([self.getCurrentNode()])) 
             
         if(message['type'] == MSG.PROBE and message['id'] == self.gateway_id):
-            print('2')
+            #print('2')
             self.gateway_src= message['src']
             new_message         = {}
             new_message['id']   = self.id
