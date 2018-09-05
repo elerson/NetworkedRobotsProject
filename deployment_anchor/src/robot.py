@@ -115,7 +115,7 @@ class Robot:
         self.is_idle         = True
         self.discovery_start = False
         self.dicover_walk    = []
-        self.gateway_id      = 0
+        self.gateway_id      = 1
         self.gateway_node_id = -1
         self.is_anchored     = True
         self.map_resolution  = 0.05
