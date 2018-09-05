@@ -20,10 +20,23 @@ class Network:
         self.running = True
         self.port = port
         self.broadcast_addr = broadcast_addr
+        self.id      = id
+        self.lock = threading.Lock()
+        self.num_msg = {}
 
         print('initializing network ...')
 
-        #configure send socket
+
+        
+
+        self.rcv_data    = {}
+        self.rcv_command = {}
+
+        self.command_callback = None
+        self.message_callback = None
+        self.msg_num = 0
+
+                #configure send socket
         self.send_socket = socket(AF_INET, SOCK_DGRAM, SOL_UDP)
         self.send_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         #self.send_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -36,17 +49,6 @@ class Network:
 
         self.rcv_thread = threading.Thread(target=self.rcvMessage)
         self.rcv_thread.start()
-        self.num_msg = {}
-        self.id      = id
-
-        self.rcv_data    = {}
-        self.rcv_command = {}
-
-        self.command_callback = None
-        self.message_callback = None
-        self.msg_num = 0
-
-        self.lock = threading.Lock()
 
     def addCommandCallback(self, callback):
         self.command_callback = callback
