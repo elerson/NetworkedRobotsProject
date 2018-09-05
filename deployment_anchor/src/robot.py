@@ -373,7 +373,7 @@ class Robot:
             self.robot_position_ids[message['id']] = message['src']
 
 
-        #print('step ', self.step, self.status)
+        print('step ', self.step)
 
         if self.step == STEP.DISCOVER:
             if(self.is_idle and self.discovery_start):
