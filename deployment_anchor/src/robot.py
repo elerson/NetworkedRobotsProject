@@ -669,7 +669,7 @@ class Robot:
             return
 
         if(not self.wait_init_ack):
-            self.graphWalk = self.goNextNode(self.graphWalk)
+            self.graphWalk = self.goNextNode(self.graphWalk, 10)
             print('wait 1', self.graphWalk)
             print('wait 2', self.node_id)
 
