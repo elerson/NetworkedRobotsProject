@@ -523,7 +523,7 @@ class Robot:
                 self.settleWalk = self.goNextNode(self.settleWalk)
                 self.allow_go_next_node = last_node_id == self.getCurrentNode()
             
-            #print('visiting settle', self.visiting)
+            print('visiting settle', self.visiting, self.settleWalk)
 
             if message['type'] == MSG.PROBE:
                 if(self.settleWalk == []):
