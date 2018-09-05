@@ -352,6 +352,9 @@ class Robot:
         if(self.phase_alg != PHASE.INIT and (not self.is_coord) and message['type'] == MSG.PROBE):
             return
 
+        if(message['type'] == MSG.INFO):
+            return
+
         self.message_fifo.insert(0, message)
 
         if(message['type'] == MSG.PROBE):
