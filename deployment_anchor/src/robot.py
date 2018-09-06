@@ -312,7 +312,7 @@ class Robot:
                     new_message['phase'] = int(STEP.DEPLOY)
                     new_message['dest']  = self.deployment_assignment.get(message['id'], self.gateway_src)
                     new_message['route'] = self.robot_neighbors.get(message['id'], [])
-                    #print(self.deployment_assignment, self.deployment_assignment.get(message['id'], self.gateway_src), message['id'],message)
+                    print(self.deployment_assignment, self.deployment_assignment.get(message['id'], self.gateway_src), message['id'],message)
                     self.network.sendMessageTo(message['id'], new_message)
 
                 self.allow_go_next_node = last_node_id == self.getCurrentNode()

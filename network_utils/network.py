@@ -164,7 +164,7 @@ class Network:
         self.send_socket.sendto(data_string,(self.broadcast_addr, self.port))
         pass
 
-    def sendMessageTo(self, dst_id, message, resend_time = 100):
+    def sendMessageTo(self, dst_id, message, resend_time = 4):
 
 
         message['_type_'] = TYPE.WAITREPLY

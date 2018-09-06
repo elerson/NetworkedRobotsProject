@@ -243,7 +243,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         #verify experiment exit
         #print(self.ended, self.exit)
-        if((self.ended and self.exit) or (self.exit and (self.finish_time.elapsed() > 6000000 ))):
+        if((self.ended and self.exit) or (self.exit and (self.finish_time.elapsed() > 4000000 ))):
             self.closeRos()
             self.close()
 
