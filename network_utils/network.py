@@ -164,7 +164,7 @@ class Network:
         self.send_socket.sendto(data_string,(self.broadcast_addr, self.port))
         pass
 
-    def sendMessageTo(self, dst_id, message, resend_time = 4):
+    def sendMessageTo(self, dst_id, message, resend_time = 20):
 
 
         message['_type_'] = TYPE.WAITREPLY
@@ -177,7 +177,7 @@ class Network:
 
         self.waiting_reply = True
         retry_count        = resend_time
-        while(self.waiting_reply):
+        while(self.waiting_reply and retry_count >= 0):
             if(retry_count <= 0):
                 retry_count     = resend_time
                 self.send_socket.sendto(data_string, (self.broadcast_addr, self.port))
