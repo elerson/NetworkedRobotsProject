@@ -1,0 +1,19 @@
+Connecting to host 192.168.10.2, port 5201
+[  4] local 192.168.10.1 port 41016 connected to 192.168.10.2 port 5201
+[ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
+[  4]   0.00-1.00   sec   187 KBytes  1.53 Mbits/sec    0   46.7 KBytes       
+[  4]   1.00-2.00   sec   103 KBytes   846 Kbits/sec    1   36.8 KBytes       
+[  4]   2.00-3.00   sec  45.2 KBytes   371 Kbits/sec    1   26.9 KBytes       
+[  4]   3.00-4.00   sec  0.00 Bytes  0.00 bits/sec    5   18.4 KBytes       
+[  4]   4.00-5.00   sec  0.00 Bytes  0.00 bits/sec    2   14.1 KBytes       
+[  4]   5.00-6.00   sec  96.2 KBytes   788 Kbits/sec    1   21.2 KBytes       
+[  4]   6.00-7.00   sec   157 KBytes  1.29 Mbits/sec    0   25.5 KBytes       
+[  4]   7.00-8.00   sec   154 KBytes  1.26 Mbits/sec    0   29.7 KBytes       
+[  4]   8.00-9.00   sec   194 KBytes  1.59 Mbits/sec    0   35.4 KBytes       
+[  4]   9.00-10.00  sec   188 KBytes  1.54 Mbits/sec    0   38.2 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bandwidth       Retr
+[  4]   0.00-10.00  sec  1.10 MBytes   921 Kbits/sec   10             sender
+[  4]   0.00-10.00  sec  1.03 MBytes   865 Kbits/sec                  receiver
+
+iperf Done.
