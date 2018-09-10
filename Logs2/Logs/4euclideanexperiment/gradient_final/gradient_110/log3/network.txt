@@ -1,0 +1,55 @@
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{11: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}}
+{11: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}}
+{11: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}}
+{11: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}, 13: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (255.9999961853028, 411.80000174641606, 0.0), 'id': 13}, 15: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (181.87999728977684, 412.680001733303, 0.0), 'id': 15}}
+{11: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}, 13: {'started': 1, 'destination': (413.0, 149.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (255.9999961853028, 411.80000174641606, 0.0), 'id': 13}, 14: {'started': 1, 'destination': (770.0, 119.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (220.97999670714142, 413.3600017231703, 0.0), 'id': 14}, 15: {'started': 1, 'destination': (770.0, 119.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (181.87999728977684, 412.680001733303, 0.0), 'id': 15}, 16: {'started': 1, 'destination': (770.0, 119.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (182.99999727308756, 431.9600014460087, 0.0), 'id': 16}, 17: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (256.39999617934234, 431.18000145763153, 0.0), 'id': 17}, 18: {'started': 1, 'destination': (770.0, 119.5), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (220.97999670714142, 430.90000146180387, 0.0), 'id': 18}, 19: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.49999565631157, 432.6400014358759, 0.0), 'id': 19}, 20: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (325.65999514728793, 431.88000144720075, 0.0), 'id': 20}, 21: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (182.31999728322032, 453.92000111877917, 0.0), 'id': 21}, 23: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (255.57999619156126, 454.28000111341476, 0.0), 'id': 23}}

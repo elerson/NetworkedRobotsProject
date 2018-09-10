@@ -1,0 +1,56 @@
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{10: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (32.454, -11.562, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 10}}
+{10: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (324.5399951639772, 413.38000172287224, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 10}, 11: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (29.126, -11.658, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 11}, 12: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (25.6, -11.72, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 12}, 13: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (22.098, -11.564, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 13}, 14: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (18.188, -11.632, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 14}, 15: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (18.3, -9.704, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 15}}
+{10: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (324.5399951639772, 413.38000172287224, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 10}, 11: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (29.126, -11.658, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 11}, 12: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (255.9999961853028, 411.80000174641606, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 12}, 13: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (22.098, -11.564, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 13}, 14: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (18.188, -11.632, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 14}, 15: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (18.3, -9.704, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 15}, 16: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (25.64, -9.782, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 16}, 17: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (220.97999670714142, 430.90000146180387, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 17}}
+{10: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (324.5399951639772, 413.38000172287224, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 10}, 11: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (291.25999565988786, 412.42000173717736, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 11}, 12: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (255.9999961853028, 411.80000174641606, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 12}, 13: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (220.97999670714142, 413.3600017231703, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 13}, 14: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (181.87999728977684, 412.680001733303, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 14}, 15: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (182.99999727308756, 431.9600014460087, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 15}, 16: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (256.39999617934234, 431.18000145763153, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 16}, 17: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (220.97999670714142, 430.90000146180387, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 17}, 18: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (291.49999565631157, 432.6400014358759, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 18}, 19: {'ended': 0, 'state': 0, 'routing': [], 'started': 0, 'position': (325.65999514728793, 431.88000144720075, 0.0), '_type_': <TYPE.NOWAITREPLY: 1>, 'id': 19}}

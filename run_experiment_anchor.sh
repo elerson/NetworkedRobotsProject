@@ -1,9 +1,9 @@
 #!/bin/bash
 
-distancias=(90 110 140 170)
-diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 5euclideanexperiment)
+distancias=(60 90 110 140 170)
+diretorios=(3euclideanexperiment 5euclideanexperiment)
 #diretorios=(1euclideanexperiment)
-experiments=(1)
+experiments=(1 2 3 4 5)
 
 for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_

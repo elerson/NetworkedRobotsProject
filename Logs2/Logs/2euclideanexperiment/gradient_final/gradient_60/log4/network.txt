@@ -1,0 +1,57 @@
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+{12: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}}
+{11: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}}
+{11: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}}
+{11: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}, 13: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (255.9999961853028, 411.80000174641606, 0.0), 'id': 13}}
+{11: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (324.5399951639772, 413.38000172287224, 0.0), 'id': 11}, 12: {'started': 1, 'destination': (410.5, 368.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (291.25999565988786, 412.42000173717736, 0.0), 'id': 12}, 13: {'started': 1, 'destination': (530.5, 213.0), '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (255.9999961853028, 411.80000174641606, 0.0), 'id': 13}, 14: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (220.97999670714142, 413.3600017231703, 0.0), 'id': 14}, 15: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (181.87999728977684, 412.680001733303, 0.0), 'id': 15}, 18: {'started': 0, '_type_': <TYPE.NOWAITREPLY: 1>, 's_size': 10000, 'radius': 1, 'routing': [], 'diff': -1, 'position': (220.97999670714142, 430.90000146180387, 0.0), 'id': 18}}

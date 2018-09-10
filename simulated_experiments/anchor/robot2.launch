@@ -2,7 +2,7 @@
 <launch>
   <group ns = "robot_2">
     <node pkg="deployment_anchor" type="robot.py" name="ros_robot_2" output="screen">
-      <param name="radius" value="160" />
+      <param name="radius" value="60" />
       <param name="xoffset" value="0" />
       <param name="yoffset" value="0" />
       <param name="id" value="2" />
@@ -10,7 +10,7 @@
     </node> 
 
 
-    <node pkg="fake_localization" type="fake_localization" name="amclrobot_2" output="screen">
+    <node pkg="fake_localization" type="fake_localization" name="amclrobot_2">
      <!-- Publish scans from best pose at a max of 10 Hz -->
      <param name="odom_model_type" value="omni"/>
      <param name="base_frame_id" value="robot_2/base_link"/>
@@ -19,7 +19,7 @@
     </node>
 
 
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base">
 
      <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
      <rosparam file="$(find deployment_anchor)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
