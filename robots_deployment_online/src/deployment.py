@@ -48,13 +48,23 @@ class Robot:
         ####  ALGORITHM PARAMETERS
         ####
 
-        self.alpha               = 0.5*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
-        self.beta                = 2.0  #2.0               ## the importance of following the path
-        self.robot_center_y      = 0.6                     ## how fast the robot turns
+        # self.alpha               = 0.5*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## the importance of following the objective
+        # self.beta                = 2.0  #2.0               ## the importance of following the path
+        # self.robot_center_y      = 0.6                     ## how fast the robot turns
+        # self.dead_velocity       = 0.15
+
+        # self.max_linear_vel      = 0.18
+        # self.max_angular_vel     = 0.14
+
+        
+        self.alpha               = 0.9*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## th$
+        self.beta                = 0.7  #2.0               ## the importance of $
+        self.robot_center_y      = 0.6                     ## how fast the robot$
         self.dead_velocity       = 0.15
 
-        self.max_linear_vel      = 0.18
-        self.max_angular_vel     = 0.14
+        self.max_linear_vel      = 0.40
+        self.max_angular_vel     = 1.0
+
 
 
         ###
