@@ -80,7 +80,7 @@ for algorithm in algorithms:
 2
 
 
-#raio de communicação vs tempo
+#raio de communicacao vs tempo
 N    = 5
 i = 1
 for exp in experiments:
@@ -116,7 +116,7 @@ for exp in experiments:
     plt.ylabel('# Robots',  fontsize=16)
     #
     plt.legend(loc='best')
-    plt.savefig('simulated_num_robots' + str(i) + 'pdf')
+    plt.savefig('simulated_num_robots' + str(i-1) + '.pdf')
     #plt.show()
 
 
@@ -125,7 +125,7 @@ for exp in experiments:
 
 
 
-#raio de communicação vs tempo
+#raio de communica vs tempo
 N    = 5
 i    = 1
 for exp in experiments:
@@ -156,28 +156,9 @@ for exp in experiments:
     plt.ylabel('Time (seconds)',  fontsize=16)
     #
     plt.legend(loc='best')
-    plt.savefig('simulated_time_robots' + str(i) + 'pdf')
+    plt.savefig('simulated_time_robots' + str(i-1) + '.pdf')
     #plt.show()
 
-
-# for exp in experiments:
-#     index = [s for s in data.keys() if 'gradient' in s and exp in s]
-#     index = sorted(index, key=lambda tup: int(tup[2]))
-#     print([ data[idx][0] for idx in index])
-#     print([ data[idx][1] for idx in index])
-
-
-
-
-
-
-# #raio de communicação vs número de robots
-
-# #ambiente vs numero de robots vs raio de communicacao
-
-
-# mean = list(np.array(sum_['odom'])/N)
-# std_ = list(np.sqrt(np.array(sum_2['odom'])/N - (np.array(sum_['odom'])/N)**2))
 
 
 
