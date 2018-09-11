@@ -352,8 +352,8 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
             if 'state' in self.network.rcv_data[id]:
                 if self.network.rcv_data[id]['state'] == 3:
                     num_connected  += 1
-                if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
-                    connected = False 
+                #if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
+                #    connected = False 
                 print('ended', self.network.rcv_data[id]['ended'])
                 ended = ended or self.network.rcv_data[id]['ended']
 
