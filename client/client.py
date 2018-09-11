@@ -181,7 +181,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
         #verify experiment exit
         
-        if((connected and num_connected > 1 and self.exit) or (self.exit and (self.finish_time.elapsed() > 1000000 ))):
+        if((connected and num_connected >= 1 and self.exit) or (self.exit and (self.finish_time.elapsed() > 1000000 ))):
             self.closeRos()
             self.close()
 
@@ -352,15 +352,16 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
             if 'state' in self.network.rcv_data[id]:
                 if self.network.rcv_data[id]['state'] == 3:
                     num_connected  += 1
-                #if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
-                connected = True 
+                
+                if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
+                    connected = False 
                 #print('ended', self.network.rcv_data[id]['ended'])
                 ended = ended or self.network.rcv_data[id]['ended']
 
         if len(ids) > 0 and 'diff' in self.network.rcv_data[ids[0]]:
             connected = connected and (num_connected >= self.network.rcv_data[ids[0]]['s_size'])
 
-        print('ended', connected, ended)
+
         connected = connected and ended
         return connected, num_connected
 
