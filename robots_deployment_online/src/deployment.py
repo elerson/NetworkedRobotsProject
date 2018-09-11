@@ -56,7 +56,7 @@ class Robot:
         # self.max_linear_vel      = 0.18
         # self.max_angular_vel     = 0.14
 
-        
+
         self.alpha               = 0.9*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## th$
         self.beta                = 0.7  #2.0               ## the importance of $
         self.robot_center_y      = 0.6                     ## how fast the robot$
@@ -64,6 +64,7 @@ class Robot:
 
         self.max_linear_vel      = 0.40
         self.max_angular_vel     = 1.0
+        
 
 
 
@@ -808,14 +809,14 @@ class Robot:
         alphas = np.asfarray(alphas[1:]) - self_alpha
         #print(alphas, self_alpha)
         #guarantee that the robot start the deployment only inside its path
-        if(self_alpha < 0.05):
+        if(self_alpha < 0.01):
             neigh_0 = self.id
             neigh_1 = segmentation[self.allocation_id][-1]
             self.neigh_0 = neigh_0
             self.neigh_1 = neigh_1
             return [neigh_0, neigh_1] 
 
-        if(self_alpha > 0.95):
+        if(self_alpha > 0.99):
             neigh_0 = segmentation[self.allocation_id][0]
             neigh_1 = self.id
             self.neigh_0 = neigh_0
