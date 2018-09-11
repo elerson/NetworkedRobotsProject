@@ -354,12 +354,13 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
                     num_connected  += 1
                 #if not (self.network.rcv_data[id]['state'] == 0 or self.network.rcv_data[id]['state'] == 3):
                 connected = True 
-                print('ended', self.network.rcv_data[id]['ended'])
+                #print('ended', self.network.rcv_data[id]['ended'])
                 ended = ended or self.network.rcv_data[id]['ended']
 
         if len(ids) > 0 and 'diff' in self.network.rcv_data[ids[0]]:
             connected = connected and (num_connected >= self.network.rcv_data[ids[0]]['s_size'])
 
+        print('ended', connected, ended)
         connected = connected and ended
         return connected, num_connected
 
