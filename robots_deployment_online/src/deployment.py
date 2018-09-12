@@ -782,6 +782,7 @@ class Robot:
         for alloc_id in allocation:
             if(self.id in allocation[alloc_id]):
                 self.allocation_id = alloc_id
+                self.position['alloc_id'] = self.allocation_id
                 break
 
         #print(allocation, self.allocation_id)
