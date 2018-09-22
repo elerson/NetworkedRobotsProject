@@ -15,7 +15,7 @@ for dir_ in ${diretorios[@]}; do
   export EXP_DIR=~/NetworkedRobotsProject/simulated_experiments/$dir_
   for dist in ${distancias[@]}; do
     for exp in ${experiments[@]}; do
-	export LOG_DIR=$dir_$'/gradient_final/gradient_'$dist'/'
+	export LOG_DIR=$dir_$'/gradient_final_video/gradient_'$dist'/'
 	#export LOG_DIR=$dir_$'_cefsm_'$dist'/'
 	./client/client.py -c $EXP_DIR/../config_sim.yaml &
 	
