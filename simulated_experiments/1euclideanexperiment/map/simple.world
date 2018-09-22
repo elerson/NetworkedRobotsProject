@@ -56,8 +56,8 @@ window
 ( 
   size [ 745 448 ] 
 
-  rotate [ 13.000 -7.060 ]
-  scale 13.438 
+  rotate [ 14.000 -8.060 ]
+  scale 21.642 
 )
 
 
@@ -71,29 +71,29 @@ floorplan
 )
 
 # throw in two robots
-erratic( pose [ 17.923 4.351 0.000 0.000 ] name "era0" color "blue")
-erratic( pose [ 17.002 4.266 0.000 0.000 ] name "era1" color "blue")
-erratic( pose [ 16.124 4.304 0.000 0.000 ] name "era2" color "blue")
-erratic( pose [ 15.344 4.348 0.000 0.000 ] name "era3" color "blue")
-erratic( pose [ 14.572 4.401 0.000 0.000 ] name "era4" color "blue")
-erratic( pose [ 14.289 3.488 0.000 0.000 ] name "era5" color "blue")
-erratic( pose [ 16.252 3.547 0.000 0.000 ] name "era6" color "blue")
-erratic( pose [ 15.160 3.566 0.000 0.000 ] name "era7" color "blue")
-erratic( pose [ 17.051 3.583 0.000 0.000 ] name "era8" color "blue")
-erratic( pose [ 17.933 3.589 0.000 0.000 ] name "era9" color "blue")
-erratic( pose [ 14.300 2.762 0.000 0.000 ] name "era10" color "blue")
-erratic( pose [ 15.298 2.758 0.000 0.000 ] name "era11" color "blue")
-erratic( pose [ 16.171 2.784 0.000 0.000 ] name "era12" color "blue")
-erratic( pose [ 17.169 2.801 0.000 0.000 ] name "era13" color "blue")
-erratic( pose [ 18.093 2.833 0.000 0.000 ] name "era14" color "blue")
-erratic( pose [ 14.496 1.984 0.000 0.000 ] name "era15" color "blue")
-erratic( pose [ 15.333 1.872 0.000 0.000 ] name "era16" color "blue")
-erratic( pose [ 16.110 1.851 0.000 0.000 ] name "era17" color "blue")
-erratic( pose [ 17.213 1.955 0.000 0.000 ] name "era18" color "blue")
-erratic( pose [ 18.150 2.042 0.000 0.000 ] name "era19" color "blue")
-erratic( pose [ 14.360 1.073 0.000 0.000 ] name "era20" color "blue")
-erratic( pose [ 15.346 0.902 0.000 0.000 ] name "era21" color "blue")
-erratic( pose [ 16.111 1.101 0.000 0.000 ] name "era22" color "blue")
-erratic( pose [ 17.133 1.153 0.000 0.000 ] name "era23" color "blue")
-erratic( pose [ 18.177 1.174 0.000 0.000 ] name "era24" color "blue")
+erratic( pose [ 14.992 9.636 0.000 0.000 ] name "era0" color "blue")
+erratic( pose [ 13.928 9.521 0.000 0.000 ] name "era1" color "blue")
+erratic( pose [ 12.803 9.446 0.000 0.000 ] name "era2" color "blue")
+erratic( pose [ 11.633 9.347 0.000 0.000 ] name "era3" color "blue")
+erratic( pose [ 10.352 9.418 0.000 0.000 ] name "era4" color "blue")
+erratic( pose [ 10.435 8.457 0.000 0.000 ] name "era5" color "blue")
+erratic( pose [ 12.868 8.553 0.000 0.000 ] name "era6" color "blue")
+erratic( pose [ 11.678 8.537 0.000 0.000 ] name "era7" color "blue")
+erratic( pose [ 13.988 8.550 0.000 0.000 ] name "era8" color "blue")
+erratic( pose [ 15.037 8.774 0.000 0.000 ] name "era9" color "blue")
+erratic( pose [ 10.433 7.255 0.000 0.000 ] name "era10" color "blue")
+erratic( pose [ 11.666 7.269 0.000 0.000 ] name "era11" color "blue")
+erratic( pose [ 12.878 7.397 0.000 0.000 ] name "era12" color "blue")
+erratic( pose [ 14.111 7.432 0.000 0.000 ] name "era13" color "blue")
+erratic( pose [ 14.967 7.664 0.000 0.000 ] name "era14" color "blue")
+erratic( pose [ 10.463 6.258 0.000 0.000 ] name "era15" color "blue")
+erratic( pose [ 11.604 6.348 0.000 0.000 ] name "era16" color "blue")
+erratic( pose [ 12.771 6.470 0.000 0.000 ] name "era17" color "blue")
+erratic( pose [ 13.920 6.568 0.000 0.000 ] name "era18" color "blue")
+erratic( pose [ 15.040 6.632 0.000 0.000 ] name "era19" color "blue")
+erratic( pose [ 10.470 5.378 0.000 0.000 ] name "era20" color "blue")
+erratic( pose [ 11.754 5.361 0.000 0.000 ] name "era21" color "blue")
+erratic( pose [ 12.743 5.484 0.000 0.000 ] name "era22" color "blue")
+erratic( pose [ 13.960 5.608 0.000 0.000 ] name "era23" color "blue")
+erratic( pose [ 15.101 5.664 0.000 0.000 ] name "era24" color "blue")
 #block( pose [ 13.924 25.020 0 0 ] color "red")

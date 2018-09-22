@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from math import sqrt
+import matplotlib
+plt.rcParams['text.usetex'] = True
+
 
 root = '/home/elerson/NetworkedRobotsProject/Logs2/Logs/'
 pattern = "*.txt"
@@ -101,7 +104,7 @@ for exp in experiments:
     index  = [s for s in data.keys() if 'gradient' in s and exp in s]
     index  = sorted(index, key=lambda tup: int(tup[2]))
     mean   = [ data[idx][2] for idx in index]
-    rects2 = ax.bar([2,5,8,11,14], mean, 1, color='g')
+    rects2 = ax.bar([2,5,8,11,14], mean, 1, color='g', hatch="//")
     #
     #
     ax.set_ylabel('Radius')
@@ -110,10 +113,10 @@ for exp in experiments:
     ax.set_xticklabels(('60', '90', '110', '140', '170'))
     #
     ax.legend((rects1[0], rects2[0]), ('CEFSM', 'Proposed'))
-    plt.title('# Robots vs Radius - ' + "Simulated Enviroment "+str(i)  ,  fontsize=20)
+    plt.title('\# Robots vs Radius - ' + "Simulated Enviroment "+str(i)  ,  fontsize=20)
     i+= 1
     plt.xlabel('Radius',  fontsize=16)
-    plt.ylabel('# Robots',  fontsize=16)
+    plt.ylabel('\# Robots',  fontsize=16)
     #
     plt.legend(loc='best')
     plt.savefig('simulated_num_robots' + str(i-1) + '.pdf')

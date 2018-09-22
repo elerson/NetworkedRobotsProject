@@ -1,9 +1,9 @@
 #!/bin/bash
 
-distancias=(60 90 110 140 170)
+distancias=(60 90)
 diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 5euclideanexperiment)
 #diretorios=(5euclideanexperiment)
-experiments=(1 2 3 4 5)
+experiments=(1)
 
 #distancias=(160)
 #diretorios=(1euclideanexperiment 2euclideanexperiment 3euclideanexperiment 4euclideanexperiment 5euclideanexperiment)
@@ -28,7 +28,7 @@ for dir_ in ${diretorios[@]}; do
 	cd ../
 
 	cd simulated_experiments/gradient/
-	./create_exp.py 20 $dist 0.05
+	./create_exp.py 15 $dist 0.05
 	cd ../../
 
 	#./simulated_experiments/gradient/create_exp.py 25 ${distancias[d]} 0.05
