@@ -57,21 +57,21 @@ class Robot:
         # self.max_angular_vel     = 0.14
 
 
-        self.alpha               = 0.9*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## th$
-        self.beta                = 0.7  #2.0               ## the importance of $
-        self.robot_center_y      = 0.6                     ## how fast the robot$
-        self.dead_velocity       = 0.15
-
-        self.max_linear_vel      = 0.40
-        self.max_angular_vel     = 1.0
-
-        # self.alpha               = 0.5*(1.0/100.0)#1.0    ## th$
-        # self.beta                = 2.0               ## the importance of $
+        # self.alpha               = 0.9*(1.0/100.0) #0.5*(1.0/100.0)#1.0    ## th$
+        # self.beta                = 0.7  #2.0               ## the importance of $
         # self.robot_center_y      = 0.6                     ## how fast the robot$
-        # self.dead_velocity       = 0.01
+        # self.dead_velocity       = 0.15
 
         # self.max_linear_vel      = 0.40
         # self.max_angular_vel     = 1.0
+
+        self.alpha               = 0.5*(1.0/100.0)#1.0    ## th$
+        self.beta                = 2.0               ## the importance of $
+        self.robot_center_y      = 0.6                     ## how fast the robot$
+        self.dead_velocity       = 0.01
+
+        self.max_linear_vel      = 0.40
+        self.max_angular_vel     = 1.0
         
 
 
