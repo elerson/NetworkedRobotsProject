@@ -24,6 +24,9 @@ from util import dist_to_segment_alpha, dist_to_segment
 from network_utils.rssi_kalman import RSSIKalmanFilter
 from network_utils.Routing import Routing
 from network_utils.rssmeasure_v2 import RSSMeasure
+from network_utils.map import Map
+from network_utils.rssi_linear_regression import LinearRegressionRSSI
+
 from enum import IntEnum
 
 import time
@@ -68,11 +71,11 @@ class Robot:
         self.alpha               = 0.5*(1.0/100.0)#1.0    ## th$
         self.beta                = 2.0               ## the importance of $
         self.robot_center_y      = 0.6                     ## how fast the robot$
-        self.dead_velocity       = 0.01
+        self.dead_velocity       = 0.0000001
 
         self.max_linear_vel      = 0.40
         self.max_angular_vel     = 1.0
-        
+        self.real_distance       = {}
 
 
 
@@ -84,6 +87,7 @@ class Robot:
         self.config              = self.readConfig(self.config_file)
 
         self.real_robot          = not self.config['configs']['simulation'] 
+        self.map                 = Map(self.config['configs']['map'])
 
         if(self.real_robot):        	
             self.routing         = Routing('teste4', self.config_file, 'ra0')
@@ -248,12 +252,26 @@ class Robot:
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
-            self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
+            self.metric_kalman[data_id]   =  LinearRegressionRSSI(self.id, [-40, 3.5], 0.1) #RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
         position = self.getPositionByID(data_id)
 
+        my_pos    = self.position['position']
+        neigh_pos = position
+        in_s, initial, final = self.map.inLineOfSight((int(my_pos[0]), int(my_pos[1])), (int(neigh_pos[0]), int(neigh_pos[1])))
+        if(not in_s):
+            return
+
         real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
         real_metric    = rss
+
+        try:
+            if(abs(real_distance - self.real_distance[data_id]) < 0.1):
+                return
+        except:
+            self.real_distance[data_id] = real_distance
+
+        self.real_distance[data_id] = real_distance
 
 
         x = abs(self.position['position'][0] - position[0])*self.map_resolution
@@ -263,8 +281,8 @@ class Robot:
         d = np.matrix([[10*x*gamma/(x**2 + y**2), 10*y*gamma/(x**2 + y**2)]])
         measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + m_var
 
-        self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
-        self.metric_kalman[data_id].addMeasurement(real_distance, real_metric)
+        #self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+        self.metric_kalman[data_id].addMeasurement(real_distance, real_metric, measurement_var)#addMeasurement(real_distance, real_metric)
 
 
     def simulationMetric(self, param):
@@ -278,12 +296,24 @@ class Robot:
             real_distance    = self.getDistance(self.position['position'], self.network.getData(data_id)['position'])*self.map_resolution
             simulated_metric = self.logNormalMetric(real_distance, variance) #real_distance + np.random.normal(0,variance,1)[0]
             
+            try:
+                if(abs(real_distance - self.real_distance[data_id]) < 0.1):
+                    continue
+            except:
+                self.real_distance[data_id] = real_distance
+            self.real_distance[data_id] = real_distance
+
 
             #0-time, 1-realposition, 2-neighposition, 3-real_distance, 4-simulated_metric
             #self.metric_measurements[data_id] = (rospy.get_time(), self.position['position'], self.network.rcv_data[data_id]['position'], real_distance, simulated_metric)
             if( data_id not in self.metric_kalman):
-                self.metric_kalman[data_id]   =  RSSIKalmanFilter(self.id, [-40.0, 4], .1 ,.1, variance, self.log_rss)
+                self.metric_kalman[data_id]   =  LinearRegressionRSSI(self.id,[-40, 3.5], 0.1) #RSSIKalmanFilter(self.id, [-40.0, 4], .1 ,.1, variance, self.log_rss)
 
+            my_pos    = self.position['position']
+            neigh_pos = self.network.getData(data_id)['position']
+            in_s, initial, final = self.map.inLineOfSight((int(my_pos[0]), int(my_pos[1])), (int(neigh_pos[0]), int(neigh_pos[1])))
+            if(not in_s):
+                continue
 
             m, P = self.metric_kalman[data_id].getResult()
             #print(m)
@@ -294,9 +324,9 @@ class Robot:
 
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
+                #self.metric_kalman[data_id].setMeasurmentVar(measurement_var)
 
-                self.metric_kalman[data_id].addMeasurement(real_distance, simulated_metric)
+                self.metric_kalman[data_id].addMeasurement(real_distance, simulated_metric, measurement_var) #addMeasurement(real_distance, simulated_metric)
 
 
         #for the tree
@@ -305,9 +335,26 @@ class Robot:
             simulated_metric = self.logNormalMetric(real_distance, variance)#real_distance + np.random.normal(0,variance,1)[0]
             #self.metric_measurements[vertex] = (rospy.get_time(), self.position['position'], self.tree.graph_vertex_position[vertex], real_distance, simulated_metric)
 
-            if( vertex not in self.metric_kalman):
-                self.metric_kalman[vertex] =  RSSIKalmanFilter(self.id, [-40.0, 4], .1, .1, variance, self.log_rss)
+            try:
+                if(abs(real_distance - self.real_distance[vertex]) < 0.1):
+                    continue
+            except:
+                self.real_distance[vertex] = real_distance
 
+            self.real_distance[vertex] = real_distance
+            
+
+            my_pos    = self.position['position']
+            neigh_pos = self.tree.graph_vertex_position[vertex]
+            in_s, initial, final = self.map.inLineOfSight((int(my_pos[0]), int(my_pos[1])), (int(neigh_pos[0]), int(neigh_pos[1])))
+
+
+
+            if( vertex not in self.metric_kalman):
+                self.metric_kalman[vertex] =  LinearRegressionRSSI(self.id, [-40, 3.5], 0.1)#RSSIKalmanFilter(self.id, [-40.0, 4], .1, .1, variance, self.log_rss)
+
+            if(not in_s):
+                continue
             
             if(real_distance > 1.0):
                 #caculate the variance
@@ -316,9 +363,10 @@ class Robot:
 
                 d = np.matrix([[x, y]])
                 measurement_var = np.dot(np.dot(d,self.covariance),d.T)[0,0] + variance
-                self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
+                #self.metric_kalman[vertex].setMeasurmentVar(measurement_var)
 
-                self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
+                #self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric)
+                self.metric_kalman[vertex].addMeasurement(real_distance, simulated_metric, measurement_var)
 
 
     def createRoutingGraph(self):
@@ -375,12 +423,12 @@ class Robot:
         pose.pose.position.x = deployment_position[0]*self.map_resolution
         pose.pose.position.y = (self.height - deployment_position[1])*self.map_resolution
 
-        print(pose.pose.position)
+        #print(pose.pose.position)
 
         #for debug
         self.position['destination'] = (deployment_position[0], deployment_position[1])
 
-        print(pose.pose.position.x, pose.pose.position.y)
+        #print(pose.pose.position.x, pose.pose.position.y)
         q = tf.transformations.quaternion_from_euler(0, 0, 0)
         pose.pose.orientation = Quaternion(*q)
 
@@ -985,15 +1033,32 @@ class Robot:
             #print(self.position['destination'])
         else:
             self.started_control = True
-            #print('status', self.status)
+            print('status', self.status)
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
-                #print('control 2')
+                #print(self.id, 'control 2')        
                 self.control_nonholonomic()
+
 
        
         self.position['started'] = 1
+
+    def getDistanceByIDInSight(self, id, r):
+
+        p = self.getPositionByID(id)
+        distance = self.getDistance(r, p)*self.map_resolution
+
+
+        in_s, initial, final = self.map.inLineOfSight((int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
+        if(in_s):
+            return self.metric_kalman[id].getMetricValue(distance)
+        else:
+            d_sight = initial*self.map_resolution
+            #print('In'id)
+            return self.metric_kalman[id].getMetricValueInSight(distance, d_sight, 0.1)
+
+
 
     def getDistanceByID(self, id):
         r = self.position['position']
@@ -1019,6 +1084,7 @@ class Robot:
 
     def verifyMetricOnNeighbors(self, neighbors_ids):
         #print(self.network.getDataIds())
+        #print(self.metric_kalman.keys(), neighbors_ids)
         return (neighbors_ids[0] in self.metric_kalman) and (neighbors_ids[1] in self.metric_kalman)      
 
 
@@ -1036,10 +1102,12 @@ class Robot:
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
         #neighbors_positions = self.getNeighbors()
-        neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
-        neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
-        
+
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
+
+        neighbor_1_distance = -self.getDistanceByIDInSight(neighbors_ids[0], closest_point)
+        neighbor_2_distance = -self.getDistanceByIDInSight(neighbors_ids[1], closest_point)       
+        
         
         tangent = (0, 0)
         #print('out', self.allocation_id)
@@ -1088,19 +1156,20 @@ class Robot:
         r = self.position['position']
         neighbors_ids = self.getNeighborsIDs()
         if( not self.verifyMetricOnNeighbors(neighbors_ids) ):
+            #print('foi')
             return        
 
         #neighbors_positions = robot.getNeighbors()
         neighbors_positions = [ self.getPositionByID(neighbors_ids[0]), self.getPositionByID(neighbors_ids[1])]
 
-        #neighbors_positions = self.getNeighbors()
-        neighbor_1_distance = -self.getDistanceByID(neighbors_ids[0])
-        neighbor_2_distance = -self.getDistanceByID(neighbors_ids[1])
-
-        #print('running', self.id, neighbors_ids, neighbor_1_distance, neighbor_2_distance)
 
         t, closest_point = self.splines[self.allocation_id].getClosestPoint(r[0], r[1])
-        
+
+        #neighbors_positions = self.getNeighbors()
+        neighbor_1_distance = -self.getDistanceByIDInSight(neighbors_ids[0], closest_point)
+        neighbor_2_distance = -self.getDistanceByIDInSight(neighbors_ids[1], closest_point)
+
+        #print('running', self.id, neighbor_1_distance, neighbor_2_distance)
         tangent = (0, 0)
         #print('out', self.allocation_id)
         if(t > 0):
@@ -1128,7 +1197,7 @@ class Robot:
         cmd_vel.linear.y = 0#final_direction[0]*math.sin(robot_angle) + final_direction[1]*math.cos(robot_angle)
         
         cmd_vel.angular.z = self.truncateAngularVelocity(theta)
-        print('control', sqrt(final_direction[0]**2 +  final_direction[1]**2))
+        #print('control', sqrt(final_direction[0]**2 +  final_direction[1]**2))
 
         if(sqrt(final_direction[0]**2 +  final_direction[1]**2) > self.dead_velocity):
             self.vel_pub.publish(cmd_vel)

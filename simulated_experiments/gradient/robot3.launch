@@ -6,7 +6,7 @@
     <param name="id" value="3" />
     <param name="config_file" value="$(env EXP_DIR)/../config_sim.yaml" />
     <param name="map_resolution" value="0.05" />
-    <param name="ray" value="160"/>
+    <param name="ray" value="30"/>
   </node> 
 
 
