@@ -71,11 +71,11 @@ class Robot:
         self.alpha               = 0.5*(1.0/100.0)#1.0    ## th$
         self.beta                = 2.0               ## the importance of $
         self.robot_center_y      = 0.6                     ## how fast the robot$
-        self.dead_velocity       = 0.0000001
+        self.dead_velocity       = 0.1
 
         self.max_linear_vel      = 0.40
         self.max_angular_vel     = 1.0
-        self.communication_beta  = 0.14
+        self.communication_beta  = 0.15
         self.real_distance       = {}
 
 
@@ -1049,16 +1049,12 @@ class Robot:
 
         p = self.getPositionByID(id)
         distance = self.getDistance(r, p)*self.map_resolution
-
-
         in_s, initial, final = self.map.inLineOfSight((int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
-
-        print('In', self.id , id,  in_s, (int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
+        #print('In', self.id , id,  in_s, (int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
         if(in_s):
             return self.metric_kalman[id].getMetricValue(distance)
         else:
-            d_sight = initial*self.map_resolution
-            
+            d_sight = initial*self.map_resolution            
             return self.metric_kalman[id].getMetricValueInSight(distance, d_sight, self.communication_beta)
 
 
@@ -1172,7 +1168,7 @@ class Robot:
         neighbor_1_distance = -self.getDistanceByIDInSight(neighbors_ids[0], closest_point)
         neighbor_2_distance = -self.getDistanceByIDInSight(neighbors_ids[1], closest_point)
 
-        print('running', self.id, neighbor_1_distance, neighbor_2_distance)
+        #print('running', self.id, neighbor_1_distance, neighbor_2_distance)
         tangent = (0, 0)
         #print('out', self.allocation_id)
         if(t > 0):
@@ -1205,6 +1201,7 @@ class Robot:
         if(sqrt(final_direction[0]**2 +  final_direction[1]**2) > self.dead_velocity):
             self.vel_pub.publish(cmd_vel)
 
+        print((neighbor_1_distance - neighbor_2_distance)**2)
         self.position['diff'] = neighbor_1_distance - neighbor_2_distance
         self.position['s_size']  = self.solution_size
         self.position['radius']  = self.radius*self.map_resolution
