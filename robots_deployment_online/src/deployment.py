@@ -75,6 +75,7 @@ class Robot:
 
         self.max_linear_vel      = 0.40
         self.max_angular_vel     = 1.0
+        self.communication_beta  = 0.14
         self.real_distance       = {}
 
 
@@ -1033,7 +1034,7 @@ class Robot:
             #print(self.position['destination'])
         else:
             self.started_control = True
-            print('status', self.status)
+            #print('status', self.status)
             if(self.status == 1 or self.status == 0):
                 self.Stall()
             else:
@@ -1051,12 +1052,14 @@ class Robot:
 
 
         in_s, initial, final = self.map.inLineOfSight((int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
+
+        print('In', self.id , id,  in_s, (int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
         if(in_s):
             return self.metric_kalman[id].getMetricValue(distance)
         else:
             d_sight = initial*self.map_resolution
-            #print('In'id)
-            return self.metric_kalman[id].getMetricValueInSight(distance, d_sight, 0.1)
+            
+            return self.metric_kalman[id].getMetricValueInSight(distance, d_sight, self.communication_beta)
 
 
 
@@ -1169,7 +1172,7 @@ class Robot:
         neighbor_1_distance = -self.getDistanceByIDInSight(neighbors_ids[0], closest_point)
         neighbor_2_distance = -self.getDistanceByIDInSight(neighbors_ids[1], closest_point)
 
-        #print('running', self.id, neighbor_1_distance, neighbor_2_distance)
+        print('running', self.id, neighbor_1_distance, neighbor_2_distance)
         tangent = (0, 0)
         #print('out', self.allocation_id)
         if(t > 0):
