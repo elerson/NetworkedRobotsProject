@@ -1,0 +1,38 @@
+robots:
+  1:
+    id: 1
+    ip: 192.168.0.1
+    macaddress: ec:08:6b:0d:68:ef
+    cable_ip: 150.164.212.43
+
+  2:
+    id: 2
+    ip: 192.168.0.5
+    macaddress: c4:e9:84:0b:8e:30
+    cable_ip: 150.164.212.45
+  3:
+    id: 3
+    ip: 192.168.0.6
+    macaddress: 30:b5:c2:1f:20:a1
+    cable_ip: 150.164.212.46
+  4:
+    id: 4
+    ip: 192.168.0.7
+    macaddress: 30:b5:c2:15:6e:7e
+    cable_ip: 150.164.212.46
+  5:
+    id: 5
+    ip: 192.168.0.8
+    macaddress: ec:08:6b:0d:5b:19
+    cable_ip: 150.164.212.46
+
+configs:
+  map: /home/elerson/NetworkedRobotsProject/real_experiement/map2/map.pgm
+  treefile: /home/elerson/NetworkedRobotsProject/real_experiement/map2/steinerData1.dat
+  resolution: 0.05
+  exit: 1
+  simulation: 0
+  broadcast_address: 192.168.10.255
+  algorithm_port: 39988
+  configuration_port: 46544
+
