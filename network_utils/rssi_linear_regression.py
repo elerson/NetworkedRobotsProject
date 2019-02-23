@@ -11,9 +11,11 @@ import math
 from threading import Lock
 import os
 import glob
+import pickle
+import time
 
 class LinearRegressionRSSI:
-  def __init__(self, id_, m, var, d0 = 1.0):
+  def __init__(self, id_, m, var, d0 = 1.0, log = False):
     #
     self.m_prior = np.array(m)
     self.P_prior = np.array([[var, 0],[0, var]])
@@ -25,6 +27,26 @@ class LinearRegressionRSSI:
     #
     self.gamma = self.m_prior[1]
     self.mutex = Lock()
+
+    self.log = log
+    self.time = time.time()
+    self.max_time = 20.0
+    if(self.log):
+      home = os.path.expanduser("~")
+
+      log_dir_ = home + '/NetworkedRobotsProject/RSSLog/'
+      folders  = glob.glob(log_dir_+'/*')
+      folder   = log_dir_ + '/log' + str(len(folders) + 1)
+      os.makedirs(folder)
+      self.log_data = folder + '/log.pkl'
+      self.log_data_file  = open(self.log_data, 'wb')
+      print(self.log_data)
+
+
+  def saveLog(self):
+    pickle.dump(self, self.log_data_file, pickle.HIGHEST_PROTOCOL)
+
+
     #
   def addMeasurement(self, distance, measurement, variance):
     if(distance < self.d0):
@@ -39,6 +61,11 @@ class LinearRegressionRSSI:
     self.measurment_var = np.append(self.measurment_var, [variance], axis=0)
     
     self.mutex.release()
+
+    if (self.log and (time.time() - self.time) > self.max_time ):
+      self.time = time.time()
+      self.saveLog()
+
     #
     #print(self.X.shape, self.Y.shape)
     #
