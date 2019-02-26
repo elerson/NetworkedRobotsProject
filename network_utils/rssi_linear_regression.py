@@ -15,7 +15,7 @@ import pickle
 import time
 
 class LinearRegressionRSSI:
-  def __init__(self, id_, m, var, d0 = 1.0, log = True):
+  def __init__(self, id_, m, var, d0 = 1.0, log = False):
     #
     self.m_prior = np.array(m)
     self.P_prior = np.array([[var, 0],[0, var]])
