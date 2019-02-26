@@ -92,7 +92,8 @@ class Robot:
 
         print('real robot', self.real_robot)
 
-        if(self.real_robot):        	
+        if(self.real_robot):
+            self.log_rss         = True
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
             id                   = self.routing.getID()
