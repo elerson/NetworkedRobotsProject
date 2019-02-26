@@ -31,6 +31,7 @@ class LinearRegressionRSSI:
     self.log = log
     self.time = time.time()
     self.max_time = 20.0
+    print('logging ...', self.log)
     if(self.log):
       home = os.path.expanduser("~")
 
@@ -40,6 +41,7 @@ class LinearRegressionRSSI:
       os.makedirs(folder)
       self.log_data = folder + '/log.pkl'
       self.log_data_file  = open(self.log_data, 'wb')
+
       print(self.log_data)
 
 
