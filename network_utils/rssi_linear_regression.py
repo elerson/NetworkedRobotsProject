@@ -31,7 +31,7 @@ class LinearRegressionRSSI:
     self.log = log
     self.time = time.time()
     self.max_time = 20.0
-    print('logging ...', self.log)
+    print('logging ...', self.log, id_)
     if(self.log):
       home = os.path.expanduser("~")
 
