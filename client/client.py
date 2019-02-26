@@ -71,6 +71,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
         self.image       = self.loadImage()
         self.widget_image.setImage(self.image)
         self.network     = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['algorithm_port'])
+        print(self.config_data['broadcast_address'])
         self.tree        = Tree(self.treefile)
         print(self.tree.getSize(), 'size')
         self.tree_segmentation   = TreeSegmention(self.tree)

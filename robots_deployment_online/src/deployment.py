@@ -253,7 +253,7 @@ class Robot:
 
         m_var = 4.0
         if( data_id not in self.metric_kalman):
-            self.metric_kalman[data_id]   =  LinearRegressionRSSI(self.id, [-40, 3.5], 0.1, self.log_rss) #RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
+            self.metric_kalman[data_id]   =  LinearRegressionRSSI(self.id, [-40, 3.0], 0.1, self.log_rss) #RSSIKalmanFilter(self.id, [-40.0, 3.5], 0.1, 10.0, m_var, self.log_rss)
 
         position = self.getPositionByID(data_id)
 

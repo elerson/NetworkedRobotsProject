@@ -84,7 +84,7 @@ class clientApp(QtGui.QMainWindow, client_ui.Ui_MainWindow):
 
 
         command['robot_id']     =  int(str(self.lineEdit_id.text()))
-        print((initial_position.x(), initial_position.y()))
+        print((initial_position.x(), initial_position.y()), self.image.height())
         command['initial_pose'] =  (initial_position.x()*self.config_data['resolution'], (self.image.height() - initial_position.y())*self.config_data['resolution'])
         command['direction']    =  angle
 

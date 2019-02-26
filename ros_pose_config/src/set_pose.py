@@ -11,6 +11,8 @@ import numpy as np
 import tf
 import os
 import subprocess as sub
+from PIL import Image
+
 
 
 import yaml
@@ -28,8 +30,9 @@ class Robot:
         self.config_data = self.readConfig(home+'/NetworkedRobotsProject/configs/data_real.yaml')
 
         self.map_resolution = 0.05
-        self.height         = 618
-
+        im = Image.open(self.config_data['map'])
+        width, height = im.size
+        self.height   = height
 
 
         self.network              = Network(id=-1, broadcast_addr = self.config_data['broadcast_address'], port = self.config_data['configuration_port'])

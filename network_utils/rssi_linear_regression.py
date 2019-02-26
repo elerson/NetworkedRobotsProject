@@ -44,7 +44,8 @@ class LinearRegressionRSSI:
 
 
   def saveLog(self):
-    pickle.dump(self, self.log_data_file, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(self.__dict__, self.log_data_file, pickle.HIGHEST_PROTOCOL)
+    print('saving log ...')
 
 
     #
