@@ -90,6 +90,8 @@ class Robot:
         self.real_robot          = not self.config['configs']['simulation'] 
         self.map                 = Map(self.config['configs']['map'])
 
+        print('real robot', self.real_robot)
+
         if(self.real_robot):        	
             self.routing         = Routing('teste4', self.config_file, 'ra0')
             self.rss_measure     = RSSMeasure('teste4', self.config_file)
