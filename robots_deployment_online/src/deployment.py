@@ -251,7 +251,7 @@ class Robot:
 
     def realMetricCallback(self, data_id, rss):
 
-        print(data_id, rss, not self.start_real or self.id == data_id)
+        #print(data_id, rss, not self.start_real or self.id == data_id)
         if(not self.start_real or self.id == data_id):
             return
 
