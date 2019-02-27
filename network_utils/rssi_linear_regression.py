@@ -40,14 +40,15 @@ class LinearRegressionRSSI:
       folder   = log_dir_ + '/log' + str(len(folders) + 1)
       os.makedirs(folder)
       self.log_data = folder + '/log.pkl'
-      self.log_data_file  = open(self.log_data, 'wb')
-
+      
       self.saveLog()
       print(self.log_data)
 
 
   def saveLog(self):
-    pickle.dump(self.__dict__, self.log_data_file, pickle.HIGHEST_PROTOCOL)
+    self.log_data_file  = open(self.log_data, 'wb')
+    pickle.dump(self.__dict__, self.log_data_file, 2)
+    self.log_data_file.close()
     threading.Timer(7, self.saveLog).start()
     print('saving log ...')
 
