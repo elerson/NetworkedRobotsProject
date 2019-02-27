@@ -12,7 +12,7 @@ from threading import Lock
 import os
 import glob
 import pickle
-import time
+import time, threading
 
 class LinearRegressionRSSI:
   def __init__(self, id_, m, var, d0 = 1.0, log = False):
@@ -30,7 +30,7 @@ class LinearRegressionRSSI:
 
     self.log = log
     self.time = time.time()
-    self.max_time = 20.0
+    self.max_time = 5.0
     print('logging ...', self.log, id_)
     if(self.log):
       home = os.path.expanduser("~")
@@ -42,11 +42,13 @@ class LinearRegressionRSSI:
       self.log_data = folder + '/log.pkl'
       self.log_data_file  = open(self.log_data, 'wb')
 
+      self.saveLog()
       print(self.log_data)
 
 
   def saveLog(self):
     pickle.dump(self.__dict__, self.log_data_file, pickle.HIGHEST_PROTOCOL)
+    threading.Timer(7, self.saveLog).start()
     print('saving log ...')
 
 
@@ -65,9 +67,9 @@ class LinearRegressionRSSI:
     
     self.mutex.release()
 
-    if (self.log and (time.time() - self.time) > self.max_time ):
-      self.time = time.time()
-      self.saveLog()
+    #if (self.log and (time.time() - self.time) > self.max_time ):
+    #  self.time = time.time()
+    #  self.saveLog()
 
     #
     #print(self.X.shape, self.Y.shape)

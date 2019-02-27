@@ -1056,7 +1056,7 @@ class Robot:
         distance = self.getDistance(r, p)*self.map_resolution
         in_s, initial, final = self.map.inLineOfSight((int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
         #print('In', self.id , id,  in_s, (int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
-        if(in_s and self.communication_beta > 0):
+        if(in_s or self.communication_beta <= 0):
             return self.metric_kalman[id].getMetricValue(distance)
         else:
             d_sight = initial*self.map_resolution            
