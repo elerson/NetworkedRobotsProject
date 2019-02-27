@@ -69,13 +69,13 @@ class Robot:
         # self.max_angular_vel     = 1.0
 
         self.alpha               = 0.5*(1.0/100.0)#1.0    ## th$
-        self.beta                = 2.0               ## the importance of $
+        self.beta                = 0.7               ## the importance of $
         self.robot_center_y      = 0.6                     ## how fast the robot$
         self.dead_velocity       = 0.1
 
         self.max_linear_vel      = 0.40
         self.max_angular_vel     = 1.0
-        self.communication_beta  = 0.15
+        self.communication_beta  = -0.15
         self.real_distance       = {}
 
 
@@ -265,7 +265,7 @@ class Robot:
         my_pos    = self.position['position']
         neigh_pos = position
         in_s, initial, final = self.map.inLineOfSight((int(my_pos[0]), int(my_pos[1])), (int(neigh_pos[0]), int(neigh_pos[1])))
-        if(not in_s):
+        if(not in_s and self.communication_beta > 0):
             return
 
         real_distance    = self.getDistance(self.position['position'], position)*self.map_resolution
@@ -1056,7 +1056,7 @@ class Robot:
         distance = self.getDistance(r, p)*self.map_resolution
         in_s, initial, final = self.map.inLineOfSight((int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
         #print('In', self.id , id,  in_s, (int(r[0]), int(r[1])), (int(p[0]), int(p[1])))
-        if(in_s):
+        if(in_s and self.communication_beta > 0):
             return self.metric_kalman[id].getMetricValue(distance)
         else:
             d_sight = initial*self.map_resolution            
